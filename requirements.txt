@@ -1,0 +1,16 @@
+# Upgrade pip
+pip3 install --upgrade pip
+
+# Install project dependencies
+pip3 install openai==0.27.0
+pip3 install python-decouple==3.8
+pip3 install python-multipart==0.0.6
+pip3 install requests==2.28.1
+pip3 install "fastapi[all]"
+pip3 install mysql-connector-python
+pip3 install langdetect
+pip3 install google-cloud-texttospeech
+pip3 install bcrypt
+pip3 install sqlalchemy
+pip3 install alembic
+
