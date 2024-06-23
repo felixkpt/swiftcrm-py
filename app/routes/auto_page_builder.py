@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException
 from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 from app.database.crud.auto_page_builder import get_pages, store_page, update_page, delete_page, get_page_by_id, get_page_by_name
-from app.services.auto_model.generate_model import auto_model_handler
+from app.services.auto_model.auto_model_handler import auto_model_handler
 
 # Create a router instance
 router = APIRouter()
@@ -20,7 +20,7 @@ async def get_list_endpoint():
 
 @router.post("/dashboard/auto-page-builder")
 async def store_endpoint(auto_page_data: AutoPageBuilderRequest):
-    existing_page = get_page_by_name('ssdsdd'+auto_page_data.modelName)
+    existing_page = get_page_by_name(auto_page_data.modelName)
     if existing_page:
         raise HTTPException(
             status_code=422, detail="A similar AutoPageBuilder configuration exists")

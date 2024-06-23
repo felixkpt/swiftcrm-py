@@ -1,5 +1,5 @@
 from app.models.base import Base
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, func
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, func, JSON
 from sqlalchemy.orm import relationship
 
 
@@ -15,6 +15,8 @@ class AutoPageBuilderField(Base):
     isRequired = Column(Integer, nullable=False, default=0)
     dataType = Column(String(50))
     defaultValue = Column(Text)
+    dropdownSource = Column(String(255), nullable=True)
+    dropdownDependsOn = Column(JSON, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False,
                         server_default=func.now(), onupdate=func.now())

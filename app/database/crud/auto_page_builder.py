@@ -1,5 +1,6 @@
 # app/models/auto_page_builder.py
 from typing import List
+import json
 from app.database.old_connection import execute_query, execute_insert, start_transaction, commit_transaction, rollback_transaction
 
 def get_page_by_id(page_id: str) -> bool:
@@ -32,16 +33,22 @@ def store_page(auto_page_data):
         page = get_page_by_name(auto_page_data.modelName)
         page_id = page['id']
 
-        
+        print('fields::::',fields)
         # Insert fields, action_labels, and headers
         for field in fields:
+
+            # Serialize dropdownDependsOn to JSON string
+            dropdown_depends_on = json.dumps(field.dropdownDependsOn) if field.dropdownDependsOn else None
+
             query = """
                 INSERT INTO auto_page_builder_fields
-                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue, dropdownSource, dropdownDependsOn)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            execute_insert(query, (page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue))
-    
+            execute_insert(query, (
+                page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue,
+                field.dropdownSource, dropdown_depends_on))
+
         for action_label in action_labels:
             query = """
                 INSERT INTO auto_page_builder_action_labels
@@ -76,7 +83,7 @@ def update_page(page_id: int, auto_page_data):
             SET modelName = %s, modelUri = %s, apiEndpoint = %s
             WHERE id = %s
         """
-        execute_insert(query, (auto_page_data.modelName, auto_page_data.modelURI, auto_page_data.apiEndpoint, page_id))
+        execute_query(query, (auto_page_data.modelName, auto_page_data.modelURI, auto_page_data.apiEndpoint, page_id))
         
         # Clear existing fields, action_labels, headers associated with this page_id
         query = "DELETE FROM auto_page_builder_fields WHERE auto_page_builder_id = %s"
@@ -92,10 +99,12 @@ def update_page(page_id: int, auto_page_data):
         for field in fields:
             query = """
                 INSERT INTO auto_page_builder_fields
-                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue, dropdownSource, dropdownDependsOn)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            execute_insert(query, (page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue))
+            execute_insert(query, (
+                page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue,
+                field.dropdownSource, ",".join(field.dropdownDependsOn) if field.dropdownDependsOn else None))
     
         for action_label in action_labels:
             query = """
@@ -141,7 +150,7 @@ def delete_page(page_id: int):
 def get_pages() -> List[dict]:
     query = """
         SELECT apb.id, apb.modelName, apb.modelUri, apb.apiEndpoint,
-               GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbf.name, apbf.type, apbf.label, apbf.isRequired, apbf.dataType, apbf.defaultValue) SEPARATOR ';') AS fields,
+               GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbf.name, apbf.type, apbf.label, apbf.isRequired, apbf.dataType, apbf.defaultValue, apbf.dropdownSource, apbf.dropdownDependsOn) SEPARATOR ';') AS fields,
                GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbal.key, apbal.label, apbal.actionType, apbal.show) SEPARATOR ';') AS actionLabels,
                GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbh.key, apbh.label, apbh.isVisibleInList, apbh.isVisibleInSingleView) SEPARATOR ';') AS headers
         FROM auto_page_builder apb

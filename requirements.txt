@@ -13,4 +13,4 @@ pip3 install google-cloud-texttospeech
 pip3 install bcrypt
 pip3 install sqlalchemy
 pip3 install alembic
-
+pip3 install inflect

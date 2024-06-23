@@ -1,8 +1,11 @@
+# app/main.py
 from fastapi import FastAPI
 from app.database.connection import engine
 from app.models.base import Base
-from app.routes import auto_page_builder
-from app.requests.middleware import cors_middleware, auth_middleware
+from app.requests.middleware.cors import cors_middleware
+from app.requests.middleware.auth import auth_middleware
+from app.auto_routes_handler import auto_register_routes
+from fastapi import FastAPI
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -11,14 +14,10 @@ app = FastAPI()
 # Base.metadata.create_all(bind=engine)
 
 # Include CORS middleware
-# app.middleware("http")(cors_middleware)
+cors_middleware(app)
 
 # Include authentication middleware
-# app.middleware("http")(auth_middleware)
-
-# Include routes
-app.include_router(auto_page_builder.router,
-                   prefix="/auto-page-builder", tags=["AutoPageBuilder"])
+# auth_middleware(app)
 
 # Add root endpoint
 
@@ -27,6 +26,8 @@ app.include_router(auto_page_builder.router,
 def read_root():
     return {"message": "Welcome to SwiftCRM-PY!"}
 
+# Automatically generate and register routes
+auto_register_routes(app)
 
 if __name__ == "__main__":
     import uvicorn
