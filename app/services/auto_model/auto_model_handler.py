@@ -2,6 +2,7 @@ from .model_generator import generate_model
 from .routes_generator import generate_routes
 from .schema_generator import generate_schema
 import inflect
+from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 
 
 def prepare_generate_model(model_name, model_name_pluralized, fields):
@@ -26,25 +27,25 @@ def prepare_generate_model(model_name, model_name_pluralized, fields):
     return generate_model(model_name, model_name_pluralized, fields_dict_list, options)
 
 
-def auto_model_handler(data):
-    model_name = data.modelName
-    model_name = model_name.capitalize()
+def auto_model_handler(data: AutoPageBuilderRequest):
+    model_name = data.modelName.lower().capitalize()
+    singularized = inflect.engine().singular_noun(model_name)
+    model_name_singular = singularized or model_name
 
-    # Initialize inflect engine
-    p = inflect.engine()
-    # Check if model_name is already plural
-    if not p.singular_noun(model_name):
-        model_name_pluralized = p.plural(model_name)
-    else:
-        model_name_pluralized = model_name
+    # Capitalize model_name_singular to match class naming convention
+    model_name_singular = model_name_singular
+
+    # Pluralize the model_name_singular to generate model_name_pluralized
+    model_name_pluralized = inflect.engine().plural(
+        model_name_singular) if not singularized else model_name
 
     api_endpoint = data.apiEndpoint
     fields = data.fields
 
     res = prepare_generate_model(
-        model_name, model_name_pluralized, fields)
+        model_name_singular, model_name_pluralized, fields)
 
-    if res == True:
-        # generate_crud(model_name, model_name_pluralized, fields)
-        generate_schema(model_name, fields)
-        generate_routes(model_name, model_name_pluralized, api_endpoint)
+    if res:
+        generate_schema(model_name_singular, fields)
+        generate_routes(model_name_singular,
+                        model_name_pluralized, api_endpoint)

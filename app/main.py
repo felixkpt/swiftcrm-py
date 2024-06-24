@@ -1,7 +1,5 @@
 # app/main.py
 from fastapi import FastAPI
-from app.database.connection import engine
-from app.models.base import Base
 from app.requests.middleware.cors import cors_middleware
 from app.requests.middleware.auth import auth_middleware
 from app.auto_routes_handler import auto_register_routes

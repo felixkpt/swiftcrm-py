@@ -18,6 +18,7 @@ def get_{model_name.lower()}(db, {model_name.lower()}_id):
 
 
 def create_{model_name.lower()}(db, {model_name.lower()}):
+    current_time = datetime.now()
     db_{model_name.lower()} = {model_name}(
 """
 
@@ -35,14 +36,15 @@ def create_{model_name.lower()}(db, {model_name.lower()}):
 
 
 def update_{model_name.lower()}(db, {model_name.lower()}_id, {model_name.lower()}):
+    current_time = datetime.now()
     db_{model_name.lower()} = db.query({model_name}).filter({model_name}.id == {model_name.lower()}_id).first()
     if db_{model_name.lower()}:
 """
 
     for field in fields:
         if field['name'] == 'updated_at':
-            content += f"        {field['name']}=current_time,\n"
-        elif field['name'] != 'id':
+            content += f"        db_{model_name.lower()}.{field['name']} = current_time\n"
+        elif field['name'] != 'id' and field['name'] != 'created_at':
             content += f"        db_{model_name.lower()}.{field['name']} = {model_name.lower()}.{field['name']}\n"
 
     content += f"""    db.commit()

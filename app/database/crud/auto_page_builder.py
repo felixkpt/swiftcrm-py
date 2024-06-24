@@ -1,163 +1,147 @@
-# app/models/auto_page_builder.py
-from typing import List
-import json
-from app.database.old_connection import execute_query, execute_insert, start_transaction, commit_transaction, rollback_transaction
+from sqlalchemy.orm import Session
+from app.models.auto_page_builder import AutoPageBuilder
+from app.models.auto_page_builder_field import AutoPageBuilderField
+from app.models.auto_page_builder_action_label import AutoPageBuilderActionLabel
+from app.models.auto_page_builder_header import AutoPageBuilderHeader
 
-def get_page_by_id(page_id: str) -> bool:
-    query = "SELECT 1 FROM auto_page_builder WHERE id = %s"
-    result = execute_query(query, (page_id,))
-    return len(result) > 0
+def get_page_by_id(db: Session, page_id: int):
+    return db.query(AutoPageBuilder).filter(AutoPageBuilder.id == page_id).first()
 
-def get_page_by_name(modelName: str) -> dict:
-    query = "SELECT * FROM auto_page_builder WHERE modelName = %s"
-    result = execute_query(query, (modelName,))
-    return result[0] if result else None
+def get_page_by_name(db: Session, modelName: str):
+    return db.query(AutoPageBuilder).filter(AutoPageBuilder.modelName == modelName).first()
 
-def page_exists(modelName: str) -> bool:
-    query = "SELECT 1 FROM auto_page_builder WHERE modelName = %s"
-    result = execute_query(query, (modelName,))
-    return len(result) > 0
-
-def store_page(auto_page_data):
-    fields = auto_page_data.fields
-    action_labels = auto_page_data.actionLabels
-    headers = auto_page_data.headers
+def store_page(db: Session, auto_page_data):
     
-    cnx = start_transaction()
     try:
-        # Insert main auto_page_builder entry
-        query = "INSERT INTO auto_page_builder (modelName, modelUri, apiEndpoint) VALUES (%s, %s, %s)"
-        execute_insert(query, (auto_page_data.modelName, auto_page_data.modelURI, auto_page_data.apiEndpoint))
-        
-        # Get the last inserted page id
-        page = get_page_by_name(auto_page_data.modelName)
-        page_id = page['id']
+        # Create AutoPageBuilder instance
+        new_page = AutoPageBuilder(
+            modelName=auto_page_data.modelName,
+            modelUri=auto_page_data.modelURI,
+            apiEndpoint=auto_page_data.apiEndpoint
+        )
+        print('new_page',new_page)
 
-        print('fields::::',fields)
-        # Insert fields, action_labels, and headers
-        for field in fields:
+        # db.add(new_page)
+        # db.commit()
 
-            # Serialize dropdownDependsOn to JSON string
-            dropdown_depends_on = json.dumps(field.dropdownDependsOn) if field.dropdownDependsOn else None
+        # Store fields
+        # for field in auto_page_data.fields:
+        #     db_field = AutoPageBuilderField(
+        #         auto_page_builder_id=new_page.id,
+        #         name=field.name,
+        #         type=field.type,
+        #         label=field.label,
+        #         isRequired=field.isRequired,
+        #         dataType=field.dataType,
+        #         defaultValue=field.defaultValue,
+        #         dropdownSource=field.dropdownSource,
+        #         dropdownDependsOn=field.dropdownDependsOn
+        #     )
+        #     db.add(db_field)
 
-            query = """
-                INSERT INTO auto_page_builder_fields
-                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue, dropdownSource, dropdownDependsOn)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (
-                page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue,
-                field.dropdownSource, dropdown_depends_on))
+        # # Store action labels
+        # for action_label in auto_page_data.actionLabels:
+        #     db_action_label = AutoPageBuilderActionLabel(
+        #         auto_page_builder_id=new_page.id,
+        #         key=action_label.key,
+        #         label=action_label.label,
+        #         actionType=action_label.actionType,
+        #         show=action_label.show
+        #     )
+        #     db.add(db_action_label)
 
-        for action_label in action_labels:
-            query = """
-                INSERT INTO auto_page_builder_action_labels
-                (auto_page_builder_id, `key`, label, actionType, `show`)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (page_id, action_label.key, action_label.label, action_label.actionType, action_label.show))
-    
-        for header in headers:
-            query = """
-                INSERT INTO auto_page_builder_headers
-                (auto_page_builder_id, `key`, label, isVisibleInList, isVisibleInSingleView)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (page_id, header.key, header.label, header.isVisibleInList, header.isVisibleInSingleView))
-        
-        commit_transaction(cnx)
+        # # Store headers
+        # for header in auto_page_data.headers:
+        #     db_header = AutoPageBuilderHeader(
+        #         auto_page_builder_id=new_page.id,
+        #         key=header.key,
+        #         label=header.label,
+        #         isVisibleInList=header.isVisibleInList,
+        #         isVisibleInSingleView=header.isVisibleInSingleView
+        #     )
+        #     db.add(db_header)
+
+        db.commit()
+        return {"message": "AutoPageBuilder configuration stored successfully"}
+
     except Exception as e:
-        rollback_transaction(cnx)
+        db.rollback()
         raise e
 
-def update_page(page_id: int, auto_page_data):
-    fields = auto_page_data.fields
-    action_labels = auto_page_data.actionLabels
-    headers = auto_page_data.headers
-    
-    cnx = start_transaction()
+def update_page(db: Session, page_id: int, auto_page_data):
     try:
-        # Update main auto_page_builder table
-        query = """
-            UPDATE auto_page_builder
-            SET modelName = %s, modelUri = %s, apiEndpoint = %s
-            WHERE id = %s
-        """
-        execute_query(query, (auto_page_data.modelName, auto_page_data.modelURI, auto_page_data.apiEndpoint, page_id))
-        
-        # Clear existing fields, action_labels, headers associated with this page_id
-        query = "DELETE FROM auto_page_builder_fields WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
-        
-        query = "DELETE FROM auto_page_builder_action_labels WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
-        
-        query = "DELETE FROM auto_page_builder_headers WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
-        
-        # Insert updated fields, action_labels, headers
-        for field in fields:
-            query = """
-                INSERT INTO auto_page_builder_fields
-                (auto_page_builder_id, name, type, label, isRequired, dataType, defaultValue, dropdownSource, dropdownDependsOn)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (
-                page_id, field.name, field.type, field.label, field.isRequired, field.dataType, field.defaultValue,
-                field.dropdownSource, ",".join(field.dropdownDependsOn) if field.dropdownDependsOn else None))
-    
-        for action_label in action_labels:
-            query = """
-                INSERT INTO auto_page_builder_action_labels
-                (auto_page_builder_id, `key`, label, actionType, `show`)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (page_id, action_label.key, action_label.label, action_label.actionType, action_label.show))
-    
-        for header in headers:
-            query = """
-                INSERT INTO auto_page_builder_headers
-                (auto_page_builder_id, `key`, label, isVisibleInList, isVisibleInSingleView)
-                VALUES (%s, %s, %s, %s, %s)
-            """
-            execute_insert(query, (page_id, header.key, header.label, header.isVisibleInList, header.isVisibleInSingleView))
-        
-        commit_transaction(cnx)
+        # Update AutoPageBuilder instance
+        db.query(AutoPageBuilder).filter(AutoPageBuilder.id == page_id).update({
+            AutoPageBuilder.modelName: auto_page_data.modelName,
+            AutoPageBuilder.modelUri: auto_page_data.modelURI,
+            AutoPageBuilder.apiEndpoint: auto_page_data.apiEndpoint
+        })
+
+        # Clear existing fields, action labels, headers associated with this page_id
+        db.query(AutoPageBuilderField).filter(AutoPageBuilderField.auto_page_builder_id == page_id).delete()
+        db.query(AutoPageBuilderActionLabel).filter(AutoPageBuilderActionLabel.auto_page_builder_id == page_id).delete()
+        db.query(AutoPageBuilderHeader).filter(AutoPageBuilderHeader.auto_page_builder_id == page_id).delete()
+
+        # Store updated fields
+        for field in auto_page_data.fields:
+            db_field = AutoPageBuilderField(
+                auto_page_builder_id=page_id,
+                name=field.name,
+                type=field.type,
+                label=field.label,
+                isRequired=field.isRequired,
+                dataType=field.dataType,
+                defaultValue=field.defaultValue,
+                dropdownSource=field.dropdownSource,
+                dropdownDependsOn=field.dropdownDependsOn
+            )
+            db.add(db_field)
+
+        # Store updated action labels
+        for action_label in auto_page_data.actionLabels:
+            db_action_label = AutoPageBuilderActionLabel(
+                auto_page_builder_id=page_id,
+                key=action_label.key,
+                label=action_label.label,
+                actionType=action_label.actionType,
+                show=action_label.show
+            )
+            db.add(db_action_label)
+
+        # Store updated headers
+        for header in auto_page_data.headers:
+            db_header = AutoPageBuilderHeader(
+                auto_page_builder_id=page_id,
+                key=header.key,
+                label=header.label,
+                isVisibleInList=header.isVisibleInList,
+                isVisibleInSingleView=header.isVisibleInSingleView
+            )
+            db.add(db_header)
+
+        db.commit()
+        return {"message": "AutoPageBuilder configuration updated successfully"}
+
     except Exception as e:
-        rollback_transaction(cnx)
+        db.rollback()
         raise e
 
-def delete_page(page_id: int):
-    cnx = start_transaction()
+def delete_page(db: Session, page_id: int):
     try:
-        query = "DELETE FROM auto_page_builder WHERE id = %s"
-        execute_query(query, (page_id,))
+        # Delete AutoPageBuilder instance
+        db.query(AutoPageBuilder).filter(AutoPageBuilder.id == page_id).delete()
 
-        query = "DELETE FROM auto_page_builder_fields WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
+        # Delete associated fields, action labels, headers
+        db.query(AutoPageBuilderField).filter(AutoPageBuilderField.auto_page_builder_id == page_id).delete()
+        db.query(AutoPageBuilderActionLabel).filter(AutoPageBuilderActionLabel.auto_page_builder_id == page_id).delete()
+        db.query(AutoPageBuilderHeader).filter(AutoPageBuilderHeader.auto_page_builder_id == page_id).delete()
 
-        query = "DELETE FROM auto_page_builder_action_labels WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
+        db.commit()
+        return {"message": "AutoPageBuilder configuration deleted successfully"}
 
-        query = "DELETE FROM auto_page_builder_headers WHERE auto_page_builder_id = %s"
-        execute_query(query, (page_id,))
-        
-        commit_transaction(cnx)
     except Exception as e:
-        rollback_transaction(cnx)
+        db.rollback()
         raise e
 
-def get_pages() -> List[dict]:
-    query = """
-        SELECT apb.id, apb.modelName, apb.modelUri, apb.apiEndpoint,
-               GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbf.name, apbf.type, apbf.label, apbf.isRequired, apbf.dataType, apbf.defaultValue, apbf.dropdownSource, apbf.dropdownDependsOn) SEPARATOR ';') AS fields,
-               GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbal.key, apbal.label, apbal.actionType, apbal.show) SEPARATOR ';') AS actionLabels,
-               GROUP_CONCAT(DISTINCT CONCAT_WS(':', apbh.key, apbh.label, apbh.isVisibleInList, apbh.isVisibleInSingleView) SEPARATOR ';') AS headers
-        FROM auto_page_builder apb
-        LEFT JOIN auto_page_builder_fields apbf ON apb.id = apbf.auto_page_builder_id
-        LEFT JOIN auto_page_builder_action_labels apbal ON apb.id = apbal.auto_page_builder_id
-        LEFT JOIN auto_page_builder_headers apbh ON apb.id = apbh.auto_page_builder_id
-        GROUP BY apb.id
-    """
-    results = execute_query(query)
-    return results
+def get_pages(db: Session):
+    return db.query(AutoPageBuilder).all()
