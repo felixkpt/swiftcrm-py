@@ -1,11 +1,12 @@
 from .model_generator import generate_model
-from .routes_generator import generate_routes
+from app.services.auto_model.repo_generator import generate_repo
 from .schema_generator import generate_schema
+from .routes_generator import generate_routes
 import inflect
 from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 
 
-def prepare_generate_model(model_name, model_name_pluralized, fields):
+def prepare_generate_model(model_name, fields):
     options = {'timestamps': True}
     # Assuming fields is a list of FieldSchema objects
     fields_dict_list = [
@@ -24,7 +25,7 @@ def prepare_generate_model(model_name, model_name_pluralized, fields):
         for field in fields
     ]
 
-    return generate_model(model_name, model_name_pluralized, fields_dict_list, options)
+    return generate_model(model_name, fields_dict_list, options)
 
 
 def auto_model_handler(data: AutoPageBuilderRequest):
@@ -42,10 +43,10 @@ def auto_model_handler(data: AutoPageBuilderRequest):
     api_endpoint = data.apiEndpoint
     fields = data.fields
 
-    res = prepare_generate_model(
-        model_name_singular, model_name_pluralized, fields)
+    res = prepare_generate_model(model_name_singular, fields)
 
     if res:
+        generate_repo(model_name_singular, model_name_pluralized, fields)
         generate_schema(model_name_singular, fields)
         generate_routes(model_name_singular,
                         model_name_pluralized, api_endpoint)

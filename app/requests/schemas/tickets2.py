@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class TicketSchema(BaseModel):
+class Tickets2Schema(BaseModel):
     source_id: str
 
     class Config:

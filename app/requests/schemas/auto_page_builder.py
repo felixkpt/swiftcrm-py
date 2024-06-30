@@ -6,9 +6,12 @@ class FieldSchema(BaseModel):
     name: str
     type: str
     label: str
-    isRequired: bool
     dataType: Optional[str] = None
     defaultValue: Optional[Any] = None
+    isRequired: Optional[bool] = False
+    isVisibleInList: Optional[bool] = False
+    isVisibleInSingleView: Optional[bool] = False
+    isUnique: Optional[bool] = False
     dropdownSource: Optional[str] = None
     dropdownDependsOn: Optional[List] = None
 
@@ -17,9 +20,6 @@ class ActionLabelSchema(BaseModel):
     key: str
     label: str
     actionType: str
-    show: bool
-    required: bool
-    isRequired: bool
 
 
 class HeaderSchema(BaseModel):

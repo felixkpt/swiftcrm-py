@@ -1,1 +1,6 @@
-virtual
+__pycache__
+venv/
+virtual/
+storage/
+.env
+.env.local
