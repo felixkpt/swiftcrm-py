@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class Tickets2351112Schema(BaseModel):
+class SysOpportunitySchema(BaseModel):
     source_id: str
 
     class Config:

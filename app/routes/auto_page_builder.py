@@ -29,14 +29,14 @@ async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = D
     if existing_page:
         raise HTTPException(
             status_code=422, detail="A similar AutoPageBuilder configuration exists")
-    try:
-        auto_model_handler(auto_page_data)
-        repo.store_page(db, auto_page_data)
-        return {"message": "AutoPageBuilder configuration stored successfully"}
-    except Exception as e:
-        print('e::',e)
-        raise HTTPException(
-            status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
+    # try:
+    auto_model_handler(auto_page_data)
+    repo.store_page(db, auto_page_data)
+    return {"message": "AutoPageBuilder configuration stored successfully"}
+    # except Exception as e:
+    #     print('e::',e)
+    #     raise HTTPException(
+    #         status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
 
 # Endpoint to update an existing AutoPageBuilder configuration
 

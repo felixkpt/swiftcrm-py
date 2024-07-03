@@ -7,8 +7,8 @@ from sqlalchemy import Column, Integer, String
 from app.models.base import Base
 
 
-class Model01(Base):
-    __tablename__ = 'model01'
+class SysOpportunity(Base):
+    __tablename__ = 'sys_opportunities'
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(String(255))
     updated_at = Column(String(255))

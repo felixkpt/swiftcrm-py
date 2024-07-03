@@ -1,7 +1,8 @@
 import os
+from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 import re
-from typing import List
-from app.models.schemas.auto_page_builder import AutoPageBuilderRequest
+from app.services.str import STR
+import inflect
 
 
 def is_english(text):
@@ -36,7 +37,8 @@ def generate_model_files(data: AutoPageBuilderRequest):
     print('AutoPageBuilderRequest::', modelName, modelURI, fieldsRaw)
 
     singularModelName = modelName.capitalize()
-    listDirPath = os.path.join(os.getcwd(), 'app', 'pages', 'dashboard', modelURI)
+    listDirPath = os.path.join(
+        os.getcwd(), 'app', 'pages', 'dashboard', modelURI)
 
     os.makedirs(listDirPath, exist_ok=True)
 
@@ -77,4 +79,25 @@ def map_data_type(data_type):
     elif data_type == 'longtext':
         return 'TEXT'
     else:
-        return 'VARCHAR(255)'  # Default to VARCHAR(255) if data type is unknown
+        # Default to VARCHAR(255) if data type is unknown
+        return 'VARCHAR(255)'
+
+
+def get_model_names(model_name):
+    # Convert modelName to slug with underscore and capitalize
+    model_name_slug = STR.slug(model_name).capitalize()
+    
+
+    # Singularize the model_name if possible, otherwise use as is
+    singularized = inflect.engine().singular_noun(model_name_slug)
+    model_name_singular = singularized or model_name_slug
+
+    # PascalCase conversion for singular model name
+    model_name_pascal = STR.pascal(model_name_singular)
+
+    # Pluralize the singular model name to generate pluralized version
+    model_name_plural = inflect.engine().plural(
+        model_name_singular) if not singularized else model_name_slug
+    
+    print('model_name_slug::', model_name_singular, model_name_plural, model_name_pascal,)
+    return model_name_singular, model_name_plural, model_name_pascal,
