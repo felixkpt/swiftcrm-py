@@ -19,4 +19,3 @@ from .refresh_token import RefreshToken
 from .token_blacklist import TokenBlacklist
 from .ticket import Ticket
 from .ticket import Ticket
-from .category import Category

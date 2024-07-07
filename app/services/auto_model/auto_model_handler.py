@@ -18,6 +18,7 @@ def prepare_generate_model(model_name, fields):
             "defaultValue": field.defaultValue,
             # Default to False if attribute is not present
             "isPrimaryKey": getattr(field, 'isPrimaryKey', False),
+            "isUnique": getattr(field, 'isUnique', False),
             # Default to False if attribute is not present
             "autoIncrements": getattr(field, 'autoIncrements', False),
         }

@@ -3,19 +3,25 @@ import os
 import subprocess
 from app.services.helpers import get_model_names
 
+
 def create_directory_if_not_exists(directory_path):
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
-def generate_model(model_name, fields, options=None):
 
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
+def generate_model(model_name, fields, options=None):
+    print('FFFFFFF', fields)
+
+    model_name_singular, model_name_plural, model_name_pascal = get_model_names(
+        model_name)
 
     # Updated dictionary to map field data types to SQLAlchemy types
     type_mapping = {
         'string': {'name': 'String', 'length': 255},
         'integer': {'name': 'Integer', 'length': None},
+        'text': {'name': 'Text', 'length': None},
         'longtext': {'name': 'Text', 'length': None},
+        'json': {'name': 'JSON', 'length': None},
     }
 
 # Check if 'id' field exists in fields
@@ -42,6 +48,10 @@ def generate_model(model_name, fields, options=None):
             "autoIncrements": True
         })
 
+    # ignore created_at, and updated_at if exists in fields
+    ignore_fields = ['created_at', 'updated_at']
+    fields = [field for field in fields if 'name' not in field or field['name'] not in ignore_fields]
+
     # Collect the required imports based on fields
     imports = set()
     for field in fields:
@@ -62,6 +72,7 @@ def generate_model(model_name, fields, options=None):
     # Start building the model class content
     content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{model_name_plural.lower()}'\n"
 
+    # ignore created_at, and updated_at if exists in fields
     for field in fields:
         data_type = field['dataType'].lower() if field['dataType'] else ''
         sqlalchemy_type = type_mapping.get(
@@ -76,20 +87,27 @@ def generate_model(model_name, fields, options=None):
                 column_args += ", primary_key=True"
                 if field.get('autoIncrements', False):
                     column_args += ", autoincrement=True"
+            if field.get('isUnique', False):
+                column_args += ", unique=True"
+            
             content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
 
         else:
             if field.get('isPrimaryKey', False):
                 column_args += ", primary_key=True"
+            print('CCCCCCCCCCCCC', field.get('isUnique', False))
+            if field.get('isUnique', False):
+                column_args += ", unique=True"
+            
             content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
 
     # Add timestamp fields if specified in options
+    content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
     if options and options.get('timestamps'):
         content += "    created_at = Column(DateTime, default=datetime.utcnow)\n"
         content += "    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)\n"
         # Add import for DateTime and datetime
-        content = f"from datetime import datetime\n{import_statement}from sqlalchemy import DateTime\n" + \
-            base_import + "\n" + content
+        content = f"from datetime import datetime\nfrom sqlalchemy import DateTime\n" + content
 
     # Ensure the models directory exists
     directory_path = os.path.join(os.getcwd(), 'app', 'models')
@@ -106,11 +124,13 @@ def generate_model(model_name, fields, options=None):
     with open(init_py_path, 'a') as init_py:
         if not content.endswith('\n'):
             init_py.write('\n')
-        init_py.write(f"from .{model_filename[:-3]} import {model_name_pascal}\n")
+        init_py.write(
+            f"from .{model_filename[:-3]} import {model_name_pascal}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:
-        subprocess.run(['alembic', 'revision', '--autogenerate', '-m', f"added {model_name_singular.lower()} table"], check=True)
+        subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
+                       f"added {model_name_singular.lower()} table"], check=True)
         subprocess.run(['alembic', 'upgrade', 'head'], check=True)
         return True
     except subprocess.CalledProcessError as e:
