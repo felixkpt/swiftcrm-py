@@ -17,5 +17,3 @@ from .message import Message
 from .interview import Interview
 from .refresh_token import RefreshToken
 from .token_blacklist import TokenBlacklist
-from .ticket import Ticket
-from .ticket import Ticket
