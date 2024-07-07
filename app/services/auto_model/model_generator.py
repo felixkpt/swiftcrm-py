@@ -72,7 +72,7 @@ def generate_model(model_name, fields, options=None):
     import_statement = f"from sqlalchemy import Column, {imports_str}\n"
 
     # Base class import
-    base_import = "from app.models.base import Base\n"
+    base_import = "from app.models.base import Base\nfrom sqlalchemy.orm import relationship\n"
 
     # Start building the model class content
     content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{model_name_plural.lower()}'\n"
@@ -108,8 +108,8 @@ def generate_model(model_name, fields, options=None):
     # Add timestamp fields if specified in options
     content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
     if options and options.get('timestamps'):
-        content += "    created_at = Column(DateTime, default=func.utcnow)\n"
-        content += "    updated_at = Column(DateTime, default=func.utcnow, onupdate=func.utcnow)\n"
+        content += "    created_at = Column(DateTime, server_default=func.now())\n"
+        content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
 
     # Ensure the models directory exists
     directory_path = os.path.join(os.getcwd(), 'app', 'models')
