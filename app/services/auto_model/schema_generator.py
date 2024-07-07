@@ -16,6 +16,7 @@ def generate_schema(model_name, fields):
         'longtext': 'str',
     }
 
+    content = f"from pydantic import BaseModel, Field\n\n"
     content = f"""from pydantic import BaseModel
 
 class {model_name_pascal}Schema(BaseModel):
