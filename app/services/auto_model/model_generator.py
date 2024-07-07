@@ -50,7 +50,8 @@ def generate_model(model_name, fields, options=None):
 
     # ignore created_at, and updated_at if exists in fields
     ignore_fields = ['created_at', 'updated_at']
-    fields = [field for field in fields if 'name' not in field or field['name'] not in ignore_fields]
+    fields = [field for field in fields if 'name' not in field or field['name']
+              not in ignore_fields]
 
     # Collect the required imports based on fields
     imports = set()
@@ -61,6 +62,10 @@ def generate_model(model_name, fields, options=None):
         else:
             # Default to 'String' if data_type is invalid or None
             imports.add('String')
+
+    if options and options.get('timestamps'):
+        imports.add('DateTime')
+        imports.add('func')
 
     # Create import statement dynamically
     imports_str = ', '.join(sorted(imports))
@@ -89,25 +94,22 @@ def generate_model(model_name, fields, options=None):
                     column_args += ", autoincrement=True"
             if field.get('isUnique', False):
                 column_args += ", unique=True"
-            
+
             content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
 
         else:
             if field.get('isPrimaryKey', False):
                 column_args += ", primary_key=True"
-            print('CCCCCCCCCCCCC', field.get('isUnique', False))
             if field.get('isUnique', False):
                 column_args += ", unique=True"
-            
+
             content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
 
     # Add timestamp fields if specified in options
     content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
     if options and options.get('timestamps'):
-        content += "    created_at = Column(DateTime, default=datetime.utcnow)\n"
-        content += "    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)\n"
-        # Add import for DateTime and datetime
-        content = f"from datetime import datetime\nfrom sqlalchemy import DateTime\n" + content
+        content += "    created_at = Column(DateTime, default=func.utcnow)\n"
+        content += "    updated_at = Column(DateTime, default=func.utcnow, onupdate=func.utcnow)\n"
 
     # Ensure the models directory exists
     directory_path = os.path.join(os.getcwd(), 'app', 'models')
