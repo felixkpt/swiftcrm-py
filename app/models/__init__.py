@@ -17,11 +17,3 @@ from .message import Message
 from .interview import Interview
 from .refresh_token import RefreshToken
 from .token_blacklist import TokenBlacklist
-from .category import Category
-from .category import Category
-from .category import Category
-from .category import Category
-from .category import Category
-from .categories2 import Categories2
-from .justcat import Justcat
-from .justcat import Justcat
