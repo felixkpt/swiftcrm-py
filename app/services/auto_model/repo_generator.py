@@ -12,6 +12,8 @@ def generate_repo(model_name, fields):
     content = f"""
 from datetime import datetime
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException, status
 from app.models.{model_path_name} import {model_name_pascal} as Model
 
 class {model_name_pascal}Repo:
@@ -26,6 +28,22 @@ class {model_name_pascal}Repo:
 
     @staticmethod
     def create(db: Session, model_request):
+"""
+
+    # Add validation for unique fields
+    for field in fields:
+        if field.isUnique:
+            content += f"""
+        # Validate unique {field.name}
+        existing_{field.name} = db.query(Model).filter(Model.{field.name} == model_request.{field.name}).first()
+        if existing_{field.name}:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A record with this {field.name} already exists."
+            )
+"""
+
+    content += """
         current_time = datetime.now()
         db_query = Model(
 """
@@ -36,9 +54,16 @@ class {model_name_pascal}Repo:
         elif field.name != 'id':
             content += f"            {field.name}=model_request.{field.name},\n"
 
-    content += f"""        )
+    content += """        )
         db.add(db_query)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to create record. Possibly due to unique constraint."
+            )
         db.refresh(db_query)
         return db_query
 
@@ -49,13 +74,26 @@ class {model_name_pascal}Repo:
         if db_query:
 """
 
+    # Add validation for unique fields during update
+    for field in fields:
+        if field.isUnique:
+            content += f"""
+            # Validate unique {field.name} during update
+            existing_{field.name} = db.query(Model).filter(Model.{field.name} == model_request.{field.name}, Model.id != model_id).first()
+            if existing_{field.name}:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="A record with this {field.name} already exists."
+                )
+"""
+
     for field in fields:
         if field.name == 'updated_at':
             content += f"            db_query.{field.name} = current_time\n"
         elif field.name != 'id' and field.name != 'created_at':
             content += f"            db_query.{field.name} = model_request.{field.name}\n"
 
-    content += f"""        db.commit()
+    content += """        db.commit()
         db.refresh(db_query)
         return db_query
 
@@ -69,7 +107,7 @@ class {model_name_pascal}Repo:
         return False
 """
 
-    # Ensure the models directory exists
+    # Ensure the repositories directory exists
     directory_path = os.path.join(os.getcwd(), 'app', 'repositories')
     create_directory_if_not_exists(directory_path)
 
