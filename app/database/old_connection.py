@@ -1,4 +1,4 @@
-# app/database/connection.py
+# app/database/old_connection.py
 import mysql.connector
 from mysql.connector import errorcode
 

@@ -1,0 +1,57 @@
+[
+    {
+        "id": 1,
+        "name": "Software World",
+        "description": "Interview prep Software Development"
+    },
+    {
+        "id": 2,
+        "name": "English Mastery",
+        "description": "Master communication"
+    },
+    {
+        "id": 3,
+        "name": "Cloud Computing",
+        "description": "Master cloud platforms and services"
+    },
+    {
+        "id": 4,
+        "name": "Cybersecurity",
+        "description": "Master cybersecurity principles and practices"
+    },
+    {
+        "id": 5,
+        "name": "Data Engineering",
+        "description": "Master data processing and management"
+    },
+    {
+        "id": 6,
+        "name": "Project Management",
+        "description": "Master project planning and execution"
+    },
+    {
+        "id": 7,
+        "name": "DevOps",
+        "description": "Master collaboration and automation practices"
+    },
+    {
+        "id": 8,
+        "name": "Quality Assurance",
+        "description": "Master software testing and quality assurance"
+    },
+    {
+        "id": 9,
+        "name": "Networking",
+        "description": "Master network design and administration"
+    },
+    {
+        "id": 10,
+        "name": "Machine Learning",
+        "description": "Master machine learning algorithms and applications"
+    },
+    {
+        "id": 11,
+        "name": "Emotional Intelligence",
+        "description": "Master self-awareness, self-regulation, empathy, and social skills"
+    }
+]

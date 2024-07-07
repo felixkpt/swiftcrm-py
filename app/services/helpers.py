@@ -1,13 +1,16 @@
 import os
 from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
-import re
 from app.services.str import STR
 import inflect
+from langdetect import detect, LangDetectException
 
 
 def is_english(text):
-    # Assuming you have the necessary setup for language detection
-    return detect(text) == 'en'
+    try:
+        return detect(text) == 'en'
+    except LangDetectException as e:
+        print(f"Error detecting language: {e}")
+        return False
 
 
 def filter_english_messages(messages, limit=5):
@@ -86,7 +89,6 @@ def map_data_type(data_type):
 def get_model_names(model_name):
     # Convert modelName to slug with underscore and capitalize
     model_name_slug = STR.slug(model_name).capitalize()
-    
 
     # Singularize the model_name if possible, otherwise use as is
     singularized = inflect.engine().singular_noun(model_name_slug)
@@ -98,6 +100,7 @@ def get_model_names(model_name):
     # Pluralize the singular model name to generate pluralized version
     model_name_plural = inflect.engine().plural(
         model_name_singular) if not singularized else model_name_slug
-    
-    print('model_name_slug::', model_name_singular, model_name_plural, model_name_pascal,)
+
+    print('model_name_slug::', model_name_singular,
+          model_name_plural, model_name_pascal,)
     return model_name_singular, model_name_plural, model_name_pascal,
