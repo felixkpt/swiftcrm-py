@@ -14,4 +14,7 @@ class SubCategory(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
-    category = relationship("Category", back_populates="sub_categories")
+    category = relationship("Category", back_populates="sub_category")
+    questions = relationship("Question", back_populates="sub_category")
+    messages = relationship("Message", back_populates="sub_category")
+    interviews = relationship("Interview", back_populates="sub_category")

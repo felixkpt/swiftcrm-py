@@ -21,3 +21,5 @@ class Interview(Base):
     user = relationship("User", back_populates="interviews")
     category = relationship("Category", back_populates="interviews")
     sub_category = relationship("SubCategory", back_populates="interviews")
+    messages = relationship("Message", back_populates="interview")
+

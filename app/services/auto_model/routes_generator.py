@@ -30,21 +30,21 @@ def list_route(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 def view_route(model_id: int, db: Session = Depends(get_db)):
     result = Repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="{model_name} not found")
+        raise HTTPException(status_code=404, detail="{model_name_singular} not found")
     return result
 
 @router.put("/{{model_id}}", response_model=ModelSchema)
 def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = Repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="{model_name} not found")
+        raise HTTPException(status_code=404, detail="{model_name_singular} not found")
     return Repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
 @router.delete("/{{model_id}}")
 def delete_route(model_id: int, db: Session = Depends(get_db)):
     result = Repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="{model_name} not found")
+        raise HTTPException(status_code=404, detail="{model_name_singular} not found")
     return Repo.delete(db=db, model_id=model_id)
 """
 

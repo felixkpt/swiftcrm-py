@@ -13,7 +13,7 @@ class Message(Base):
     role = Column(Enum('user', 'assistant'))
     mode = Column(Enum('training', 'interview'))
     interview_id = Column(Integer, ForeignKey('interviews.id', ondelete='CASCADE'), nullable=True)
-    question_id = Column(Integer, nullable=True)
+    question_id = Column(Integer, ForeignKey('questions.id'))
     question_scores = Column(Integer, nullable=True)
     content = Column(Text)
     audio_uri = Column(String(255))

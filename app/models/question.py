@@ -14,3 +14,4 @@ class Question(Base):
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
     sub_category = relationship("SubCategory", back_populates="questions")
+    
