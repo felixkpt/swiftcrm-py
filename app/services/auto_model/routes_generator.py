@@ -1,15 +1,18 @@
 from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
+from app.services.str import STR
 
 
 def generate_routes(api_endpoint, model_name):
+    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
+
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(
         model_name)
 
     content = f"""from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.repositories.{api_endpoint.replace('/', '.')+'.'+model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{api_endpoint.replace('/', '.')+'.'+model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
+from app.repositories.{api_endpoint_slugged+'.'+model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
+from app.requests.schemas.{api_endpoint_slugged+'.'+model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
 from app.requests.schemas.query_params import QueryParams
 from app.database.connection import get_db
 

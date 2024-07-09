@@ -4,8 +4,8 @@ import subprocess
 from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
 
-
 def generate_model(api_endpoint, model_name, fields, options=None):
+    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
 
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(
         model_name)
@@ -70,7 +70,7 @@ def generate_model(api_endpoint, model_name, fields, options=None):
     base_import = "from app.models.base import Base\nfrom sqlalchemy.orm import relationship\n"
 
     # Start building the model class content
-    content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{api_endpoint.replace('/', '_')+'_'+model_name_plural.lower()}'\n"
+    content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{api_endpoint_slugged+'_'+model_name_plural.lower()}'\n"
 
     # ignore created_at, and updated_at if exists in fields
     for field in fields:
@@ -116,7 +116,7 @@ def generate_model(api_endpoint, model_name, fields, options=None):
         if not content.endswith('\n'):
             init_py.write('\n')
         init_py.write(
-            f"from app.models.{api_endpoint.replace('/', '.')+'.'+filename[:-3]} import {model_name_pascal}\n")
+            f"from app.models.{api_endpoint_slugged+'.'+filename[:-3]} import {model_name_pascal}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:

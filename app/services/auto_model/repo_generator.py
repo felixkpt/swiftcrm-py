@@ -1,8 +1,11 @@
 from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
+from app.services.str import STR
 
 
 def generate_repo(api_endpoint, model_name, fields):
+    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
+
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(
         model_name)
 
@@ -26,7 +29,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
-from app.models.{api_endpoint.replace('/', '.')+'.'+model_path_name} import {model_name_pascal} as Model
+from app.models.{api_endpoint_slugged+'.'+model_path_name} import {model_name_pascal} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.requests.schemas.query_params import QueryParams  # Importing QueryParams for pagination and search
 from app.services.search_repo import search_and_sort  # Importing function for searching and sorting
