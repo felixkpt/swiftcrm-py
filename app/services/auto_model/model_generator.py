@@ -2,15 +2,10 @@
 import os
 import subprocess
 from app.services.helpers import get_model_names
+from app.services.auto_model.saves_file import handler
 
 
-def create_directory_if_not_exists(directory_path):
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
-
-
-def generate_model(model_name, fields, options=None):
-    print('FFFFFFF', fields)
+def generate_model(api_endpoint, model_name, fields, options=None):
 
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(
         model_name)
@@ -75,7 +70,7 @@ def generate_model(model_name, fields, options=None):
     base_import = "from app.models.base import Base\nfrom sqlalchemy.orm import relationship\n"
 
     # Start building the model class content
-    content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{model_name_plural.lower()}'\n"
+    content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{api_endpoint.replace('/', '_')+'_'+model_name_plural.lower()}'\n"
 
     # ignore created_at, and updated_at if exists in fields
     for field in fields:
@@ -111,28 +106,22 @@ def generate_model(model_name, fields, options=None):
         content += "    created_at = Column(DateTime, server_default=func.now())\n"
         content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
 
-    # Ensure the models directory exists
-    directory_path = os.path.join(os.getcwd(), 'app', 'models')
-    create_directory_if_not_exists(directory_path)
-
     # Write the generated model content to a Python file
-    model_filename = f'{model_name_singular.lower()}.py'
-    model_filepath = os.path.join(directory_path, model_filename)
-    with open(model_filepath, 'w') as f:
-        f.write(content)
+    filename = f'{model_name_singular.lower()}.py'
+    directory_path = handler(api_endpoint, 'models', filename, content)
 
- # Update __init__.py to include import statement for the new model
+    # Update __init__.py to include import statement for the new model
     init_py_path = os.path.join(directory_path, '__init__.py')
     with open(init_py_path, 'a') as init_py:
         if not content.endswith('\n'):
             init_py.write('\n')
         init_py.write(
-            f"from .{model_filename[:-3]} import {model_name_pascal}\n")
+            f"from .{filename[:-3]} import {model_name_pascal}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:
         subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-                       f"added {model_name_singular.lower()} table"], check=True)
+                       f"Added: {directory_path.replace('/', ' > ')+' '+model_name_singular.lower()} table"], check=True)
         subprocess.run(['alembic', 'upgrade', 'head'], check=True)
         return True
     except subprocess.CalledProcessError as e:

@@ -1,18 +1,15 @@
-import os
 from app.services.helpers import get_model_names
+from app.services.auto_model.saves_file import handler
 
-def create_directory_if_not_exists(directory_path):
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
 
-def generate_routes(model_name, api_endpoint):
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
-
+def generate_routes(api_endpoint, model_name):
+    model_name_singular, model_name_plural, model_name_pascal = get_model_names(
+        model_name)
 
     content = f"""from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.repositories.{model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
+from app.repositories.{api_endpoint.replace('/', '.')+model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
+from app.requests.schemas.{api_endpoint.replace('/', '.')+model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
 from app.requests.schemas.query_params import QueryParams
 from app.database.connection import get_db
 
@@ -49,14 +46,5 @@ def delete_route(model_id: int, db: Session = Depends(get_db)):
     return Repo.delete(db=db, model_id=model_id)
 """
 
-    # Determine the directory path based on api_endpoint
-    directory_path = os.path.join(
-        os.getcwd(), 'app', 'routes', *api_endpoint.split('/'))
-    create_directory_if_not_exists(directory_path)
-
-    # Create the route file
-    route_filename = f'{model_name_plural.lower()}.py'
-    route_file_path = os.path.join(directory_path, route_filename)
-
-    with open(route_file_path, 'w') as f:
-        f.write(content)
+    filename = f'{model_name_plural.lower()}.py'
+    handler(api_endpoint, 'routes', filename, content)

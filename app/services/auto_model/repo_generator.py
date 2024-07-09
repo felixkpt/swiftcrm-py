@@ -1,12 +1,10 @@
-import os
 from app.services.helpers import get_model_names
+from app.services.auto_model.saves_file import handler
 
-def create_directory_if_not_exists(directory_path):
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
 
-def generate_repo(model_name, fields):
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
+def generate_repo(api_endpoint, model_uri, model_name, fields):
+    model_name_singular, model_name_plural, model_name_pascal = get_model_names(
+        model_name)
 
     inserts_args1 = ""
     for field in fields:
@@ -28,7 +26,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
-from app.models.{model_path_name} import {model_name_pascal} as Model
+from app.models.{api_endpoint.replace('/', '_')+'_'+model_path_name} import {model_name_pascal} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.requests.schemas.query_params import QueryParams  # Importing QueryParams for pagination and search
 from app.services.search_repo import search_and_sort  # Importing function for searching and sorting
@@ -99,14 +97,8 @@ class {model_name_pascal}Repo:
         return False
 """
 
-    # Ensure the repositories directory exists
-    directory_path = os.path.join(os.getcwd(), 'app', 'repositories')
-    create_directory_if_not_exists(directory_path)
-
     # Write the generated repo content to a Python file
-    model_filename = f'{model_name_singular.lower()}_repo.py'
-    model_filepath = os.path.join(directory_path, model_filename)
-    with open(model_filepath, 'w') as f:
-        f.write(content)
+    filename = f'{model_name_singular.lower()}_repo.py'
+    handler(api_endpoint, 'repositories', filename, content)
 
     return True

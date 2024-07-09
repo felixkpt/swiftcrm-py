@@ -5,7 +5,7 @@ from .routes_generator import generate_routes
 from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 
 
-def prepare_generate_model(model_name, fields):
+def prepare_generate_model(api_endpoint, model_name, fields):
     options = {'timestamps': True}
     # Assuming fields is a list of FieldSchema objects
     fields_dict_list = [
@@ -25,7 +25,7 @@ def prepare_generate_model(model_name, fields):
         for field in fields
     ]
 
-    return generate_model(model_name, fields_dict_list, options)
+    return generate_model(api_endpoint, model_name, fields_dict_list, options)
 
 
 def auto_model_handler(data: AutoPageBuilderRequest):
@@ -34,9 +34,9 @@ def auto_model_handler(data: AutoPageBuilderRequest):
     api_endpoint = data.apiEndpoint
     fields = data.fields
 
-    res = prepare_generate_model(model_name, fields)
+    res = prepare_generate_model(api_endpoint, model_name, fields)
 
     if res:
-        generate_repo(model_name, fields)
-        generate_schema(model_name, fields)
-        generate_routes(model_name, api_endpoint)
+        generate_repo(api_endpoint, model_name, fields)
+        generate_schema(api_endpoint, model_name, fields)
+        generate_routes(api_endpoint, model_name)

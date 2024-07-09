@@ -1,12 +1,9 @@
 # app/services/auto_model/schema_generator.py
 import os
 from app.services.helpers import get_model_names
+from app.services.auto_model.saves_file import handler
 
-def create_directory_if_not_exists(directory_path):
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
-
-def generate_schema(model_name, fields):
+def generate_schema(api_endpoint, model_name, fields):
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
 
     # Dictionary to map field data types to Pydantic types
@@ -32,7 +29,5 @@ class {model_name_pascal}Schema(BaseModel):
         from_attributes = True
 """
 
-    directory_path = os.path.join(os.getcwd(), 'app', 'requests', 'schemas')
-    create_directory_if_not_exists(directory_path)
-    with open(os.path.join(directory_path, f'{model_name_singular.lower()}.py'), 'w') as f:
-        f.write(content)
+    filename = f'{model_name_singular.lower()}.py'
+    handler(api_endpoint, 'routes', filename, content)
