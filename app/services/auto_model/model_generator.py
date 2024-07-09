@@ -111,17 +111,17 @@ def generate_model(api_endpoint, model_name, fields, options=None):
     directory_path = handler(api_endpoint, 'models', filename, content)
 
     # Update __init__.py to include import statement for the new model
-    init_py_path = os.path.join(directory_path, '__init__.py')
+    init_py_path = os.path.join('app/models', '__init__.py')
     with open(init_py_path, 'a') as init_py:
         if not content.endswith('\n'):
             init_py.write('\n')
         init_py.write(
-            f"from .{api_endpoint.replace('/', '.')+'.'+filename[:-3]} import {model_name_pascal}\n")
+            f"from app.models.{api_endpoint.replace('/', '.')+'.'+filename[:-3]} import {model_name_pascal}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:
         subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-                       f"Added: {directory_path.replace('/', ' > ')+' '+model_name_singular.lower()} table"], check=True)
+                       f"Added: {api_endpoint.replace('/', ' > ')+' '+model_name_singular.lower()} table"], check=True)
         subprocess.run(['alembic', 'upgrade', 'head'], check=True)
         return True
     except subprocess.CalledProcessError as e:
