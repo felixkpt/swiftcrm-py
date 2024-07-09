@@ -8,8 +8,8 @@ def generate_routes(api_endpoint, model_name):
 
     content = f"""from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.repositories.{api_endpoint.replace('/', '.')+model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{api_endpoint.replace('/', '.')+model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
+from app.repositories.{api_endpoint.replace('/', '.')+'.'+model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
+from app.requests.schemas.{api_endpoint.replace('/', '.')+'.'+model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
 from app.requests.schemas.query_params import QueryParams
 from app.database.connection import get_db
 

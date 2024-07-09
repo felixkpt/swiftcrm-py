@@ -116,7 +116,7 @@ def generate_model(api_endpoint, model_name, fields, options=None):
         if not content.endswith('\n'):
             init_py.write('\n')
         init_py.write(
-            f"from .{filename[:-3]} import {model_name_pascal}\n")
+            f"from .{api_endpoint.replace('/', '.')+'.'+filename[:-3]} import {model_name_pascal}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:

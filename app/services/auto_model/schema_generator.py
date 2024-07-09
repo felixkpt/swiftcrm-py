@@ -30,4 +30,4 @@ class {model_name_pascal}Schema(BaseModel):
 """
 
     filename = f'{model_name_singular.lower()}.py'
-    handler(api_endpoint, 'routes', filename, content)
+    handler(api_endpoint, 'requests/schemas', filename, content)

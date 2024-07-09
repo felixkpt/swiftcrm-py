@@ -1,8 +1,8 @@
 """Add conversation app tables
 
-Revision ID: a6752ead66a4
+Revision ID: f872800ec1b7
 Revises: 
-Create Date: 2024-07-09 20:40:48.824725
+Create Date: 2024-07-09 21:02:37.326122
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a6752ead66a4'
+revision: str = 'f872800ec1b7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
