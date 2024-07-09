@@ -15,4 +15,5 @@ class Category(Base):
     sub_category = relationship("SubCategory", back_populates="category")
     messages = relationship("Message", back_populates="category")
     interviews = relationship("Interview", back_populates="category")
+    questions = relationship("Question", back_populates="category")
 

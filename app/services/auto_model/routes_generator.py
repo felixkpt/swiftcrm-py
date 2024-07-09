@@ -13,6 +13,7 @@ def generate_routes(model_name, api_endpoint):
 from sqlalchemy.orm import Session
 from app.repositories.{model_name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
 from app.requests.schemas.{model_name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
+from app.requests.schemas.query_params import QueryParams
 from app.database.connection import get_db
 
 router = APIRouter()
@@ -22,8 +23,8 @@ def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
     return Repo.create(db=db, model_request=modelRequest)
 
 @router.get("/")
-def list_route(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    results = Repo.list(db, skip=skip, limit=limit)
+def list_route(query_params: QueryParams = Depends(QueryParams), db: Session = Depends(get_db)):
+    results = Repo.list(db, query_params)
     return results
 
 @router.get("/{{model_id}}")

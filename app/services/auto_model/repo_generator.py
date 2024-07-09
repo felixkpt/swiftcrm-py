@@ -8,6 +8,20 @@ def create_directory_if_not_exists(directory_path):
 def generate_repo(model_name, fields):
     model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
 
+    inserts_args1 = ""
+    for field in fields:
+        if field.name == 'created_at' or field.name == 'updated_at':
+            inserts_args1 += f"            {field.name}=current_time,\n"
+        elif field.name != 'id':
+            inserts_args1 += f"            {field.name}=model_request.{field.name},\n"
+
+    inserts_args2 = ""
+    for field in fields:
+        if field.name == 'updated_at':
+            inserts_args2 += f"            db_query.{field.name} = current_time\n"
+        elif field.name != 'id' and field.name != 'created_at':
+            inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
+
     model_path_name = model_name_singular.lower()
     content = f"""
 from datetime import datetime
@@ -15,12 +29,22 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from app.models.{model_path_name} import {model_name_pascal} as Model
+from app.requests.validators.base_validator import Validator, UniqueChecker
+from app.requests.schemas.query_params import QueryParams  # Importing QueryParams for pagination and search
+from app.services.search_repo import search_and_sort  # Importing function for searching and sorting
 
 class {model_name_pascal}Repo:
 
     @staticmethod
-    def list(db: Session, skip: int = 0, limit: int = 10):
-        return db.query(Model).offset(skip).limit(limit).all()
+    def list(db: Session, query_params: QueryParams):   
+        search_fields = {[field.name for field in fields if field.isRequired]}
+        query = db.query(Model)
+        query = search_and_sort(query, Model, search_fields, query_params)
+
+        skip = (query_params.page - 1) * query_params.limit
+        query = query.offset(skip).limit(query_params.limit)
+
+        return query.all()
 
     @staticmethod
     def get(db: Session, model_id: int):
@@ -28,33 +52,13 @@ class {model_name_pascal}Repo:
 
     @staticmethod
     def create(db: Session, model_request):
-"""
-
-    # Add validation for unique fields
-    for field in fields:
-        if field.isUnique:
-            content += f"""
-        # Validate unique {field.name}
-        existing_{field.name} = db.query(Model).filter(Model.{field.name} == model_request.{field.name}).first()
-        if existing_{field.name}:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="A record with this {field.name} already exists."
-            )
-"""
-
-    content += """
+        required_fields = {[field.name for field in fields if field.isRequired]}
+        unique_fields = {[field.name for field in fields if field.isUnique]}
+        Validator.validate_required_fields(model_request, required_fields)
+        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
         db_query = Model(
-"""
-
-    for field in fields:
-        if field.name == 'created_at' or field.name == 'updated_at':
-            content += f"            {field.name}=current_time,\n"
-        elif field.name != 'id':
-            content += f"            {field.name}=model_request.{field.name},\n"
-
-    content += """        )
+{inserts_args1}        )
         db.add(db_query)
         try:
             db.commit()
@@ -69,33 +73,21 @@ class {model_name_pascal}Repo:
 
     @staticmethod
     def update(db: Session, model_id: int, model_request):
+        required_fields = {[field.name for field in fields if field.isRequired]}
+        unique_fields = {[field.name for field in fields if field.isUnique]}
+        Validator.validate_required_fields(model_request, required_fields)
+        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
         db_query = db.query(Model).filter(Model.id == model_id).first()
         if db_query:
-"""
-
-    # Add validation for unique fields during update
-    for field in fields:
-        if field.isUnique:
-            content += f"""
-            # Validate unique {field.name} during update
-            existing_{field.name} = db.query(Model).filter(Model.{field.name} == model_request.{field.name}, Model.id != model_id).first()
-            if existing_{field.name}:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="A record with this {field.name} already exists."
-                )
-"""
-
-    for field in fields:
-        if field.name == 'updated_at':
-            content += f"            db_query.{field.name} = current_time\n"
-        elif field.name != 'id' and field.name != 'created_at':
-            content += f"            db_query.{field.name} = model_request.{field.name}\n"
-
-    content += """        db.commit()
-        db.refresh(db_query)
-        return db_query
+{inserts_args2}            db.commit()
+            db.refresh(db_query)
+            return db_query
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Record not found."
+            )
 
     @staticmethod
     def delete(db: Session, model_id: int):

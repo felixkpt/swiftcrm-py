@@ -51,6 +51,7 @@ async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, 
             status_code=404, detail="AutoPageBuilder configuration not found")
     try:
         Repo.update_page(db, page_id, auto_page_data)
+        auto_model_handler(auto_page_data)
         return {"message": "AutoPageBuilder configuration updated successfully"}
     except Exception as e:
         raise HTTPException(
