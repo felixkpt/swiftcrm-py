@@ -36,6 +36,10 @@ def setup_database(schema_file='app/database/schema.sql'):
         ConversationRepo.add_message(
             1, 1, 1, 'user', 'Test message', '/download-audio/sdiosdisdo.mp3')
 
-        print("Database setup successful!")
+        msg = "Database setup successful!"
+        print(msg)
+        return msg
     except Exception as e:
-        print(f"Error setting up database: {str(e)}")
+        msg = f"Error setting up database: {str(e)}"
+        print(msg)
+        return msg

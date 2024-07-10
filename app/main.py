@@ -25,8 +25,10 @@ cors_middleware(app)
 def read_root():
     return {"message": "Welcome to SwiftCRM-PY!"}
 
+
 # Automatically generate and register routes
 auto_register_routes(app)
+
 
 @app.get("/list-routes")
 def list_routes():
@@ -41,9 +43,12 @@ def list_routes():
         routes.append(route_info)
     return routes
 
+
 @app.get("/setup-database")
 async def set_database():
-    setup_database()
+    res = setup_database()
+    return {"message": res}
+
 
 if __name__ == "__main__":
     import uvicorn

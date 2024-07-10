@@ -1,15 +1,34 @@
 # app/services/auto_model/model_generator.py
 import os
 import subprocess
-from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
 
-def generate_model(api_endpoint, model_name, fields, options=None):
-    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
-
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(
-        model_name)
-
+def generate_model(data):
+    api_endpoint = data['api_endpoint']
+    api_endpoint_slugged = data['api_endpoint_slugged']
+    fields = data['fields']
+    table_name = data['table_name']
+    class_name = data['class_name']
+    model_name_singular = data['model_name_singular']
+    
+    options = {'timestamps': True}
+    # Assuming fields is a list of FieldSchema objects
+    fields = [
+        {
+            "name": field.name,
+            "type": field.type,
+            "label": field.label,
+            "isRequired": field.isRequired,
+            "dataType": field.dataType,
+            "defaultValue": field.defaultValue,
+            # Default to False if attribute is not present
+            "isPrimaryKey": getattr(field, 'isPrimaryKey', False),
+            "isUnique": getattr(field, 'isUnique', False),
+            # Default to False if attribute is not present
+            "autoIncrements": getattr(field, 'autoIncrements', False),
+        }
+        for field in fields
+    ]
     # Updated dictionary to map field data types to SQLAlchemy types
     type_mapping = {
         'string': {'name': 'String', 'length': 255},
@@ -68,9 +87,9 @@ def generate_model(api_endpoint, model_name, fields, options=None):
 
     # Base class import
     base_import = "from app.models.base import Base\nfrom sqlalchemy.orm import relationship\n"
-
+    
     # Start building the model class content
-    content = f"{import_statement}{base_import}\n\nclass {model_name_pascal}(Base):\n    __tablename__ = '{api_endpoint_slugged+'_'+model_name_plural.lower()}'\n"
+    content = f"{import_statement}{base_import}\n\nclass {class_name}(Base):\n    __tablename__ = '{table_name}'\n"
 
     # ignore created_at, and updated_at if exists in fields
     for field in fields:
@@ -111,12 +130,12 @@ def generate_model(api_endpoint, model_name, fields, options=None):
     directory_path = handler(api_endpoint, 'models', filename, content)
 
     # Update __init__.py to include import statement for the new model
-    init_py_path = os.path.join('app/models', '__init__.py')
+    init_py_path = os.path.join(directory_path, '__init__.py')
     with open(init_py_path, 'a') as init_py:
         if not content.endswith('\n'):
             init_py.write('\n')
         init_py.write(
-            f"from app.models.{api_endpoint_slugged+'.'+filename[:-3]} import {model_name_pascal}\n")
+            f"from app.models.{api_endpoint_slugged+'.'+filename[:-3]} import {class_name}\n")
 
     # Finally, run Alembic commands to manage database migrations
     try:

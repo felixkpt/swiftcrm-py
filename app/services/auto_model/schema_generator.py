@@ -1,10 +1,11 @@
 # app/services/auto_model/schema_generator.py
-import os
-from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
 
-def generate_schema(api_endpoint, model_name, fields):
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(model_name)
+def generate_schema(data):
+    api_endpoint = data['api_endpoint']
+    fields = data['fields']
+    model_name_pascal = data['model_name_pascal']
+    model_name_singular = data['model_name_singular']
 
     # Dictionary to map field data types to Pydantic types
     type_mapping = {

@@ -1,13 +1,13 @@
-from app.services.helpers import get_model_names
 from app.services.auto_model.saves_file import handler
 from app.services.str import STR
 
 
-def generate_routes(api_endpoint, model_name):
-    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
-
-    model_name_singular, model_name_plural, model_name_pascal = get_model_names(
-        model_name)
+def generate_routes(data):
+    api_endpoint = data['api_endpoint']
+    api_endpoint_slugged = data['api_endpoint_slugged']
+    model_name_pascal = data['model_name_pascal']
+    model_name_singular = data['model_name_singular']
+    model_name_plural = data['model_name_plural']
 
     content = f"""from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
