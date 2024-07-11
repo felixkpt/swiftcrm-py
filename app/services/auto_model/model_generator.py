@@ -1,148 +1,220 @@
-# app/services/auto_model/model_generator.py
 import os
 import subprocess
 from app.services.auto_model.saves_file import handler
 
-def generate_model(data):
-    api_endpoint = data['api_endpoint']
-    api_endpoint_slugged = data['api_endpoint_slugged']
-    fields = data['fields']
-    table_name = data['table_name']
-    class_name = data['class_name']
-    model_name_singular = data['model_name_singular']
-    
-    options = {'timestamps': True}
-    # Assuming fields is a list of FieldSchema objects
-    fields = [
-        {
-            "name": field.name,
-            "type": field.type,
-            "label": field.label,
-            "isRequired": field.isRequired,
-            "dataType": field.dataType,
-            "defaultValue": field.defaultValue,
-            # Default to False if attribute is not present
-            "isPrimaryKey": getattr(field, 'isPrimaryKey', False),
-            "isUnique": getattr(field, 'isUnique', False),
-            # Default to False if attribute is not present
-            "autoIncrements": getattr(field, 'autoIncrements', False),
+
+class ModelGenerator:
+    def __init__(self, data):
+        """
+        Initializes the ModelGenerator instance with input data.
+
+        Args:
+            data (dict): Input data containing fields, class_name, table_name, options, etc.
+        """
+        self.data = data
+        self.type_mapping = {
+            'string': {'name': 'String', 'length': 255},
+            'integer': {'name': 'Integer', 'length': None},
+            'text': {'name': 'Text', 'length': None},
+            'longtext': {'name': 'Text', 'length': None},
+            'json': {'name': 'JSON', 'length': None},
         }
-        for field in fields
-    ]
-    # Updated dictionary to map field data types to SQLAlchemy types
-    type_mapping = {
-        'string': {'name': 'String', 'length': 255},
-        'integer': {'name': 'Integer', 'length': None},
-        'text': {'name': 'Text', 'length': None},
-        'longtext': {'name': 'Text', 'length': None},
-        'json': {'name': 'JSON', 'length': None},
-    }
 
-# Check if 'id' field exists in fields
-    id_field = next((field for field in fields if field['name'] == 'id'), None)
+    def _generate_fields(self):
+        """
+        Generates a list of fields based on input data.
 
-    if id_field is None:
-        # If 'id' field does not exist, add it as the primary key and set auto-increments
-        fields.insert(0, {
-            "name": "id",
-            "type": "integer",
-            "label": "id",
-            "dataType": "integer",
-            "isPrimaryKey": True,
-            "autoIncrements": True,
-            "isRequired": False,
-            "defaultValue": None,
-            "hidden": True
-        })
-    else:
-        # If 'id' field exists but not set as primary key and auto-increment, update it
-        id_field.update({
-            "dataType": id_field['dataType'] or 'integer',
-            "isPrimaryKey": True,
-            "autoIncrements": True
-        })
+        Returns:
+            list: List of dictionaries representing each field.
+        """
+        fields = self.data['fields']
+        print('Fields:', fields)
+        return [
+            {
+                "name": field.name,
+                "type": field.type,
+                "label": field.label,
+                "isRequired": field.isRequired,
+                "dataType": field.dataType,
+                "defaultValue": field.defaultValue,
+                "isUnique": field.isUnique,
+                "dropdownSource": field.dropdownSource,
+                "isPrimaryKey": False,
+                "autoIncrements": False,
+            }
+            for field in fields
+        ]
 
-    # ignore created_at, and updated_at if exists in fields
-    ignore_fields = ['created_at', 'updated_at']
-    fields = [field for field in fields if 'name' not in field or field['name']
-              not in ignore_fields]
+    def _add_id_field(self, fields):
+        """
+        Adds an 'id' field if not present in the list of fields.
 
-    # Collect the required imports based on fields
-    imports = set()
-    for field in fields:
-        data_type = field['dataType'].lower() if field['dataType'] else ''
-        if data_type in type_mapping:
-            imports.add(type_mapping[data_type]['name'])
+        Args:
+            fields (list): List of dictionaries representing fields.
+
+        Returns:
+            list: Updated list of fields including 'id' field.
+        """
+        id_field = next(
+            (field for field in fields if field['name'] == 'id'), None)
+        if id_field is None:
+            fields.insert(0, {
+                "name": "id",
+                "type": "integer",
+                "label": "id",
+                "dataType": "integer",
+                "isPrimaryKey": True,
+                "autoIncrements": True,
+                "isRequired": False,
+                "defaultValue": None,
+                "hidden": True
+            })
         else:
-            # Default to 'String' if data_type is invalid or None
-            imports.add('String')
+            id_field.update({
+                "dataType": id_field['dataType'] or 'integer',
+                "isPrimaryKey": True,
+                "autoIncrements": True
+            })
+        return fields
 
-    if options and options.get('timestamps'):
-        imports.add('DateTime')
-        imports.add('func')
+    def _filter_ignore_fields(self, fields):
+        """
+        Filters out fields to ignore (e.g., 'created_at', 'updated_at').
 
-    # Create import statement dynamically
-    imports_str = ', '.join(sorted(imports))
-    import_statement = f"from sqlalchemy import Column, {imports_str}\n"
+        Args:
+            fields (list): List of dictionaries representing fields.
 
-    # Base class import
-    base_import = "from app.models.base import Base\nfrom sqlalchemy.orm import relationship\n"
-    
-    # Start building the model class content
-    content = f"{import_statement}{base_import}\n\nclass {class_name}(Base):\n    __tablename__ = '{table_name}'\n"
+        Returns:
+            list: Filtered list of fields.
+        """
+        ignore_fields = ['created_at', 'updated_at']
+        return [field for field in fields if 'name' not in field or field['name'] not in ignore_fields]
 
-    # ignore created_at, and updated_at if exists in fields
-    for field in fields:
-        data_type = field['dataType'].lower() if field['dataType'] else ''
-        sqlalchemy_type = type_mapping.get(
-            data_type, {'name': 'String'})  # Default to 'String'
-        column_type_name = sqlalchemy_type['name']
-        column_args = f"({sqlalchemy_type['length']})" if 'length' in sqlalchemy_type is not None else '(255)' if column_type_name == 'String' else ''
+    def _collect_imports(self, fields):
+        """
+        Collects necessary imports based on field types.
 
-        if column_type_name == 'Integer':
-            column_args = ''
-            # check primary and autoIncrements here
-            if field.get('isPrimaryKey', False):
-                column_args += ", primary_key=True"
-                if field.get('autoIncrements', False):
-                    column_args += ", autoincrement=True"
-            if field.get('isUnique', False):
-                column_args += ", unique=True"
+        Args:
+            fields (list): List of dictionaries representing fields.
 
-            content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
+        Returns:
+            str: Comma-separated string of imports.
+        """
+        imports = set()
+        for field in fields:
+            data_type = field['dataType'].lower() if field['dataType'] else ''
+            if data_type in self.type_mapping:
+                imports.add(self.type_mapping[data_type]['name'])
+            else:
+                imports.add('String')
+        if self.data.get('options') and self.data['options'].get('timestamps'):
+            imports.add('DateTime')
+            imports.add('func')
+        if field.get('dropdownSource', False):
+            imports.add('ForeignKey')
 
-        else:
-            if field.get('isPrimaryKey', False):
-                column_args += ", primary_key=True"
-            if field.get('isUnique', False):
-                column_args += ", unique=True"
+        return ', '.join(sorted(imports))
 
-            content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
+    def _adds_relationships(self, fields):
+        imports = set()
+        table_name = self.data['table_name']
+        for field in fields:
+            if field.get('dropdownSource', False):
+                rship_tbl_name = field['dropdownSource']
+                rship_cls_name = 'Category'
+                rship_name = 'category'
+                back_populates = None
+                rship = f'    {rship_name} = relationship("{rship_cls_name}", back_populates={back_populates})'
+                imports.add(rship)
 
-    # Add timestamp fields if specified in options
-    content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
-    if options and options.get('timestamps'):
-        content += "    created_at = Column(DateTime, server_default=func.now())\n"
-        content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
+        return '\n '.join(sorted(imports)) if imports else None
 
-    # Write the generated model content to a Python file
-    filename = f'{model_name_singular.lower()}.py'
-    directory_path = handler(api_endpoint, 'models', filename, content)
+    def _build_model_content(self, imports_str, fields):
+        """
+        Builds the content of the SQLAlchemy model class.
 
-    # Update __init__.py to include import statement for the new model
-    init_py_path = os.path.join(directory_path, '__init__.py')
-    with open(init_py_path, 'a') as init_py:
-        if not content.endswith('\n'):
-            init_py.write('\n')
-        init_py.write(
-            f"from app.models.{api_endpoint_slugged+'.'+filename[:-3]} import {class_name}\n")
+        Args:
+            imports_str (str): Comma-separated string of imports.
+            fields (list): List of dictionaries representing fields.
 
-    # Finally, run Alembic commands to manage database migrations
-    try:
-        subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-                       f"Added: {api_endpoint.replace('/', ' > ')+' '+model_name_singular.lower()} table"], check=True)
-        subprocess.run(['alembic', 'upgrade', 'head'], check=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error running Alembic commands: {e}")
-        return False
+        Returns:
+            str: Content of the SQLAlchemy model class.
+        """
+        content = (
+            f"from sqlalchemy import Column, {imports_str}\n"
+            "from app.models.base import Base\n"
+            "from sqlalchemy.orm import relationship\n\n"
+            f"class {self.data['class_name']}(Base):\n"
+            f"    __tablename__ = '{self.data['table_name']}'\n"
+        )
+        for field in fields:
+            data_type = field['dataType'].lower() if field['dataType'] else ''
+            sqlalchemy_type = self.type_mapping.get(
+                data_type, {'name': 'String'})
+            column_type_name = sqlalchemy_type['name']
+            column_args = f"({sqlalchemy_type['length']})" if 'length' in sqlalchemy_type else '(255)' if column_type_name == 'String' else ''
+            if column_type_name == 'Integer':
+                column_args = ''
+                if field.get('isPrimaryKey', False):
+                    column_args += ", primary_key=True"
+                    if field.get('autoIncrements', False):
+                        column_args += ", autoincrement=True"
+                if field.get('isUnique', False):
+                    column_args += ", unique=True"
+                if field.get('dropdownSource', False):
+                    column_args += f", ForeignKey('{field['dropdownSource']}.id')"
+
+                content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
+            else:
+                if field.get('isPrimaryKey', False):
+                    column_args += ", primary_key=True"
+                if field.get('isUnique', False):
+                    column_args += ", unique=True"
+                content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
+        content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
+        if self.data.get('options') and self.data['options'].get('timestamps'):
+            content += "    created_at = Column(DateTime, server_default=func.now())\n"
+            content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
+        # Adding relationships
+        rels = self._adds_relationships(fields)
+        if rels:
+            content += '\n'+rels
+
+        return content
+
+    def _write_model_file(self, content):
+        """
+        Writes the SQLAlchemy model file to the specified directory.
+
+        Args:
+            content (str): Content of the SQLAlchemy model class.
+        """
+        path = self.data['api_endpoint'].replace('-', '_')
+        filename = f"{self.data['model_name_singular'].lower()}.py"
+        directory_path = handler(path, 'models', filename, content)
+        init_py_path = os.path.join(directory_path, '__init__.py')
+        with open(init_py_path, 'a') as init_py:
+            if not content.endswith('\n'):
+                init_py.write('\n')
+
+    def generate_model(self):
+        """
+        Generates the SQLAlchemy model and performs database migrations using Alembic.
+
+        Returns:
+            bool: True if successful, False otherwise.
+        """
+        fields = self._generate_fields()
+        fields = self._add_id_field(fields)
+        fields = self._filter_ignore_fields(fields)
+        imports_str = self._collect_imports(fields)
+        content = self._build_model_content(imports_str, fields)
+        self._write_model_file(content)
+        try:
+            subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
+                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['model_name_singular'].lower()} table"], check=True)
+            subprocess.run(['alembic', 'upgrade', 'head'], check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error running Alembic commands: {e}")
+            return False

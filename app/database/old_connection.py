@@ -1,13 +1,22 @@
 # app/database/old_connection.py
 import mysql.connector
 from mysql.connector import errorcode
+from decouple import Config, RepositoryEnv
 
 # Database connection configuration
+
+DOTENV_FILE = '.env'
+env_config = Config(RepositoryEnv(DOTENV_FILE))
+
+DB_HOST = env_config.get('DB_HOST')
+DB_USER = env_config.get('DB_USER')
+DB_PASS = env_config.get('DB_PASS')
+DB_NAME = env_config.get('DB_NAME')
 config = {
-    'user': 'root',
-    'password': 'Felix1234!',
-    'host': '127.0.0.1',
-    'database': 'swiftcrm_py',
+    'host': DB_HOST,
+    'user': DB_USER,
+    'password': DB_PASS,
+    'database': DB_NAME,
     'raise_on_warnings': True
 }
 

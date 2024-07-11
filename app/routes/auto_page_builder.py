@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.database.connection import get_db
 from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
 from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
+from app.services.auto_model.helpers import generate_model_and_api_names
 
 from app.services.auto_model.auto_model_handler import auto_model_handler
 
@@ -26,13 +27,16 @@ async def get_page_endpoint(page_id: str, db: Session = Depends(get_db)):
 @router.post("/dashboard/auto-page-builder")
 async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = Depends(get_db)):
 
-    existing_page = Repo.get_page_by_name(db, auto_page_data.modelName)
+    existing_page = Repo.get_page_by_name(db, 'dsd'+auto_page_data.modelName)
 
     if existing_page:
         raise HTTPException(
             status_code=422, detail="A similar AutoPageBuilder configuration exists")
     # try:
-    auto_model_handler(auto_page_data)
+    generated_data = generate_model_and_api_names(auto_page_data)
+    auto_page_data.table_name = generated_data['table_name']
+    auto_page_data.class_name = generated_data['class_name']
+    auto_model_handler(generated_data)
     Repo.store_page(db, auto_page_data)
     return {"message": "AutoPageBuilder configuration stored successfully"}
     # except Exception as e:

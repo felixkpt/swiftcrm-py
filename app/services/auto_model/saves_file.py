@@ -7,7 +7,6 @@ def create_directory_if_not_exists(directory_path):
 
 
 def handler(api_endpoint, relative_folder, filename, content):
-    api_endpoint = api_endpoint.replace('-', '_')
 
     # Determine the directory path based on api_endpoint
     directory_path = os.path.join(

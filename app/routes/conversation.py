@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.repositories.conversation import ConversationRepo as Repo
 from app.repositories.category import CategoryRepo as catsRepo
-from app.repositories.interviews import InterviewRepo
+from app.repositories.shared import SharedRepo
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ async def cat_conversation(cat_id: str, mode: str = Query(..., description="Mode
 
 @router.get("/dashboard/sub-categories/{sub_cat_id}/conversation")
 async def sub_cat_conversation(sub_cat_id: str, mode: str = Query(..., description="Mode type (e.g., 'training', 'interview')"), interview_id: str = Query(None, description="Interview Session ID.")):
-    conversation = InterviewRepo.get_sub_cat_conversation(
+    conversation = SharedRepo.get_sub_cat_conversation(
         sub_cat_id, mode=mode, interview_id=interview_id)
     return conversation
 

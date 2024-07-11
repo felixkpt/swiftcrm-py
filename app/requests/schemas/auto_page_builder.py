@@ -33,6 +33,8 @@ class AutoPageBuilderRequest(BaseModel):
     modelName: str
     modelURI: str
     apiEndpoint: str
+    table_name: Optional[str] = None
+    class_name: Optional[str] = None
     fields: List[FieldSchema]
     actionLabels: List[ActionLabelSchema]
     headers: List[HeaderSchema]

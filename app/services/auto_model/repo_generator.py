@@ -102,7 +102,8 @@ class {model_name_pascal}Repo:
 """
 
     # Write the generated repo content to a Python file
+    path = api_endpoint.replace('-', '_')
     filename = f'{model_name_singular.lower()}_repo.py'
-    handler(api_endpoint, 'repositories', filename, content)
+    handler(path, 'repositories', filename, content)
 
     return True

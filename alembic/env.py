@@ -12,15 +12,19 @@ from decouple import Config, RepositoryEnv
 DOTENV_FILE = '.env'
 env_config = Config(RepositoryEnv(DOTENV_FILE))
 
-SQLALCHEMY_DB_URL = env_config.get('SQLALCHEMY_DB_URL')
+DB_HOST = env_config.get('DB_HOST')
+DB_USER = env_config.get('DB_USER')
+DB_PASS = env_config.get('DB_PASS')
+DB_NAME = env_config.get('DB_NAME')
+DATABASE_URL = f"mysql+mysqlconnector://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}"
 
-print('SQLALCHEMY_DB_URL:', SQLALCHEMY_DB_URL)
+print('SQLALCHEMY_DB_URL:', DATABASE_URL)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", SQLALCHEMY_DB_URL)
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -30,5 +30,6 @@ class {model_name_pascal}Schema(BaseModel):
         from_attributes = True
 """
 
+    path = api_endpoint.replace('-', '_')
     filename = f'{model_name_singular.lower()}.py'
-    handler(api_endpoint, 'requests/schemas', filename, content)
+    handler(path, 'requests/schemas', filename, content)

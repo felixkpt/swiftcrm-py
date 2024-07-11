@@ -2,9 +2,9 @@
 from app.database.old_connection import execute_query, execute_insert
 from datetime import datetime
 from app.repositories.sub_category import SubCategoryRepo
+from app.repositories.category import CategoryRepo
 from app.services.helpers import filter_english_messages
 import random
-from app.repositories.interviews import InterviewRepo
 from app.repositories.shared import SharedRepo
 
 PROB_THRESHOLD_1 = 0.33
@@ -191,7 +191,7 @@ class ConversationRepo:
 
     @staticmethod
     def get_interview_instructions(sub_cat):
-        cat_name = SubCategoryRepo.get_cat(sub_cat['category_id'])['name']
+        cat_name = CategoryRepo.get_cat(sub_cat['category_id'])['name']
         learn_instructions = f'You are interviewing a user on "{cat_name} - {sub_cat["name"]}".'
 
         res = SharedRepo.get_interview_question(sub_cat['id'], user_id=1, update=True)

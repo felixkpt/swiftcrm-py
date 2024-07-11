@@ -7,6 +7,7 @@ from app.models.auto_page_builder_field import AutoPageBuilderField
 from app.models.auto_page_builder_action_label import AutoPageBuilderActionLabel
 from app.models.auto_page_builder_header import AutoPageBuilderHeader
 
+
 class AutoPageBuilderRepo:
 
     @staticmethod
@@ -32,6 +33,8 @@ class AutoPageBuilderRepo:
                 modelName=auto_page_data.modelName,
                 modelURI=auto_page_data.modelURI,
                 apiEndpoint=auto_page_data.apiEndpoint,
+                table_name=auto_page_data.table_name,
+                class_name=auto_page_data.class_name,
                 created_at=current_time,
                 updated_at=current_time
             )
@@ -91,6 +94,9 @@ class AutoPageBuilderRepo:
                 db_page.modelName = auto_page_data.modelName
                 db_page.modelURI = auto_page_data.modelURI
                 db_page.apiEndpoint = auto_page_data.apiEndpoint
+                db_page.table_name = auto_page_data.table_name,
+                db_page.class_name = auto_page_data.class_name,
+
                 db_page.updated_at = current_time
 
                 # Clear existing fields, action labels, headers associated with this page_id
