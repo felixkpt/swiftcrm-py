@@ -3,7 +3,6 @@ import subprocess
 from app.services.auto_model.saves_file import handler
 from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
 from app.services.auto_model.helpers import generate_model_and_api_names
-from app.database.connection import get_db
 from sqlalchemy.orm import Session
 
 
@@ -140,9 +139,9 @@ class ModelGenerator:
                     generated_data = generate_model_and_api_names(auto_page)
                     model_name_singular = generated_data['model_name_singular']
                     class_name = generated_data['class_name']
-                    back_populates = None
+                    back_populates = self.data['model_name_singular'].lower()
 
-                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
+                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates="{back_populates}")'
                     relationships.append(relationship_str)
         return '\n'.join(relationships) if relationships else ''
 
