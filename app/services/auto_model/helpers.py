@@ -29,7 +29,7 @@ def generate_table_name(api_endpoint_slugged, model_name_plural):
 
     # Construct the table_name
     table_name = api_endpoint_slugged.replace(
-        '.', '-') + '_' + model_name_plural
+        '.', '_') + '_' + model_name_plural
 
     return table_name
 
@@ -55,7 +55,7 @@ def generate_model_and_api_names(data):
     table_name = generate_table_name(api_endpoint_slugged.replace('.', '-'), model_name_plural.lower())
     class_name = generate_class_name(api_endpoint_slugged.replace('.', '-'), model_name_singular.lower())
 
-    fields = data.fields
+    fields = data.fields or None
 
     return {
         'model_name': model_name,

@@ -26,6 +26,10 @@ class AutoPageBuilderRepo:
         return db.query(AutoPageBuilder).filter(AutoPageBuilder.modelName == modelName).first()
 
     @staticmethod
+    def get_page_by_table_name(db: Session, table_name: str):
+        return db.query(AutoPageBuilder).filter(AutoPageBuilder.table_name == table_name).first()
+
+    @staticmethod
     def store_page(db: Session, auto_page_data):
         try:
             current_time = datetime.utcnow()

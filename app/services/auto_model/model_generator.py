@@ -1,17 +1,28 @@
 import os
 import subprocess
 from app.services.auto_model.saves_file import handler
+from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
+from app.services.auto_model.helpers import generate_model_and_api_names
+from app.database.connection import get_db
+from sqlalchemy.orm import Session
 
 
 class ModelGenerator:
-    def __init__(self, data):
+    def __init__(self, data, db: Session):
         """
         Initializes the ModelGenerator instance with input data.
 
         Args:
             data (dict): Input data containing fields, class_name, table_name, options, etc.
         """
+        
         self.data = data
+        if 'options' not in self.data:
+            self.data['options'] = {}
+        if 'timestamps' not in self.data['options']:
+            self.data['options']['timestamps'] = True
+
+        self.db = db
         self.type_mapping = {
             'string': {'name': 'String', 'length': 255},
             'integer': {'name': 'Integer', 'length': None},
@@ -102,32 +113,38 @@ class ModelGenerator:
         """
         imports = set()
         for field in fields:
+            print('HEY YOU:::', field.get('dropdownSource', False))
+
             data_type = field['dataType'].lower() if field['dataType'] else ''
             if data_type in self.type_mapping:
                 imports.add(self.type_mapping[data_type]['name'])
             else:
                 imports.add('String')
+            if field.get('dropdownSource', False):
+                imports.add('ForeignKey')
+
         if self.data.get('options') and self.data['options'].get('timestamps'):
             imports.add('DateTime')
             imports.add('func')
-        if field.get('dropdownSource', False):
-            imports.add('ForeignKey')
-
+        
         return ', '.join(sorted(imports))
 
-    def _adds_relationships(self, fields):
-        imports = set()
-        table_name = self.data['table_name']
+    def _add_relationships(self, fields):
+        relationships = []
         for field in fields:
-            if field.get('dropdownSource', False):
+            if field.get('dropdownSource'):
                 rship_tbl_name = field['dropdownSource']
-                rship_cls_name = 'Category'
-                rship_name = 'category'
-                back_populates = None
-                rship = f'    {rship_name} = relationship("{rship_cls_name}", back_populates={back_populates})'
-                imports.add(rship)
+                auto_page = Repo.get_page_by_table_name(
+                    self.db, rship_tbl_name)
+                if auto_page:
+                    generated_data = generate_model_and_api_names(auto_page)
+                    model_name_singular = generated_data['model_name_singular']
+                    class_name = generated_data['class_name']
+                    back_populates = None
 
-        return '\n '.join(sorted(imports)) if imports else None
+                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
+                    relationships.append(relationship_str)
+        return '\n'.join(relationships) if relationships else ''
 
     def _build_model_content(self, imports_str, fields):
         """
@@ -176,7 +193,7 @@ class ModelGenerator:
             content += "    created_at = Column(DateTime, server_default=func.now())\n"
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
         # Adding relationships
-        rels = self._adds_relationships(fields)
+        rels = self._add_relationships(fields)
         if rels:
             content += '\n'+rels
 

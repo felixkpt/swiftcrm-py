@@ -1,3 +1,4 @@
+# app/routes/auto_page_builder.py
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
@@ -36,13 +37,13 @@ async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = D
     generated_data = generate_model_and_api_names(auto_page_data)
     auto_page_data.table_name = generated_data['table_name']
     auto_page_data.class_name = generated_data['class_name']
-    auto_model_handler(generated_data)
+    auto_model_handler(generated_data, db)
     Repo.store_page(db, auto_page_data)
     return {"message": "AutoPageBuilder configuration stored successfully"}
     # except Exception as e:
-        # print('e::', e)
-        # raise HTTPException(
-        #     status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
+    # print('e::', e)
+    # raise HTTPException(
+    #     status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
 
 # Endpoint to update an existing AutoPageBuilder configuration
 
