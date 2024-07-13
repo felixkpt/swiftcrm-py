@@ -139,9 +139,10 @@ class ModelGenerator:
                     generated_data = generate_model_and_api_names(auto_page)
                     model_name_singular = generated_data['model_name_singular']
                     class_name = generated_data['class_name']
-                    back_populates = self.data['model_name_singular'].lower()
+                    # back_populates = self.data['model_name_singular'].lower()
+                    back_populates = None
 
-                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates="{back_populates}")'
+                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
                     relationships.append(relationship_str)
         return '\n'.join(relationships) if relationships else ''
 
@@ -161,7 +162,7 @@ class ModelGenerator:
             "from app.models.base import Base\n"
             "from sqlalchemy.orm import relationship\n\n"
             f"class {self.data['class_name']}(Base):\n"
-            f"    __tablename__ = '{self.data['table_name']}'\n"
+            f"    __tablename__ = '{self.data['table_name_plural']}'\n"
         )
         for field in fields:
             data_type = field['dataType'].lower() if field['dataType'] else ''
@@ -178,7 +179,10 @@ class ModelGenerator:
                 if field.get('isUnique', False):
                     column_args += ", unique=True"
                 if field.get('dropdownSource', False):
-                    column_args += f", ForeignKey('{field['dropdownSource']}.id')"
+                    auto_page = Repo.get_page_by_apiEndpoint(
+                    self.db, field['dropdownSource'])
+                    if auto_page:
+                        column_args += f", ForeignKey('{auto_page.table_name_plural}.id')"
 
                 content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
             else:

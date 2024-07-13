@@ -26,8 +26,12 @@ class AutoPageBuilderRepo:
         return db.query(AutoPageBuilder).filter(AutoPageBuilder.modelName == modelName).first()
 
     @staticmethod
-    def get_page_by_table_name(db: Session, table_name: str):
-        return db.query(AutoPageBuilder).filter(AutoPageBuilder.table_name == table_name).first()
+    def get_page_by_table_name(db: Session, table_name_singular: str):
+        return db.query(AutoPageBuilder).filter(AutoPageBuilder.table_name_singular == table_name_singular).first()
+
+    @staticmethod
+    def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
+        return db.query(AutoPageBuilder).filter(AutoPageBuilder.apiEndpoint == apiEndpoint).first()
 
     @staticmethod
     def store_page(db: Session, auto_page_data):
@@ -37,7 +41,8 @@ class AutoPageBuilderRepo:
                 modelName=auto_page_data.modelName,
                 modelURI=auto_page_data.modelURI,
                 apiEndpoint=auto_page_data.apiEndpoint,
-                table_name=auto_page_data.table_name,
+                table_name_singular=auto_page_data.table_name_singular,
+                table_name_plural=auto_page_data.table_name_plural,
                 class_name=auto_page_data.class_name,
                 created_at=current_time,
                 updated_at=current_time
@@ -95,11 +100,12 @@ class AutoPageBuilderRepo:
             db_page = db.query(AutoPageBuilder).filter(
                 AutoPageBuilder.id == page_id).first()
             if db_page:
-                db_page.modelName = auto_page_data.modelName
-                db_page.modelURI = auto_page_data.modelURI
-                db_page.apiEndpoint = auto_page_data.apiEndpoint
-                db_page.table_name = auto_page_data.table_name,
-                db_page.class_name = auto_page_data.class_name,
+                db_page.modelName=auto_page_data.modelName,
+                db_page.modelURI=auto_page_data.modelURI,
+                db_page.apiEndpoint=auto_page_data.apiEndpoint,
+                db_page.table_name_singular=auto_page_data.table_name_singular,
+                db_page.table_name_plural=auto_page_data.table_name_plural,
+                db_page.class_name=auto_page_data.class_name,
 
                 db_page.updated_at = current_time
 

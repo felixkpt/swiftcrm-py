@@ -1,7 +1,6 @@
 from app.services.auto_model.saves_file import handler
 from app.services.str import STR
 
-
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
@@ -24,33 +23,60 @@ def generate_repo(data):
         elif field.name != 'id' and field.name != 'created_at':
             inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
 
+    # Generate filter conditions
+    added = False
+    filter_conditions = ""
+    for field in fields:
+        if field.name != 'id' and field.name.endswith('_id'):
+            added = True
+            filter_conditions += f"        value = params.get('{field.name}', None)\n"
+            filter_conditions += f"        if value is not None:\n"
+            filter_conditions += f"            query = query.filter(Model.{field.name} == value)\n"
+    if added:
+        filter_conditions = '\n' + filter_conditions
+    else:
+        filter_conditions = ''
+
     model_path_name = model_name_singular.lower()
+    
+    deleted_message = '{"message": "Record deleted successfully"}'
+    
     content = f"""
 from datetime import datetime
+from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.requests.schemas.query_params import QueryParams  # Importing QueryParams for pagination and search
 from app.services.search_repo import search_and_sort  # Importing function for searching and sorting
+from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 
 class {model_name_pascal}Repo:
 
     @staticmethod
-    def list(db: Session, query_params: QueryParams):   
+    async def list(db: Session, request: Request):
+        params = request.query_params
+        search = params.get("search", "")
         search_fields = {[field.name for field in fields if field.isRequired]}
-        query = db.query(Model)
-        query = search_and_sort(query, Model, search_fields, query_params)
+        order_by = params.get("order_by", "")
+        order_direction = params.get("order_direction", "")
+        page = int(params.get("page", 1))
+        limit = int(params.get("limit", 10))
 
-        skip = (query_params.page - 1) * query_params.limit
-        query = query.offset(skip).limit(query_params.limit)
+        query = db.query(Model)
+        query = search_and_sort(query, Model, search_fields, search, order_by, order_direction)
+{filter_conditions}
+        skip = (page - 1) * limit
+        query = query.offset(skip).limit(limit)
 
         return query.all()
 
     @staticmethod
     def get(db: Session, model_id: int):
-        return db.query(Model).filter(Model.id == model_id).first()
+        result = db.query(Model).filter(Model.id == model_id).first()
+        if not result:
+            return ResponseHelper.handle_not_found_error(model_id)
+        return result
 
     @staticmethod
     def create(db: Session, model_request):
@@ -66,10 +92,7 @@ class {model_name_pascal}Repo:
             db.commit()
         except IntegrityError:
             db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to create record. Possibly due to unique constraint."
-            )
+            return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
         return db_query
 
@@ -86,10 +109,7 @@ class {model_name_pascal}Repo:
             db.refresh(db_query)
             return db_query
         else:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Record not found."
-            )
+            return ResponseHelper.handle_not_found_error(model_id)
 
     @staticmethod
     def delete(db: Session, model_id: int):
@@ -97,8 +117,9 @@ class {model_name_pascal}Repo:
         if db_query:
             db.delete(db_query)
             db.commit()
-            return True
-        return False
+            return {deleted_message}
+        else:
+            return ResponseHelper.handle_not_found_error(model_id)
 """
 
     # Write the generated repo content to a Python file
