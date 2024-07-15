@@ -14,6 +14,8 @@ class FieldSchema(BaseModel):
     isUnique: Optional[bool] = False
     dropdownSource: Optional[str] = None
     dropdownDependsOn: Optional[List] = None
+    desktopWidth: Optional[int] = 12  # Default desktop width
+    mobileWidth: Optional[int] = 12    # Default mobile width
 
 
 class ActionLabelSchema(BaseModel):

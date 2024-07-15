@@ -45,7 +45,7 @@ class AutoPageBuilderRepo:
                 table_name_plural=auto_page_data.table_name_plural,
                 class_name=auto_page_data.class_name,
                 created_at=current_time,
-                updated_at=current_time
+                updated_at=current_time,
             )
             db.add(new_page)
             db.commit()
@@ -97,16 +97,17 @@ class AutoPageBuilderRepo:
     def update_page(db: Session, page_id: int, auto_page_data):
         try:
             current_time = datetime.utcnow()
+
             db_page = db.query(AutoPageBuilder).filter(
                 AutoPageBuilder.id == page_id).first()
-            if db_page:
-                db_page.modelName=auto_page_data.modelName,
-                db_page.modelURI=auto_page_data.modelURI,
-                db_page.apiEndpoint=auto_page_data.apiEndpoint,
-                db_page.table_name_singular=auto_page_data.table_name_singular,
-                db_page.table_name_plural=auto_page_data.table_name_plural,
-                db_page.class_name=auto_page_data.class_name,
 
+            if db_page:
+                db_page.modelName = auto_page_data.modelName
+                db_page.modelURI = auto_page_data.modelURI
+                db_page.apiEndpoint = auto_page_data.apiEndpoint
+                db_page.table_name_singular = auto_page_data.table_name_singular
+                db_page.table_name_plural = auto_page_data.table_name_plural
+                db_page.class_name = auto_page_data.class_name
                 db_page.updated_at = current_time
 
                 # Clear existing fields, action labels, headers associated with this page_id
@@ -131,7 +132,10 @@ class AutoPageBuilderRepo:
                         isVisibleInSingleView=field.isVisibleInSingleView,
                         isUnique=field.isUnique,
                         dropdownSource=field.dropdownSource,
-                        dropdownDependsOn=field.dropdownDependsOn
+                        dropdownDependsOn=field.dropdownDependsOn,
+                        desktopWidth=auto_page_data.desktopWidth,
+                        mobileWidth=auto_page_data.mobileWidth,
+
                     )
                     db.add(db_field)
 

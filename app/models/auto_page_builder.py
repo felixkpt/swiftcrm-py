@@ -1,4 +1,4 @@
-# Assuming this is app/models/auto_page_builder.py
+# app/models/auto_page_builder.py
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship
 from app.models.base import Base

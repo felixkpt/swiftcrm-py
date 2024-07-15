@@ -6,8 +6,8 @@ class SubCategory(Base):
     __tablename__ = 'sub_categories'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(255))
     category_id = Column(Integer, ForeignKey('categories.id'))
+    name = Column(String(255))
     slug = Column(String(255))
     learn_instructions = Column(Text)
     status_id = Column(Integer, nullable=False, server_default='1')

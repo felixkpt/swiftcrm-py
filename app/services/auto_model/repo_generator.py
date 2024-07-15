@@ -1,5 +1,4 @@
 from app.services.auto_model.saves_file import handler
-from app.services.str import STR
 
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
@@ -29,7 +28,7 @@ def generate_repo(data):
     for field in fields:
         if field.name != 'id' and field.name.endswith('_id'):
             added = True
-            filter_conditions += f"        value = params.get('{field.name}', None)\n"
+            filter_conditions += f"        value = query_params.get('{field.name}', None)\n"
             filter_conditions += f"        if value is not None:\n"
             filter_conditions += f"            query = query.filter(Model.{field.name} == value)\n"
     if added:
@@ -48,26 +47,21 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import search_and_sort  # Importing function for searching and sorting
+from app.services.search_repo import get_query_params, apply_search_and_sort  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 
 class {model_name_pascal}Repo:
 
     @staticmethod
     async def list(db: Session, request: Request):
-        params = request.query_params
-        search = params.get("search", "")
+        query_params = get_query_params(request)
         search_fields = {[field.name for field in fields if field.isRequired]}
-        order_by = params.get("order_by", "")
-        order_direction = params.get("order_direction", "")
-        page = int(params.get("page", 1))
-        limit = int(params.get("limit", 10))
 
         query = db.query(Model)
-        query = search_and_sort(query, Model, search_fields, search, order_by, order_direction)
+        query = apply_search_and_sort(query, Model, search_fields, query_params)
 {filter_conditions}
-        skip = (page - 1) * limit
-        query = query.offset(skip).limit(limit)
+        skip = (query_params['page'] - 1) * query_params['limit']
+        query = query.offset(skip).limit(query_params['limit'])
 
         return query.all()
 
