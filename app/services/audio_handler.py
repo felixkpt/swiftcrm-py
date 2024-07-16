@@ -71,4 +71,4 @@ def process_audio_and_return_combined_results(audio_input, sub_cat_id, my_info, 
 
 
 def get_audio_uri(cat_id, id, file_extension):
-    return f"/download-audio/cat-{cat_id}/{id}{file_extension}"
+    return f"/conversation/v1/download-audio/cat-{cat_id}/{id}{file_extension}"

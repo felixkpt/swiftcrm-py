@@ -64,9 +64,9 @@ class InterviewRepo:
             return None
 
         query = """
-        SELECT question_id, question_scores as score, content AS answer, questions.question, questions.marks as max_score 
+        SELECT question_id, question_scores as score, content AS answer, conversation_v1_questions.question, conversation_v1_questions.marks as max_score 
         FROM conversation_v1_messages
-        JOIN questions on messages.question_id = questions.id
+        JOIN conversation_v1_questions on conversation_v1_messages.question_id = conversation_v1_questions.id
         WHERE interview_id = %s AND role = 'user' AND question_id IS NOT NULL
         """
 
@@ -211,7 +211,7 @@ class InterviewRepo:
     @staticmethod
     def list_completed_interviews_grouped_by_category():
         query = """
-        SELECT conversation_v1_interviews.*, conversation_v1_categories.name AS category_name, conversation_v1_sub_categories.name AS conversation_v1_subcategory_name, conversation_v1_sub_categories.id AS subcategory_id
+        SELECT conversation_v1_interviews.*, conversation_v1_categories.name AS category_name, conversation_v1_sub_categories.name AS subcategory_name, conversation_v1_sub_categories.id AS subcategory_id
         FROM conversation_v1_interviews
         JOIN conversation_v1_categories ON conversation_v1_interviews.category_id = conversation_v1_categories.id
         LEFT JOIN conversation_v1_sub_categories ON conversation_v1_interviews.sub_category_id = conversation_v1_sub_categories.id

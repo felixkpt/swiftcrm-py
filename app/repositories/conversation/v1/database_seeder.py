@@ -34,7 +34,7 @@ def setup_database(schema_file='app/database/schema.sql'):
 
         # Add a sample message
         ConversationRepo.add_message(
-            1, 1, 1, 'user', 'Test message', '/download-audio/sdiosdisdo.mp3')
+            1, 1, 1, 'user', 'Test message', '/conversation/v1/download-audio/sdiosdisdo.mp3')
 
         msg = "Database setup successful!"
         print(msg)

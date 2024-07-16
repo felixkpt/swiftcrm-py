@@ -52,7 +52,7 @@ class SubCategoryRepo:
 
     @staticmethod
     def get_sub_cat(sub_cat_id):
-        query = "SELECT * FROM sub_categories WHERE id = %s and status_id = %s"
+        query = "SELECT * FROM conversation_v1_sub_categories WHERE id = %s and status_id = %s"
         result = execute_query(query, (sub_cat_id, 1))
         return result[0] if result else False
 
