@@ -30,4 +30,4 @@ def get_query_params(request: Request, default_search_fields=['name', 'descripti
         'page': int(params.get("page", 1)),
         'limit': int(params.get("limit", 10)),
     }
-    return query_params
+    return {**query_params,**request.query_params}

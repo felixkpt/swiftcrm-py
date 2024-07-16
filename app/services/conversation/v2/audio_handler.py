@@ -3,21 +3,21 @@ import os
 from fastapi import HTTPException
 
 # Custom imports
-from app.services.openai_requests import convert_audio_to_text, get_chat_response
-from app.repositories.conversation.v1.conversation_repo import ConversationRepo
+from app.services.conversation.v2.openai_requests import convert_audio_to_text, get_chat_response
+from app.repositories.conversation.v2.conversation_repo import ConversationRepo
 
-from app.services.text_to_speech import convert_text_to_speech
+from app.services.conversation.v2.text_to_speech import convert_text_to_speech
 import uuid
-from app.repositories.conversation.v1.sub_category import SubCategoryRepo
+from app.repositories.conversation.v2.categories.sub_categories.sub_category_repo import SubCategoryRepo
 
 
 def generate_id():
     return str(uuid.uuid4())
 
 
-def process_audio_and_return_combined_results(audio_input, sub_cat_id, my_info, mode='training'):
+def process_audio_and_return_combined_results(db, audio_input, sub_cat_id, my_info, mode='training'):
     # Ensure stored_audio folder exists
-    cat_id = SubCategoryRepo.get_cat_id(sub_cat_id)
+    cat_id = SubCategoryRepo.get(db, sub_cat_id).id
     audio_folder = f"storage/audio/cat-{cat_id}"
 
     os.makedirs(audio_folder, exist_ok=True)
@@ -31,7 +31,7 @@ def process_audio_and_return_combined_results(audio_input, sub_cat_id, my_info, 
         raise HTTPException(status_code=400, detail="Failed to decode audio")
 
     # Get ChatGPT Response
-    messages, interview_id = ConversationRepo.get_recent_messages(sub_cat_id, mode)
+    messages, interview_id = ConversationRepo.get_recent_messages(db, sub_cat_id, mode)
     
     response_message, interview_id = get_chat_response(
         messages, interview_id, message_content=request_message, sub_cat_id=sub_cat_id, mode=mode)
@@ -49,7 +49,7 @@ def process_audio_and_return_combined_results(audio_input, sub_cat_id, my_info, 
     # Save messages
     response = []
     if response_message:
-        response = ConversationRepo.store_messages(
+        response = ConversationRepo.store_messages(db, 
             sub_cat_id, my_info, assistant_info, mode, interview_id)
         results = response['results']
         if results:

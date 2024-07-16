@@ -1,16 +1,19 @@
 # app/routes/audio.py
-from fastapi import APIRouter, File, UploadFile, HTTPException, Query
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
+
 from fastapi.responses import StreamingResponse
 import os
-from app.services.conversation.v1.audio_handler import process_audio_and_return_combined_results, generate_id, get_audio_uri
-from app.repositories.conversation.v1.sub_category import SubCategoryRepo
+from app.services.conversation.v2.audio_handler import process_audio_and_return_combined_results, generate_id, get_audio_uri
+from app.repositories.conversation.v2.categories.sub_categories.sub_category_repo import SubCategoryRepo
+from app.database.connection import get_db
 
 router = APIRouter()
 
 
 @router.post("/post-audio")
-async def post_audio(file: UploadFile = File(...), sub_cat_id: str = None, mode: str = Query(..., regex="^(training|interview)$")):
-    cat_id = SubCategoryRepo.get_cat_id(sub_cat_id)
+async def post_audio(file: UploadFile = File(...), sub_cat_id: str = None, mode: str = Query(..., regex="^(training|interview)$"), db: Session = Depends(get_db)):
+    cat_id = SubCategoryRepo.get(db, sub_cat_id).id
     audio_folder = f"storage/audio/cat-{cat_id}"
     os.makedirs(audio_folder, exist_ok=True)
 
@@ -25,7 +28,7 @@ async def post_audio(file: UploadFile = File(...), sub_cat_id: str = None, mode:
 
     results = []
     with open(filename, 'rb') as audio_input:
-        results = process_audio_and_return_combined_results(
+        results = process_audio_and_return_combined_results(db, 
             audio_input, sub_cat_id, my_info, mode)
 
     return results
