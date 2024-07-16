@@ -1,13 +1,13 @@
 from datetime import datetime
 from app.database.old_connection import execute_query
-from app.repositories.sub_category import SubCategoryRepo
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo
 from app.database.old_connection import execute_query, execute_insert
 
 class SharedRepo:
 
     @staticmethod
     def get_session_by_id(interview_id):
-        query_session = "SELECT * FROM interviews WHERE id = %s AND status_id = %s"
+        query_session = "SELECT * FROM conversation_v1_interviews WHERE id = %s AND status_id = %s"
         session = execute_query(
             query_session, (interview_id, 1), fetch_method='first')
         return session
@@ -19,7 +19,7 @@ class SharedRepo:
 
         questions = SubCategoryRepo.get_sub_cat_questions(sub_cat_id)['results']
 
-        query_session = "SELECT id, current_question_id FROM interviews WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND status_id = %s"
+        query_session = "SELECT id, current_question_id FROM conversation_v1_interviews WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND status_id = %s"
         session = execute_query(
             query_session, (user_id, cat_id, sub_cat_id, 1), fetch_method='first')
 
@@ -33,7 +33,7 @@ class SharedRepo:
                 # Create a new session if none exists
                 question_id = questions[0]['id']
                 query_insert_session = """
-                INSERT INTO interviews (user_id, category_id, sub_category_id, current_question_id, created_at, updated_at)
+                INSERT INTO conversation_v1_interviews (user_id, category_id, sub_category_id, current_question_id, created_at, updated_at)
                 VALUES (%s, %s, %s,%s, %s, %s)
                 """
                 interview_id = execute_insert(
@@ -55,13 +55,13 @@ class SharedRepo:
 
             if next_question_id and update:
                 query_update_session = """
-                UPDATE interviews SET current_question_id = %s, updated_at = %s WHERE id = %s
+                UPDATE conversation_v1_interviews SET current_question_id = %s, updated_at = %s WHERE id = %s
                 """
                 execute_query(query_update_session,
                             (next_question_id, datetime.now(), session['id']))
                 session['current_question_id'] = next_question_id
 
-        query = 'SELECT * FROM questions WHERE id = %s AND status_id = %s'
+        query = 'SELECT * FROM conversation_v1_questions WHERE id = %s AND status_id = %s'
         question = execute_query(
             query, (session['current_question_id'], 1), fetch_method='first')
         question = question['question']
@@ -80,7 +80,7 @@ class SharedRepo:
 
         # Construct the query to fetch the corresponding message from the database
         query_fetch_message = """
-        SELECT * FROM messages
+        SELECT * FROM conversation_v1_messages
         WHERE interview_id = %s
         AND role = %s
         AND status_id = %s
@@ -100,7 +100,7 @@ class SharedRepo:
 
         if interview_id and int(interview_id) > 0:
             query = """
-            SELECT * FROM messages 
+            SELECT * FROM conversation_v1_messages 
             WHERE sub_category_id = %s 
             AND mode = %s 
             AND interview_id = %s 
@@ -110,7 +110,7 @@ class SharedRepo:
             params = (sub_cat_id, mode, interview_id, 1)
         else:
             query = """
-            SELECT * FROM messages 
+            SELECT * FROM conversation_v1_messages 
             WHERE sub_category_id = %s 
             AND mode = %s 
             AND interview_id IS NULL 

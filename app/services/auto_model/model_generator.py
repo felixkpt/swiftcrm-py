@@ -137,12 +137,12 @@ class ModelGenerator:
                     self.db, rship_tbl_name)
                 if auto_page:
                     generated_data = generate_model_and_api_names(auto_page)
-                    model_name_singular = generated_data['model_name_singular']
+                    name_singular = generated_data['name_singular']
                     class_name = generated_data['class_name']
-                    # back_populates = self.data['model_name_singular'].lower()
+                    # back_populates = self.data['name_singular'].lower()
                     back_populates = None
 
-                    relationship_str = f'    {model_name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
+                    relationship_str = f'    {name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
                     relationships.append(relationship_str)
         return '\n'.join(relationships) if relationships else ''
 
@@ -210,7 +210,7 @@ class ModelGenerator:
             content (str): Content of the SQLAlchemy model class.
         """
         path = self.data['api_endpoint'].replace('-', '_')
-        filename = f"{self.data['model_name_singular'].lower()}.py"
+        filename = f"{self.data['name_singular'].lower()}.py"
         directory_path = handler(path, 'models', filename, content)
         init_py_path = os.path.join(directory_path, '__init__.py')
         with open(init_py_path, 'a') as init_py:
@@ -232,7 +232,7 @@ class ModelGenerator:
         self._write_model_file(content)
         try:
             subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['model_name_singular'].lower()} table"], check=True)
+                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['name_singular'].lower()} table"], check=True)
             subprocess.run(['alembic', 'upgrade', 'head'], check=True)
             return True
         except subprocess.CalledProcessError as e:

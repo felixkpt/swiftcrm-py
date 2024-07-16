@@ -1,6 +1,6 @@
 # app/repositories/interviews.py
 from app.database.old_connection import execute_query
-from app.repositories.shared import SharedRepo
+from app.repositories.conversation.v1.shared import SharedRepo
 from app.services.openai_requests import fetch_openai_interview_scores
 from collections import defaultdict
 
@@ -9,7 +9,7 @@ class InterviewRepo:
 
     @staticmethod
     def get_interview_session(sub_cat_id, user_id):
-        query_session = "SELECT id, current_question_id FROM interviews WHERE user_id = %s AND sub_category_id = %s AND status_id = %s"
+        query_session = "SELECT id, current_question_id FROM conversation_v1_interviews WHERE user_id = %s AND sub_category_id = %s AND status_id = %s"
         session = execute_query(
             query_session, (user_id, sub_cat_id, 1), fetch_method='first')
         return session
@@ -17,7 +17,7 @@ class InterviewRepo:
     @staticmethod
     def get_interview_progress(sub_cat_id, interview_id):
         # Step 1: Query the database to get the list of questions
-        query = "SELECT * FROM questions WHERE sub_category_id = %s"
+        query = "SELECT * FROM conversation_v1_questions WHERE sub_category_id = %s"
         results = execute_query(query, (sub_cat_id,))
 
         # Step 2: Retrieve the session messages using sub_cat_id and the interview_id
@@ -56,7 +56,7 @@ class InterviewRepo:
 
     @staticmethod
     def get_existing_results(interview_id):
-        query_update_session = "select status_id from interviews WHERE id = %s"
+        query_update_session = "select status_id from conversation_v1_interviews WHERE id = %s"
         interview = execute_query(
             query_update_session, (interview_id,), fetch_method='first')
 
@@ -65,7 +65,7 @@ class InterviewRepo:
 
         query = """
         SELECT question_id, question_scores as score, content AS answer, questions.question, questions.marks as max_score 
-        FROM messages
+        FROM conversation_v1_messages
         JOIN questions on messages.question_id = questions.id
         WHERE interview_id = %s AND role = 'user' AND question_id IS NOT NULL
         """
@@ -88,13 +88,13 @@ class InterviewRepo:
 
     @staticmethod
     def new_results_assessment(interview_id):
-        query = "SELECT id, role, question_id, content FROM messages WHERE interview_id = %s"
+        query = "SELECT id, role, question_id, content FROM conversation_v1_messages WHERE interview_id = %s"
         messages = execute_query(query, (interview_id,))
 
         # Fetch the actual questions and marks
         for msg in messages:
             if msg['role'] == 'user' and msg['question_id']:
-                question_query = "SELECT question, marks FROM questions WHERE id = %s"
+                question_query = "SELECT question, marks FROM conversation_v1_questions WHERE id = %s"
                 question_result = execute_query(
                     question_query, (msg['question_id'],), fetch_method='first')
                 if question_result:
@@ -129,20 +129,20 @@ class InterviewRepo:
         for score in scores:
             total_scores += score['score']
             max_scores += score['max_score']
-            insert_query = "UPDATE messages SET question_scores = %s where id = %s"
+            insert_query = "UPDATE conversation_v1_messages SET question_scores = %s where id = %s"
             execute_query(insert_query, (score['score'], score['id']))
 
         percentage_score = round(
             total_scores / max_scores * 100) if total_scores else 0
 
-        query_update_session = "UPDATE interviews SET status_id = 2, scores = %s, max_scores = %s, percentage_score = %s WHERE id = %s"
+        query_update_session = "UPDATE conversation_v1_interviews SET status_id = 2, scores = %s, max_scores = %s, percentage_score = %s WHERE id = %s"
         execute_query(query_update_session, (total_scores,
                       max_scores, percentage_score, interview_id))
 
     # Add the listing methods below here
     @staticmethod
     def list_all_interviews():
-        query = "SELECT * FROM interviews WHERE status_id = %s"
+        query = "SELECT * FROM conversation_v1_interviews WHERE status_id = %s"
         results = execute_query(query, (2,))
 
         metadata = {
@@ -159,7 +159,7 @@ class InterviewRepo:
 
     @staticmethod
     def list_interviews_by_category_id(category_id):
-        query = "SELECT * FROM interviews WHERE category_id = %s AND status_id = %s"
+        query = "SELECT * FROM conversation_v1_interviews WHERE category_id = %s AND status_id = %s"
         results = execute_query(query, (category_id, 2))
 
         metadata = {
@@ -177,17 +177,17 @@ class InterviewRepo:
     @staticmethod
     def list_interviews_by_category_sub_category_id(category_id, sub_category_id, status_id=None):
         base_query = """
-        SELECT interviews.*, sub_categories.name AS sub_category_name, questions.question AS question, questions.marks AS max_score, messages.question_scores AS score
-        FROM interviews
-        JOIN sub_categories ON interviews.sub_category_id = sub_categories.id
-        LEFT JOIN messages ON interviews.id = messages.interview_id AND messages.role = 'user'
-        LEFT JOIN questions ON messages.question_id = questions.id
-        WHERE interviews.category_id = %s AND interviews.sub_category_id = %s
+        SELECT conversation_v1_interviews.*, conversation_v1_sub_categories.name AS sub_category_name, conversation_v1_questions.question AS question, conversation_v1_questions.marks AS max_score, conversation_v1_messages.question_scores AS score
+        FROM conversation_v1_interviews
+        JOIN conversation_v1_sub_categories ON conversation_v1_interviews.sub_category_id = conversation_v1_sub_categories.id
+        LEFT JOIN conversation_v1_messages ON conversation_v1_interviews.id = conversation_v1_messages.interview_id AND conversation_v1_messages.role = 'user'
+        LEFT JOIN conversation_v1_questions ON conversation_v1_messages.question_id = conversation_v1_questions.id
+        WHERE conversation_v1_interviews.category_id = %s AND conversation_v1_interviews.sub_category_id = %s
         """
         params = [category_id, sub_category_id]
 
         if status_id is not None and status_id != 0:
-            base_query += " AND interviews.status_id = %s"
+            base_query += " AND conversation_v1_interviews.status_id = %s"
             params.append(status_id)
 
         results = execute_query(base_query, tuple(params))
@@ -211,11 +211,11 @@ class InterviewRepo:
     @staticmethod
     def list_completed_interviews_grouped_by_category():
         query = """
-        SELECT interviews.*, categories.name AS category_name, sub_categories.name AS subcategory_name, sub_categories.id AS subcategory_id
-        FROM interviews
-        JOIN categories ON interviews.category_id = categories.id
-        LEFT JOIN sub_categories ON interviews.sub_category_id = sub_categories.id
-        WHERE interviews.status_id = %s
+        SELECT conversation_v1_interviews.*, conversation_v1_categories.name AS category_name, conversation_v1_sub_categories.name AS conversation_v1_subcategory_name, conversation_v1_sub_categories.id AS subcategory_id
+        FROM conversation_v1_interviews
+        JOIN conversation_v1_categories ON conversation_v1_interviews.category_id = conversation_v1_categories.id
+        LEFT JOIN conversation_v1_sub_categories ON conversation_v1_interviews.sub_category_id = conversation_v1_sub_categories.id
+        WHERE conversation_v1_interviews.status_id = %s
         """
         results = execute_query(query, (2,))
 
@@ -266,10 +266,10 @@ class InterviewRepo:
     @staticmethod
     def list_completed_interviews_grouped_by_sub_categories(cat_id):
         query = """
-        SELECT interviews.*, sub_categories.id AS sub_category_id, sub_categories.name AS sub_category_name
-        FROM interviews
-        JOIN sub_categories ON interviews.sub_category_id = sub_categories.id
-        WHERE interviews.status_id = %s AND interviews.category_id = %s
+        SELECT conversation_v1_interviews.*, conversation_v1_sub_categories.id AS sub_category_id, conversation_v1_sub_categories.name AS sub_category_name
+        FROM conversation_v1_interviews
+        JOIN conversation_v1_sub_categories ON conversation_v1_interviews.sub_category_id = conversation_v1_sub_categories.id
+        WHERE conversation_v1_interviews.status_id = %s AND conversation_v1_interviews.category_id = %s
         """
         results = execute_query(query, (2, cat_id))
 

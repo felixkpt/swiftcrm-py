@@ -33,6 +33,8 @@ class HeaderSchema(BaseModel):
 
 class AutoPageBuilderRequest(BaseModel):
     modelName: str
+    name_singular: Optional[str] = None
+    name_plural: Optional[str] = None
     modelURI: str
     apiEndpoint: str
     table_name_singular: Optional[str] = None

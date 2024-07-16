@@ -22,8 +22,8 @@ class AutoPageBuilderRepo:
             first()
 
     @staticmethod
-    def get_page_by_name(db: Session, modelName: str):
-        return db.query(AutoPageBuilder).filter(AutoPageBuilder.modelName == modelName).first()
+    def get_page_by_name(db: Session, name_singular: str):
+        return db.query(AutoPageBuilder).filter(AutoPageBuilder.name_singular == name_singular).first()
 
     @staticmethod
     def get_page_by_table_name(db: Session, table_name_singular: str):
@@ -38,7 +38,8 @@ class AutoPageBuilderRepo:
         try:
             current_time = datetime.utcnow()
             new_page = AutoPageBuilder(
-                modelName=auto_page_data.modelName,
+                name_singular=auto_page_data.name_singular,
+                name_plural=auto_page_data.name_plural,
                 modelURI=auto_page_data.modelURI,
                 apiEndpoint=auto_page_data.apiEndpoint,
                 table_name_singular=auto_page_data.table_name_singular,
@@ -102,7 +103,8 @@ class AutoPageBuilderRepo:
                 AutoPageBuilder.id == page_id).first()
 
             if db_page:
-                db_page.modelName = auto_page_data.modelName
+                db_page.name_singular = auto_page_data.name_singular
+                db_page.name_plural = auto_page_data.name_plural
                 db_page.modelURI = auto_page_data.modelURI
                 db_page.apiEndpoint = auto_page_data.apiEndpoint
                 db_page.table_name_singular = auto_page_data.table_name_singular

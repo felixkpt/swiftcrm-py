@@ -3,10 +3,10 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 class SubCategory(Base):
-    __tablename__ = 'sub_categories'
+    __tablename__ = 'conversation_v1_sub_categories'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    category_id = Column(Integer, ForeignKey('categories.id'))
+    category_id = Column(Integer, ForeignKey('conversation_v1_categories.id'))
     name = Column(String(255))
     slug = Column(String(255))
     learn_instructions = Column(Text)

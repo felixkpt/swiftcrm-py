@@ -1,8 +1,8 @@
 import bcrypt  # Import bcrypt for password hashing
 from app.database.old_connection import execute_insert
-from app.repositories.category import CategoryRepo as CatsRepo
-from app.repositories.sub_category import SubCategoryRepo as SubCatsRepo
-from app.repositories.conversation import ConversationRepo
+from app.repositories.conversation.v1.category import CategoryRepo as CatsRepo
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo as SubCatsRepo
+from app.repositories.conversation.v1.conversation_repo import ConversationRepo
 
 
 def setup_database(schema_file='app/database/schema.sql'):

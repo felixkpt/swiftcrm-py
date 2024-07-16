@@ -4,7 +4,7 @@ def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
     fields = data['fields']
-    model_name_singular = data['model_name_singular']
+    name_singular = data['name_singular']
     model_name_pascal = data['model_name_pascal']
     class_name = data['class_name']
 
@@ -36,7 +36,7 @@ def generate_repo(data):
     else:
         filter_conditions = ''
 
-    model_path_name = model_name_singular.lower()
+    model_path_name = name_singular.lower()
     
     deleted_message = '{"message": "Record deleted successfully"}'
     
@@ -118,7 +118,7 @@ class {model_name_pascal}Repo:
 
     # Write the generated repo content to a Python file
     path = api_endpoint.replace('-', '_')
-    filename = f'{model_name_singular.lower()}_repo.py'
+    filename = f'{name_singular.lower()}_repo.py'
     handler(path, 'repositories', filename, content)
 
     return True

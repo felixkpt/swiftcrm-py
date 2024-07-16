@@ -4,12 +4,12 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 class Interview(Base):
-    __tablename__ = 'interviews'
+    __tablename__ = 'conversation_v1_interviews'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    category_id = Column(Integer, ForeignKey('categories.id'))
-    sub_category_id = Column(Integer, ForeignKey('sub_categories.id'))
+    category_id = Column(Integer, ForeignKey('conversation_v1_categories.id'))
+    sub_category_id = Column(Integer, ForeignKey('conversation_v1_sub_categories.id'))
     current_question_id = Column(Integer)
     scores = Column(Integer, nullable=True)
     max_scores = Column(Integer, nullable=True)

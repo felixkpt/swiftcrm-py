@@ -3,7 +3,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, Query
 from fastapi.responses import StreamingResponse
 import os
 from app.services.audio_handler import process_audio_and_return_combined_results, generate_id, get_audio_uri
-from app.repositories.sub_category import SubCategoryRepo
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo
 
 router = APIRouter()
 

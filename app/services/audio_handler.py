@@ -4,11 +4,11 @@ from fastapi import HTTPException
 
 # Custom imports
 from app.services.openai_requests import convert_audio_to_text, get_chat_response
-from app.repositories.conversation import ConversationRepo
+from app.repositories.conversation.v1.conversation_repo import ConversationRepo
 
 from app.services.text_to_speech import convert_text_to_speech
 import uuid
-from app.repositories.sub_category import SubCategoryRepo
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo
 
 
 def generate_id():

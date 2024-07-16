@@ -4,7 +4,7 @@ from app.requests.middleware.cors import cors_middleware
 from app.requests.middleware.auth import auth_middleware
 from app.auto_routes_handler import auto_register_routes
 from fastapi import FastAPI
-from app.repositories.database import setup_database
+from app.repositories.conversation.v1.database_seeder import setup_database
 
 # Initialize the FastAPI app
 app = FastAPI()

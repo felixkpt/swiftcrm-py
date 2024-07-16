@@ -1,19 +1,19 @@
 # app/models/message.py
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from .base import Base
+from app.models.base import Base
 
 class Message(Base):
-    __tablename__ = 'messages'
+    __tablename__ = 'conversation_v1_messages'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    category_id = Column(Integer, ForeignKey('categories.id'))
-    sub_category_id = Column(Integer, ForeignKey('sub_categories.id'))
+    category_id = Column(Integer, ForeignKey('conversation_v1_categories.id'))
+    sub_category_id = Column(Integer, ForeignKey('conversation_v1_sub_categories.id'))
     role = Column(Enum('user', 'assistant'))
     mode = Column(Enum('training', 'interview'))
-    interview_id = Column(Integer, ForeignKey('interviews.id', ondelete='CASCADE'), nullable=True)
-    question_id = Column(Integer, ForeignKey('questions.id'))
+    interview_id = Column(Integer, ForeignKey('conversation_v1_interviews.id', ondelete='CASCADE'), nullable=True)
+    question_id = Column(Integer, ForeignKey('conversation_v1_questions.id'))
     question_scores = Column(Integer, nullable=True)
     content = Column(Text)
     audio_uri = Column(String(255))

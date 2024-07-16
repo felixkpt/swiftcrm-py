@@ -1,11 +1,11 @@
 # app/repositories/conversation.py
 from app.database.old_connection import execute_query, execute_insert
 from datetime import datetime
-from app.repositories.sub_category import SubCategoryRepo
-from app.repositories.category import CategoryRepo
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo
+from app.repositories.conversation.v1.category import CategoryRepo
 from app.services.helpers import filter_english_messages
 import random
-from app.repositories.shared import SharedRepo
+from app.repositories.conversation.v1.shared import SharedRepo
 
 PROB_THRESHOLD_1 = 0.33
 PROB_THRESHOLD_2 = 0.66
@@ -30,7 +30,7 @@ class ConversationRepo:
 
         # Insert user's message
         user_message_query = """
-        INSERT INTO messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode, created_at, updated_at)
+        INSERT INTO conversation_v1_messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode, created_at, updated_at)
         VALUES (%s, %s, %s, 'user', %s, %s, %s, %s, %s)
         """
         execute_insert(user_message_query, (user_id, cat_id, sub_cat_id,
@@ -38,7 +38,7 @@ class ConversationRepo:
 
         # Insert assistant's response
         assistant_message_query = """
-        INSERT INTO messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode, created_at, updated_at)
+        INSERT INTO conversation_v1_messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode, created_at, updated_at)
         VALUES (%s, %s, %s, 'assistant', %s, %s, %s, %s, %s)
         """
         execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, response_message,
@@ -82,7 +82,7 @@ class ConversationRepo:
         prev_question_id = message['question_id'] if message else None
 
         user_message_query = """
-            INSERT INTO messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
+            INSERT INTO conversation_v1_messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
         execute_insert(user_message_query, (user_id, cat_id, sub_cat_id, 'user', 'interview', request_message,
@@ -95,7 +95,7 @@ class ConversationRepo:
         question_id = session['current_question_id'] or None
 
         assistant_message_query = """
-        INSERT INTO messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
+        INSERT INTO conversation_v1_messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
         VALUES (%s, %s, %s,  %s, %s, %s, %s, %s, %s, %s, %s)
         """
         execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, 'assistant', 'interview', response_message,
@@ -131,7 +131,7 @@ class ConversationRepo:
     @staticmethod
     def fetch_inserted_records(sub_cat_id, user_id, cat_id, created_at):
         query = """
-        SELECT * FROM messages
+        SELECT * FROM conversation_v1_messages
         WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND created_at = %s
         """
         return execute_query(query, (user_id, cat_id, sub_cat_id, created_at))
@@ -139,27 +139,27 @@ class ConversationRepo:
     @staticmethod
     def archive_messages(cat_id: int, sub_cat_id: int = None, mode='training'):
         if sub_cat_id:
-            query = "UPDATE messages SET status_id = 0 WHERE sub_category_id = %s AND mode = %s"
+            query = "UPDATE conversation_v1_messages SET status_id = 0 WHERE sub_category_id = %s AND mode = %s"
             execute_query(query, (sub_cat_id, mode))
         else:
-            query = "UPDATE messages SET status_id = 0 WHERE category_id = %s AND mode = %s"
+            query = "UPDATE conversation_v1_messages SET status_id = 0 WHERE category_id = %s AND mode = %s"
             execute_query(query, (cat_id, mode))
         if mode == 'interview':
-            query = "UPDATE interviews SET status_id = 0 WHERE sub_category_id = %s"
+            query = "UPDATE conversation_v1_interviews SET status_id = 0 WHERE sub_category_id = %s"
             execute_query(query, (sub_cat_id,))
 
     @staticmethod
     def reset_messages(cat_id, sub_cat_id=None):
         if sub_cat_id:
-            query = "DELETE FROM messages WHERE sub_category_id = %s"
+            query = "DELETE FROM conversation_v1_messages WHERE sub_category_id = %s"
             execute_query(query, (sub_cat_id,))
         else:
-            query = "DELETE FROM messages WHERE category_id = %s"
+            query = "DELETE FROM conversation_v1_messages WHERE category_id = %s"
             execute_query(query, (cat_id,))
 
     @staticmethod
     def add_message(user_id, cat_id, sub_cat_id, role, content, audio_uri, mode='training'):
-        query = "INSERT INTO messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO conversation_v1_messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         values = (user_id, cat_id, sub_cat_id, role, content, audio_uri, mode)
         execute_insert(query, values)
 
@@ -225,7 +225,7 @@ class ConversationRepo:
         messages = [{'content': learn_instructions, 'role': 'system'}]
 
         query = """
-        SELECT content, role FROM messages 
+        SELECT content, role FROM conversation_v1_messages 
         WHERE sub_category_id = %s 
         AND mode = %s
         AND status_id = %s

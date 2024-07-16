@@ -7,7 +7,8 @@ class AutoPageBuilder(Base):
     __tablename__ = 'auto_page_builder'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    modelName = Column(String(255), nullable=False)
+    name_singular = Column(String(255), nullable=False)
+    name_plural = Column(String(255), nullable=False)
     modelURI = Column(String(255), nullable=False)
     apiEndpoint = Column(String(255), nullable=False)
     table_name_singular = Column(String(255), nullable=False)

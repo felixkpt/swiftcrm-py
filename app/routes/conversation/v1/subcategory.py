@@ -1,25 +1,25 @@
 from fastapi import APIRouter, HTTPException
-from app.requests.schemas.sub_category import SubCategoryRequest, QuestionRequest
-from app.repositories.sub_category import SubCategoryRepo as Repo
+from app.requests.schemas.conversation.v1.sub_category import SubCategoryRequest, QuestionRequest
+from app.repositories.conversation.v1.sub_category import SubCategoryRepo as Repo
 
 from app.services.helpers import format_error
 
 router = APIRouter()
 
 
-@router.get("/dashboard/categories/{cat_id}/sub-categories")
+@router.get("/categories/{cat_id}/sub-categories")
 async def sub_categories(cat_id: str):
     sub_cats = Repo.get_sub_cats(cat_id)
     return sub_cats
 
 
-@router.get("/dashboard/categories/{cat_id}/sub-categories/{sub_cat_id}")
+@router.get("/categories/{cat_id}/sub-categories/{sub_cat_id}")
 async def get_sub_category(sub_cat_id: str):
     sub_cat = Repo.get_sub_cat(sub_cat_id)
     return sub_cat
 
 
-@router.post("/dashboard/categories/{cat_id}/sub-categories")
+@router.post("/categories/{cat_id}/sub-categories")
 async def create_sub_category(cat_id: str, sub_category: SubCategoryRequest):
     if Repo.sub_category_exists(cat_id, sub_category.name):
         raise HTTPException(
@@ -33,7 +33,7 @@ async def create_sub_category(cat_id: str, sub_category: SubCategoryRequest):
             status_code=500, detail=f"Failed to add sub-category: {e}")
 
 
-@router.put("/dashboard/categories/{cat_id}/sub-categories/{sub_cat_id}")
+@router.put("/categories/{cat_id}/sub-categories/{sub_cat_id}")
 async def update_sub_category_endpoint(sub_cat_id: int, sub_category: SubCategoryRequest):
     existing_sub_category = Repo.get_sub_cat(sub_cat_id)
     if not existing_sub_category:
@@ -47,12 +47,12 @@ async def update_sub_category_endpoint(sub_cat_id: int, sub_category: SubCategor
             status_code=500, detail=f"Failed to update sub-category: {e}")
 
 
-@router.get("/dashboard/categories/{cat_id}/sub-categories/{sub_cat_id}/questions")
+@router.get("/categories/{cat_id}/sub-categories/{sub_cat_id}/questions")
 async def get_sub_category_questions(sub_cat_id: str):
     sub_cats = Repo.get_sub_cat_questions(sub_cat_id)
     return sub_cats
 
-@router.post("/dashboard/categories/{cat_id}/sub-categories/{sub_cat_id}/questions")
+@router.post("/categories/{cat_id}/sub-categories/{sub_cat_id}/questions")
 async def add_question(cat_id: int, sub_cat_id: int, question: QuestionRequest):
     try:
         # Check if the category exists
@@ -75,7 +75,7 @@ async def add_question(cat_id: int, sub_cat_id: int, question: QuestionRequest):
             status_code=500, detail=f"Failed to add question: {e}")
 
 
-@router.put("/dashboard/categories/{cat_id}/sub-categories/{sub_cat_id}/questions/{question_id}")
+@router.put("/categories/{cat_id}/sub-categories/{sub_cat_id}/questions/{question_id}")
 async def update_quiz(question_id: int, question: QuestionRequest):
     existing_question = Repo.get_question(question_id)
     if not existing_question:

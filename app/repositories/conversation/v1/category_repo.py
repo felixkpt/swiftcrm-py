@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.models.category import Category as Model
+from app.models.conversation.v1.category import Category as Model
 
 class CategoryRepo:
 

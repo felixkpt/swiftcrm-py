@@ -3,11 +3,11 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 class Question(Base):
-    __tablename__ = 'questions'
+    __tablename__ = 'conversation_v1_questions'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    category_id = Column(Integer, ForeignKey("categories.id"))
-    sub_category_id = Column(Integer, ForeignKey("sub_categories.id"))
+    category_id = Column(Integer, ForeignKey("conversation_v1_categories.id"))
+    sub_category_id = Column(Integer, ForeignKey("conversation_v1_sub_categories.id"))
     question = Column(Text)
     marks = Column(Integer)
     status_id = Column(Integer, nullable=False, server_default='1')

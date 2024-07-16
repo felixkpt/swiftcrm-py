@@ -35,6 +35,8 @@ async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = D
             status_code=422, detail="A similar AutoPageBuilder configuration exists")
     try:
         generated_data = generate_model_and_api_names(auto_page_data)
+        auto_page_data.name_singular = generated_data['name_singular']
+        auto_page_data.name_plural = generated_data['name_plural']
         auto_page_data.table_name_singular = generated_data['table_name_singular']
         auto_page_data.table_name_plural = generated_data['table_name_plural']
         auto_page_data.class_name = generated_data['class_name']
@@ -58,18 +60,20 @@ async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, 
         raise HTTPException(
             status_code=404, detail="AutoPageBuilder configuration not found")
 
-    try:
-        generated_data = generate_model_and_api_names(auto_page_data)
-        auto_page_data.table_name_singular = generated_data['table_name_singular']
-        auto_page_data.table_name_plural = generated_data['table_name_plural']
-        auto_page_data.class_name = generated_data['class_name']
+    # try:
+    generated_data = generate_model_and_api_names(auto_page_data)
+    auto_page_data.name_singular = generated_data['name_singular']
+    auto_page_data.name_plural = generated_data['name_plural']
+    auto_page_data.table_name_singular = generated_data['table_name_singular']
+    auto_page_data.table_name_plural = generated_data['table_name_plural']
+    auto_page_data.class_name = generated_data['class_name']
 
-        auto_model_handler(generated_data, db)
-        Repo.update_page(db, page_id, auto_page_data)
-        return {"message": "AutoPageBuilder configuration updated successfully"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to update AutoPageBuilder configuration: {str(e)}")
+    auto_model_handler(generated_data, db)
+    Repo.update_page(db, page_id, auto_page_data)
+    return {"message": "AutoPageBuilder configuration updated successfully"}
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=500, detail=f"Failed to update AutoPageBuilder configuration: {str(e)}")
 
 # Endpoint to delete an existing AutoPageBuilder configuration
 
