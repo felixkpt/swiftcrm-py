@@ -34,7 +34,6 @@ def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"Category not found")
-    print(model_id, modelRequest)
     return repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
 # Retrieve counts or statistics related to Categories.
