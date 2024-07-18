@@ -68,7 +68,7 @@ async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, 
     auto_page_data.table_name_plural = generated_data['table_name_plural']
     auto_page_data.class_name = generated_data['class_name']
 
-    auto_model_handler(generated_data, db)
+    auto_model_handler(generated_data, db, page_id)
     Repo.update_page(db, page_id, auto_page_data)
     return {"message": "AutoPageBuilder configuration updated successfully"}
     # except Exception as e:
