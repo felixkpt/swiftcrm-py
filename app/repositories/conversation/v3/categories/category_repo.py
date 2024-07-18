@@ -9,6 +9,7 @@ from app.services.search_repo import get_query_params, apply_filters, add_metada
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 
+
 class CategoryRepo(BaseRepo):
     
     model = Model
