@@ -5,10 +5,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v2.categories.category import ConversationV2Category as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
+from app.repositories.base_repo import BaseRepo
 
-class CategoryRepo:
+class CategoryRepo(BaseRepo):
 
     @staticmethod
     async def list(db: Session, request: Request):
@@ -21,14 +22,14 @@ class CategoryRepo:
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
 
-        return query.all()
+        metadata = add_metadata(query, query_params)
+        
+        results = {
+            "data": query.all(),
+            "metadata": metadata
+        }
 
-    @staticmethod
-    def get(db: Session, model_id: int):
-        result = db.query(Model).filter(Model.id == model_id).first()
-        if not result:
-            return ResponseHelper.handle_not_found_error(model_id)
-        return result
+        return results
 
     @staticmethod
     def create(db: Session, model_request):
@@ -46,7 +47,7 @@ class CategoryRepo:
         db.add(db_query)
         try:
             db.commit()
-        except IntegrityError:
+        except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
@@ -67,15 +68,5 @@ class CategoryRepo:
             db.commit()
             db.refresh(db_query)
             return db_query
-        else:
-            return ResponseHelper.handle_not_found_error(model_id)
-
-    @staticmethod
-    def delete(db: Session, model_id: int):
-        db_query = db.query(Model).filter(Model.id == model_id).first()
-        if db_query:
-            db.delete(db_query)
-            db.commit()
-            return {"message": "Record deleted successfully"}
         else:
             return ResponseHelper.handle_not_found_error(model_id)

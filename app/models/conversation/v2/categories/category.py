@@ -10,8 +10,3 @@ class ConversationV2Category(Base):
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
-
-    sub_category = relationship("ConversationV2CategoriesSubCategory", back_populates="category")
-    messages = relationship("ConversationV2Message", back_populates="category")
-    interviews = relationship("ConversationV2Interview", back_populates="category")
-    questions = relationship("ConversationV2CategoriesSubCategoriesQuestion", back_populates="category")
