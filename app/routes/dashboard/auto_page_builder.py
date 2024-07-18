@@ -13,19 +13,19 @@ router = APIRouter()
 # Endpoint to retrieve a list of AutoPageBuilders
 
 
-@router.get("/dashboard/auto-page-builder")
+@router.get("/auto-page-builder")
 async def get_list_endpoint(db: Session = Depends(get_db)):
     return Repo.get_pages(db)
 
 
-@router.get("/dashboard/auto-page-builder/{page_id}")
+@router.get("/auto-page-builder/{page_id}")
 async def get_page_endpoint(page_id: str, db: Session = Depends(get_db)):
     return Repo.get_page_by_id(db, page_id)
 
 # Endpoint to store a new AutoPageBuilder configuration
 
 
-@router.post("/dashboard/auto-page-builder")
+@router.post("/auto-page-builder")
 async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = Depends(get_db)):
 
     existing_page = Repo.get_page_by_name(db, auto_page_data.modelName)
@@ -52,7 +52,7 @@ async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = D
 # Endpoint to update an existing AutoPageBuilder configuration
 
 
-@router.put("/dashboard/auto-page-builder/{page_id}", response_model=dict)
+@router.put("/auto-page-builder/{page_id}", response_model=dict)
 async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, db: Session = Depends(get_db)):
 
     existing_page = Repo.get_page_by_id(db, page_id)
@@ -78,7 +78,7 @@ async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, 
 # Endpoint to delete an existing AutoPageBuilder configuration
 
 
-@router.delete("/dashboard/auto-page-builder/{page_id}", response_model=dict)
+@router.delete("/auto-page-builder/{page_id}", response_model=dict)
 async def delete_endpoint(page_id: int, db: Session = Depends(get_db)):
     existing_page = Repo.get_page_by_id(db, page_id)
     if not existing_page:

@@ -7,7 +7,7 @@ from app.models.conversation.v2.categories.sub_categories.questions.question imp
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.repositories.conversation.v2.categories.sub_categories.sub_category_repo import SubCategoryRepo
 # Importing functions for querying, searching and sorting
-from app.services.search_repo import get_query_params, apply_search_and_sort
+from app.services.search_repo import get_query_params, apply_filters
 # Importing ResponseHelper for consistent error handling
 from app.requests.response.response_helper import ResponseHelper
 
@@ -20,7 +20,7 @@ class QuestionRepo:
         search_fields = ['category_id', 'sub_category_id', 'question', 'marks']
 
         query = db.query(Model)
-        query = apply_search_and_sort(
+        query = apply_filters(
             query, Model, search_fields, query_params)
 
         value = query_params.get('category_id', None)
@@ -30,8 +30,8 @@ class QuestionRepo:
         if value is not None:
             query = query.filter(Model.sub_category_id == value)
 
-        skip = (query_params['page'] - 1) * query_params['limit']
-        query = query.offset(skip).limit(query_params['limit'])
+        skip = (query_params['page'] - 1) * query_params['per_page']
+        query = query.offset(skip).limit(query_params['per_page'])
 
         return query.all()
 

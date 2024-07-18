@@ -135,8 +135,8 @@ class AutoPageBuilderRepo:
                         isUnique=field.isUnique,
                         dropdownSource=field.dropdownSource,
                         dropdownDependsOn=field.dropdownDependsOn,
-                        desktopWidth=auto_page_data.desktopWidth,
-                        mobileWidth=auto_page_data.mobileWidth,
+                        desktopWidth=field.desktopWidth,
+                        mobileWidth=field.mobileWidth,
 
                     )
                     db.add(db_field)

@@ -16,7 +16,7 @@ class SharedRepo:
 
     @staticmethod
     def get_interview_question(db, sub_cat_id, user_id, update=False):
-        cat_id = SubCategoryRepo.get(db, sub_cat_id).id
+        cat_id = SubCategoryRepo.get(db, sub_cat_id).category_id
 
         questions = QuestionRepo.get_sub_cat_questions(db, sub_cat_id)[
             'results']
@@ -26,14 +26,14 @@ class SharedRepo:
             query_session, (user_id, cat_id, sub_cat_id, 1), fetch_method='first')
 
         question_number = 0
-        last_question_id = questions[-1].id
+        last_question_id = questions[-1].id if questions else None
         is_completed = False
 
         if not session:
             if update:
                 question_number = 1
                 # Create a new session if none exists
-                question_id = questions[0].id
+                question_id = questions[0].id if questions else 0
                 query_insert_session = """
                 INSERT INTO conversation_v2_interviews (user_id, category_id, sub_category_id, current_question_id, created_at, updated_at)
                 VALUES (%s, %s, %s,%s, %s, %s)
@@ -56,7 +56,7 @@ class SharedRepo:
                 # Handle case where current question is not found or there is no next question
                 next_question_id = None
                 is_completed = True
-
+            
             if next_question_id and update:
                 query_update_session = """
                 UPDATE conversation_v2_interviews SET current_question_id = %s, updated_at = %s WHERE id = %s
@@ -65,10 +65,13 @@ class SharedRepo:
                               (next_question_id, datetime.now(), session['id']))
                 session['current_question_id'] = next_question_id
 
-        question = QuestionRepo.get(db, session['current_question_id'])        
-        question = question.question
-
-        interview_id = session['id']
+        question = None
+        interview_id = None
+        if session and session.get('current_question_id', False):
+            question = QuestionRepo.get(db, session['current_question_id'])        
+            question = question.question
+            interview_id = session['id']
+        
         return {
             'question': question,
             'question_number': question_number,

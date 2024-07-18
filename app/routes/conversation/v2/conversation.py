@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.repositories.conversation.v1.conversation_repo import ConversationRepo as Repo
 from app.repositories.conversation.v2.categories.category_repo import CategoryRepo as catsRepo
 from app.repositories.conversation.v2.messages.message_repo import MessageRepo
-from app.repositories.conversation.v2.database_seeder import seeder_handler
+from app.repositories.conversation.v2.database_seeder import seeder_handler_with_builder
 from app.database.connection import get_db
 
 router = APIRouter()
@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/seeder")
 async def set_database(db: Session = Depends(get_db)):
-    res = seeder_handler(db)
+    res = seeder_handler_with_builder(db)
     return {"message": res}
 
 

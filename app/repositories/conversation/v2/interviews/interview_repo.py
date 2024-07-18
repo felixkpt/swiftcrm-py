@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v2.interviews.interview import ConversationV2Interview as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_search_and_sort  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_filters  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 
 class InterviewRepo:
@@ -16,7 +16,7 @@ class InterviewRepo:
         search_fields = ['user_id', 'category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
 
         query = db.query(Model)
-        query = apply_search_and_sort(query, Model, search_fields, query_params)
+        query = apply_filters(query, Model, search_fields, query_params)
 
         value = query_params.get('user_id', None)
         if value is not None:
@@ -31,8 +31,8 @@ class InterviewRepo:
         if value is not None:
             query = query.filter(Model.question_id == value)
 
-        skip = (query_params['page'] - 1) * query_params['limit']
-        query = query.offset(skip).limit(query_params['limit'])
+        skip = (query_params['page'] - 1) * query_params['per_page']
+        query = query.offset(skip).limit(query_params['per_page'])
 
         return query.all()
 

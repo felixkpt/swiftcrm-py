@@ -1,6 +1,7 @@
-# app/repositories/conversation.py
-from app.database.old_connection import execute_query, execute_insert
 from datetime import datetime
+from fastapi import Request
+from sqlalchemy.exc import IntegrityError
+from app.database.old_connection import execute_query, execute_insert
 from app.repositories.conversation.v2.categories.sub_categories.sub_category_repo import SubCategoryRepo
 from app.repositories.conversation.v2.categories.category_repo import CategoryRepo
 from app.services.helpers import filter_english_messages
@@ -9,6 +10,7 @@ from app.repositories.conversation.v2.shared import SharedRepo
 
 PROB_THRESHOLD_1 = 0.33
 PROB_THRESHOLD_2 = 0.66
+
 
 class ConversationRepo:
     @staticmethod
@@ -19,16 +21,17 @@ class ConversationRepo:
     @staticmethod
     def store_training_messages(db, sub_cat_id, my_info, assistant_info):
         request_message = my_info['message']
+        word_confidences = my_info.get('word_confidences', [])
+
         response_message = assistant_info['message']
 
         user_id = 1
         cat_id = SubCategoryRepo.get(db, sub_cat_id).id
-
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         created_at = now
         updated_at = now
 
-        # Insert user's message
+        # Insert user's message with word confidences
         user_message_query = """
         INSERT INTO conversation_v2_messages (user_id, category_id, sub_category_id, role, content, audio_uri, mode, created_at, updated_at)
         VALUES (%s, %s, %s, 'user', %s, %s, %s, %s, %s)
@@ -44,17 +47,28 @@ class ConversationRepo:
         execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, response_message,
                        assistant_info['audio_uri'], 'training', created_at, updated_at))
 
+        # Fetch inserted records to get message_id
+        results = ConversationRepo.fetch_inserted_records(
+            sub_cat_id, user_id, cat_id, created_at)
+        message_id = results[0]['id'] if results else None
+
+        # Save word confidences if message_id is valid
+        if message_id:
+            ConversationRepo.save_word_confidences(
+                message_id, word_confidences)
+
         return {
-            'results': ConversationRepo.fetch_inserted_records(sub_cat_id, user_id, cat_id, created_at),
+            'results': results,
             'metadata': {}
         }
 
     @staticmethod
     def store_interview_messages(db, sub_cat_id, my_info, assistant_info, interview_id):
-        interview_question = SharedRepo.get_interview_question(db, sub_cat_id, user_id=1)
+        interview_question = SharedRepo.get_interview_question(
+            db, sub_cat_id, user_id=1)
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
-                
+
         interview_question['is_completed'] = interview_question['is_completed'] and interview_question[
             'last_question_id'] == current_interview_message['question_id']
 
@@ -68,49 +82,58 @@ class ConversationRepo:
             }
 
         request_message = my_info['message']
+        word_confidences = my_info.get('word_confidences', [])
+
         response_message = assistant_info['message']
 
         user_id = 1
-        cat_id = SubCategoryRepo.get(db, sub_cat_id).id
-
+        cat_id = SubCategoryRepo.get(db, sub_cat_id).category_id
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         created_at = now
         updated_at = now
 
-        # Insert user's message
-        message = SharedRepo.get_current_interview_message(interview_id, role='assistant')
+        # Insert user's message with word confidences
+        message = SharedRepo.get_current_interview_message(
+            interview_id, role='assistant')
         prev_question_id = message['question_id'] if message else None
 
         user_message_query = """
-            INSERT INTO conversation_v2_messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """
-    
-        execute_insert(user_message_query, (user_id, cat_id, sub_cat_id, 'user', 'interview', request_message,
-                                            my_info['audio_uri'], interview_id, prev_question_id, created_at, updated_at))
+        INSERT INTO conversation_v2_messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        execute_insert(user_message_query, (user_id, cat_id, sub_cat_id, 'user', 'interview',
+                       request_message, my_info['audio_uri'], interview_id, prev_question_id, created_at, updated_at))
 
         # Insert assistant's response
         session = SharedRepo.get_session_by_id(interview_id)
-        print('interview_id:', interview_id, 'session', session)
-        interview_id = session['id'] or None
-        question_id = session['current_question_id'] or None
+        interview_id = session['id'] if session else None
+        question_id = session['current_question_id'] if session else None
 
         assistant_message_query = """
         INSERT INTO conversation_v2_messages (user_id, category_id, sub_category_id, role, mode, content, audio_uri, interview_id, question_id, created_at, updated_at)
-        VALUES (%s, %s, %s,  %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, 'assistant', 'interview', response_message,
-                                                 assistant_info['audio_uri'], interview_id, question_id, created_at, updated_at))
+        execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, 'assistant', 'interview',
+                       response_message, assistant_info['audio_uri'], interview_id, question_id, created_at, updated_at))
 
-        interview_question = SharedRepo.get_interview_question(db, sub_cat_id, user_id=1)
+        interview_question = SharedRepo.get_interview_question(
+            db, sub_cat_id, user_id=1)
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
-
         interview_question['is_completed'] = interview_question['is_completed'] and interview_question[
             'last_question_id'] == current_interview_message['question_id']
 
+        results = ConversationRepo.fetch_inserted_records(
+            sub_cat_id, user_id, cat_id, created_at)
+        message_id = results[0]['id'] if results else None
+
+        # Save word confidences if message_id is valid
+        if message_id:
+            ConversationRepo.save_word_confidences(
+                message_id, word_confidences)
+
         return {
-            'results': ConversationRepo.fetch_inserted_records(sub_cat_id, user_id, cat_id, created_at),
+            'results': results,
             'metadata': {
                 'question_number': interview_question['question_number'],
                 'is_completed': interview_question['is_completed']
@@ -120,11 +143,11 @@ class ConversationRepo:
     @staticmethod
     def store_messages(db, sub_cat_id, my_info, assistant_info, mode='training', interview_id=None):
         if mode == 'training':
-            resp = ConversationRepo.store_training_messages(db, 
-                sub_cat_id, my_info, assistant_info)
+            resp = ConversationRepo.store_training_messages(db,
+                                                            sub_cat_id, my_info, assistant_info)
         else:
-            resp = ConversationRepo.store_interview_messages(db, 
-                sub_cat_id, my_info, assistant_info, interview_id)
+            resp = ConversationRepo.store_interview_messages(db,
+                                                             sub_cat_id, my_info, assistant_info, interview_id)
 
         # Return the inserted records
         return resp
@@ -195,7 +218,8 @@ class ConversationRepo:
         cat_name = CategoryRepo.get(db, sub_cat.category_id).name
         learn_instructions = f'You are interviewing a user on "{cat_name} - {sub_cat.name}".'
 
-        res = SharedRepo.get_interview_question(db, sub_cat.id, user_id=1, update=True)
+        res = SharedRepo.get_interview_question(
+            db, sub_cat.id, user_id=1, update=True)
         question = res['question']
         question_number = res['question_number']
         is_completed = res['is_completed']
@@ -219,9 +243,11 @@ class ConversationRepo:
 
         interview_id = None
         if mode == 'training':
-            learn_instructions = ConversationRepo.get_training_instructions(sub_cat)
+            learn_instructions = ConversationRepo.get_training_instructions(
+                sub_cat)
         else:
-            learn_instructions, interview_id = ConversationRepo.get_interview_instructions(db, sub_cat)
+            learn_instructions, interview_id = ConversationRepo.get_interview_instructions(
+                db, sub_cat)
 
         messages = [{'content': learn_instructions, 'role': 'system'}]
 
@@ -243,3 +269,25 @@ class ConversationRepo:
 
         interview_id = interview_id
         return messages, interview_id
+
+    @staticmethod
+    def save_word_confidences(message_id, word_confidences):
+         
+        if not word_confidences:
+            return
+
+        query = """
+        INSERT INTO conversation_v2_word_confidences (message_id, word, confidence, start_time_seconds, end_time_seconds)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+
+        values = [(message_id, wc['word'], wc['confidence'], wc['start_time'], wc['end_time'])
+                  for wc in word_confidences]
+        
+        print(values)
+
+        try:
+            for value in values:
+                execute_insert(query, value)
+        except IntegrityError as e:
+            print(f"IntegrityError: {e}")

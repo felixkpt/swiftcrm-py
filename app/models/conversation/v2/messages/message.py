@@ -23,3 +23,4 @@ class ConversationV2Message(Base):
     category = relationship("ConversationV2Category", back_populates="messages")
     sub_category = relationship("ConversationV2CategoriesSubCategory", back_populates="messages")
     interview = relationship("ConversationV2Interview", back_populates="messages")
+    word_confidences = relationship("ConversationV2WordConfidence", back_populates="message")

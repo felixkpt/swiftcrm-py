@@ -176,7 +176,6 @@ class InterviewRepo:
 
     @staticmethod
     def list_interviews_by_category_sub_category_id(category_id, sub_category_id, status_id=None):
-        
         base_query = """
         SELECT conversation_v2_interviews.*, conversation_v2_categories_sub_categories.name AS sub_category_name, conversation_v2_categories_sub_categories_questions.question AS question, conversation_v2_categories_sub_categories_questions.marks AS max_score, conversation_v2_messages.question_scores AS score
         FROM conversation_v2_interviews
@@ -192,8 +191,6 @@ class InterviewRepo:
             params.append(status_id)
 
         results = execute_query(base_query, tuple(params)) or []
-
-        print("REEEEEEEE", results)
 
         # Calculate scores
         for result in results:

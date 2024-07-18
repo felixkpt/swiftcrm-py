@@ -1,5 +1,6 @@
 from app.services.auto_model.saves_file import handler
 
+
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
@@ -37,9 +38,7 @@ def generate_repo(data):
         filter_conditions = ''
 
     model_path_name = name_singular.lower()
-    
-    deleted_message = '{"message": "Record deleted successfully"}'
-    
+        
     content = f"""
 from datetime import datetime
 from fastapi import Request
@@ -47,10 +46,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_search_and_sort  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
+from app.repositories.base_repo import BaseRepo
 
-class {model_name_pascal}Repo:
+class {model_name_pascal}Repo(BaseRepo):
 
     @staticmethod
     async def list(db: Session, request: Request):
@@ -58,19 +58,19 @@ class {model_name_pascal}Repo:
         search_fields = {[field.name for field in fields if field.isRequired]}
 
         query = db.query(Model)
-        query = apply_search_and_sort(query, Model, search_fields, query_params)
+        query = apply_filters(query, Model, search_fields, query_params)
 {filter_conditions}
-        skip = (query_params['page'] - 1) * query_params['limit']
-        query = query.offset(skip).limit(query_params['limit'])
+        skip = (query_params['page'] - 1) * query_params['per_page']
+        query = query.offset(skip).limit(query_params['per_page'])
 
-        return query.all()
+        metadata = add_metadata(query, query_params)
+        
+        results = {{
+            "data": query.all(),
+            "metadata": metadata
+        }}
 
-    @staticmethod
-    def get(db: Session, model_id: int):
-        result = db.query(Model).filter(Model.id == model_id).first()
-        if not result:
-            return ResponseHelper.handle_not_found_error(model_id)
-        return result
+        return results
 
     @staticmethod
     def create(db: Session, model_request):
@@ -84,7 +84,7 @@ class {model_name_pascal}Repo:
         db.add(db_query)
         try:
             db.commit()
-        except IntegrityError:
+        except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
@@ -102,16 +102,6 @@ class {model_name_pascal}Repo:
 {inserts_args2}            db.commit()
             db.refresh(db_query)
             return db_query
-        else:
-            return ResponseHelper.handle_not_found_error(model_id)
-
-    @staticmethod
-    def delete(db: Session, model_id: int):
-        db_query = db.query(Model).filter(Model.id == model_id).first()
-        if db_query:
-            db.delete(db_query)
-            db.commit()
-            return {deleted_message}
         else:
             return ResponseHelper.handle_not_found_error(model_id)
 """
