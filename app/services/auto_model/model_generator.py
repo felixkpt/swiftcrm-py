@@ -178,7 +178,10 @@ class ModelGenerator:
         imports_str = self._collect_imports(fields)
 
         # Get existing relationships
-        model_file_path = handler(self.data['api_endpoint'].replace('-', '_'), 'models', f"{self.data['name_singular'].lower()}.py")
+        path = self.data['api_endpoint'].replace('-', '_')
+        filename = f"{self.data['name_singular'].lower()}.py"
+        model_file_path = os.path.join(
+        os.getcwd(), 'app', path, 'models', filename)
         existing_relationships = self._extract_existing_relationships(model_file_path)
 
         content = self._build_model_content(imports_str, fields, existing_relationships)
