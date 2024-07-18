@@ -8,7 +8,8 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 
-def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_db)):
+def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_db), id: int = None):
+    action_type = "create" if id is None else "edit"
     try:
         print("STEP 1: Starting model generation\n")
         model_generator = ModelGenerator(data, db)
@@ -31,7 +32,7 @@ def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_d
             # Run Git Add and Commit
             try:
                 subprocess.run(['git', 'add', '.'], check=True)
-                commit_message = f"Autobuilder: Added {data['name_singular'].lower()} model and related files"
+                commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
                 subprocess.run(['git', 'commit', '-m', commit_message], check=True)
                 print("STEP 5: Git add and commit completed\n")
             except subprocess.CalledProcessError as e:
@@ -43,7 +44,7 @@ def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_d
     except Exception as e:
         # Stash changes if any step fails
         try:
-            stash_message = f"Autobuilder: Stash changes due to failure - {str(e)}"
+            stash_message = f"Autobuilder: Stash changes due to {action_type.capitalize()} {data['name_singular'].lower()} failure - {str(e)}"
             subprocess.run(['git', 'stash', 'push', '-m', stash_message], check=True)
             print(f"Changes stashed: {stash_message}\n")
         except subprocess.CalledProcessError as stash_error:
