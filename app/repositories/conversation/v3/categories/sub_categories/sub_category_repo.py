@@ -14,7 +14,7 @@ class SubCategoryRepo(BaseRepo):
     
     model = Model
 
-    async def list(db: Session, request: Request):
+    async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
         search_fields = ['name', 'category_id', 'learn_instructions']
 
@@ -37,7 +37,7 @@ class SubCategoryRepo(BaseRepo):
 
         return results
 
-    def create(db: Session, model_request):
+    def create(self, db: Session, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -59,7 +59,7 @@ class SubCategoryRepo(BaseRepo):
         db.refresh(db_query)
         return db_query
 
-    def update(db: Session, model_id: int, model_request):
+    def update(self, db: Session, model_id: int, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)

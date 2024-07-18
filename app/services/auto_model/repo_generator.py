@@ -55,7 +55,7 @@ class {model_name_pascal}Repo(BaseRepo):
     
     model = Model
 
-    async def list(db: Session, request: Request):
+    async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
         search_fields = {[field.name for field in fields if field.isRequired]}
 
@@ -74,7 +74,7 @@ class {model_name_pascal}Repo(BaseRepo):
 
         return results
 
-    def create(db: Session, model_request):
+    def create(self, db: Session, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
         unique_fields = {[field.name for field in fields if field.isUnique]}
         Validator.validate_required_fields(model_request, required_fields)
@@ -91,7 +91,7 @@ class {model_name_pascal}Repo(BaseRepo):
         db.refresh(db_query)
         return db_query
 
-    def update(db: Session, model_id: int, model_request):
+    def update(self, db: Session, model_id: int, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
         unique_fields = {[field.name for field in fields if field.isUnique]}
         Validator.validate_required_fields(model_request, required_fields)
