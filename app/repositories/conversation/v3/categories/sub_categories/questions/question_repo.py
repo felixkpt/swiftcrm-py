@@ -14,7 +14,7 @@ class QuestionRepo(BaseRepo):
     
     model = Model
 
-    async def list(db: Session, request: Request):
+    async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
         search_fields = ['category_id', 'sub_category_id', 'question', 'marks']
 
@@ -40,7 +40,7 @@ class QuestionRepo(BaseRepo):
 
         return results
 
-    def create(db: Session, model_request):
+    def create(self, db: Session, model_request):
         required_fields = ['category_id', 'sub_category_id', 'question', 'marks']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -63,7 +63,7 @@ class QuestionRepo(BaseRepo):
         db.refresh(db_query)
         return db_query
 
-    def update(db: Session, model_id: int, model_request):
+    def update(self, db: Session, model_id: int, model_request):
         required_fields = ['category_id', 'sub_category_id', 'question', 'marks']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
