@@ -10,10 +10,10 @@ from app.database.connection import get_db
 
 def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
+    model_generator = ModelGenerator(data, db)
+    res = model_generator.generate_model()
     try:
         print("STEP 1: Starting model generation\n")
-        model_generator = ModelGenerator(data, db)
-        res = model_generator.generate_model()
         print("STEP 1: Model generation completed\n")
 
         if res:
@@ -42,6 +42,7 @@ def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_d
             print("Model generation failed, stopping process.\n")
 
     except Exception as e:
+        return
         # Stash changes if any step fails
         try:
             stash_message = f"Autobuilder: Stash changes due to {action_type.capitalize()} {data['name_singular'].lower()} failure - {str(e)}"

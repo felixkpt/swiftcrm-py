@@ -17,8 +17,6 @@ def get_model_names(model_name):
     name_plural = inflect.engine().plural(
         name_singular) if not singularized else model_name_slug
 
-    print('model_name_slug::', name_singular,
-          name_plural, model_name_pascal,)
     return name_singular, name_plural, model_name_pascal,
 
 
@@ -51,9 +49,7 @@ def generate_class_name(api_endpoint, name_singular):
 
     # Singularize the last segment using inflect
     are_similar = last_segment_singular == name_singular.lower()
-    print('Are similar:', last_segment_singular,
-          name_singular.lower(), are_similar)
-
+    
     # Construct the class_name by replacing '/' with '-' and appending name_singular
     if are_similar:
         class_name = other_segments.replace(

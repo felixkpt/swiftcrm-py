@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 class ModelGenerator:
     def __init__(self, data, db: Session):
+
         self.data = data
         if 'options' not in self.data:
             self.data['options'] = {}
@@ -26,7 +27,7 @@ class ModelGenerator:
 
     def _generate_fields(self):
         fields = self.data['fields']
-        print('Fields:', fields)
+
         return [
             {
                 "name": field.name,
@@ -73,7 +74,6 @@ class ModelGenerator:
     def _collect_imports(self, fields):
         imports = set()
         for field in fields:
-            print('HEY YOU:::', field.get('dropdownSource', False))
 
             data_type = field['dataType'].lower() if field['dataType'] else ''
             if data_type in self.type_mapping:
@@ -172,17 +172,21 @@ class ModelGenerator:
                 init_py.write('\n')
 
     def generate_model(self):
+
         fields = self._generate_fields()
         fields = self._add_id_field(fields)
         fields = self._filter_ignore_fields(fields)
         imports_str = self._collect_imports(fields)
 
         # Get existing relationships
-        path = self.data['api_endpoint'].replace('-', '_')
         filename = f"{self.data['name_singular'].lower()}.py"
-        model_file_path = os.path.join(
-        os.getcwd(), 'app', path, 'models', filename)
-        existing_relationships = self._extract_existing_relationships(model_file_path)
+        directory_path = os.path.join(
+            os.getcwd(), 'app', 'models', *self.data['api_endpoint'].split('/'))
+        file_path = os.path.join(directory_path, filename)
+        print('file_path:', file_path)
+
+        existing_relationships = self._extract_existing_relationships(file_path)
+        return 'existing_relationship'
 
         content = self._build_model_content(imports_str, fields, existing_relationships)
         self._write_model_file(content)

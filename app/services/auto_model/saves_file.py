@@ -21,9 +21,9 @@ def handler(api_endpoint, relative_folder, filename, content):
         os.getcwd(), 'app', relative_folder, *api_endpoint.split('/'))
     create_directory_if_not_exists(directory_path)
 
-    # Create the route file
     file_path = os.path.join(directory_path, filename)
 
+    # Create the file
     with open(file_path, 'w') as f:
         f.write(content)
     return directory_path
