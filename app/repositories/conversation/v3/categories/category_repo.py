@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.conversation.v2.categories.category import ConversationV2Category as Model
+from app.models.conversation.v3.categories.category import ConversationV3Category as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
