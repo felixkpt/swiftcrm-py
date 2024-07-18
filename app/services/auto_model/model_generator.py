@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 from app.services.auto_model.saves_file import handler
 from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
@@ -8,13 +9,6 @@ from sqlalchemy.orm import Session
 
 class ModelGenerator:
     def __init__(self, data, db: Session):
-        """
-        Initializes the ModelGenerator instance with input data.
-
-        Args:
-            data (dict): Input data containing fields, class_name, table_name, options, etc.
-        """
-        
         self.data = data
         if 'options' not in self.data:
             self.data['options'] = {}
@@ -31,12 +25,6 @@ class ModelGenerator:
         }
 
     def _generate_fields(self):
-        """
-        Generates a list of fields based on input data.
-
-        Returns:
-            list: List of dictionaries representing each field.
-        """
         fields = self.data['fields']
         print('Fields:', fields)
         return [
@@ -56,15 +44,6 @@ class ModelGenerator:
         ]
 
     def _add_id_field(self, fields):
-        """
-        Adds an 'id' field if not present in the list of fields.
-
-        Args:
-            fields (list): List of dictionaries representing fields.
-
-        Returns:
-            list: Updated list of fields including 'id' field.
-        """
         id_field = next(
             (field for field in fields if field['name'] == 'id'), None)
         if id_field is None:
@@ -88,28 +67,10 @@ class ModelGenerator:
         return fields
 
     def _filter_ignore_fields(self, fields):
-        """
-        Filters out fields to ignore (e.g., 'created_at', 'updated_at').
-
-        Args:
-            fields (list): List of dictionaries representing fields.
-
-        Returns:
-            list: Filtered list of fields.
-        """
         ignore_fields = ['created_at', 'updated_at']
         return [field for field in fields if 'name' not in field or field['name'] not in ignore_fields]
 
     def _collect_imports(self, fields):
-        """
-        Collects necessary imports based on field types.
-
-        Args:
-            fields (list): List of dictionaries representing fields.
-
-        Returns:
-            str: Comma-separated string of imports.
-        """
         imports = set()
         for field in fields:
             print('HEY YOU:::', field.get('dropdownSource', False))
@@ -146,17 +107,17 @@ class ModelGenerator:
                     relationships.append(relationship_str)
         return '\n'.join(relationships) if relationships else ''
 
-    def _build_model_content(self, imports_str, fields):
-        """
-        Builds the content of the SQLAlchemy model class.
+    def _extract_existing_relationships(self, file_path):
+        relationships = []
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    if 'relationship(' in line:
+                        relationships.append(line.strip())
+        return relationships
 
-        Args:
-            imports_str (str): Comma-separated string of imports.
-            fields (list): List of dictionaries representing fields.
-
-        Returns:
-            str: Content of the SQLAlchemy model class.
-        """
+    def _build_model_content(self, imports_str, fields, existing_relationships):
         content = (
             f"from sqlalchemy import Column, {imports_str}\n"
             "from app.models.base import Base\n"
@@ -195,20 +156,13 @@ class ModelGenerator:
         if self.data.get('options') and self.data['options'].get('timestamps'):
             content += "    created_at = Column(DateTime, server_default=func.now())\n"
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
-        # Adding relationships
-        rels = self._add_relationships(fields)
-        if rels:
-            content += '\n'+rels
+        # Adding existing relationships
+        if existing_relationships:
+            content += '\n' + '\n'.join(existing_relationships) + '\n'
 
         return content
 
     def _write_model_file(self, content):
-        """
-        Writes the SQLAlchemy model file to the specified directory.
-
-        Args:
-            content (str): Content of the SQLAlchemy model class.
-        """
         path = self.data['api_endpoint'].replace('-', '_')
         filename = f"{self.data['name_singular'].lower()}.py"
         directory_path = handler(path, 'models', filename, content)
@@ -218,17 +172,16 @@ class ModelGenerator:
                 init_py.write('\n')
 
     def generate_model(self):
-        """
-        Generates the SQLAlchemy model and performs database migrations using Alembic.
-
-        Returns:
-            bool: True if successful, False otherwise.
-        """
         fields = self._generate_fields()
         fields = self._add_id_field(fields)
         fields = self._filter_ignore_fields(fields)
         imports_str = self._collect_imports(fields)
-        content = self._build_model_content(imports_str, fields)
+
+        # Get existing relationships
+        model_file_path = handler(self.data['api_endpoint'].replace('-', '_'), 'models', f"{self.data['name_singular'].lower()}.py")
+        existing_relationships = self._extract_existing_relationships(model_file_path)
+
+        content = self._build_model_content(imports_str, fields, existing_relationships)
         self._write_model_file(content)
         try:
             subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
