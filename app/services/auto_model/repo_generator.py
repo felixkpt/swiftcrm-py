@@ -104,21 +104,6 @@ class {model_name_pascal}Repo(BaseRepo):
         else:
             return ResponseHelper.handle_not_found_error(model_id)
 
-    def get(self, db: Session, model_id: int):
-        return super().get(db, model_id)
-
-    def update_status(self, db: Session, model_id: int, status_id: int):
-        return super().update_status(db, model_id, status_id)
-
-    def update_multiple_statuses(self, db: Session, model_ids: list[int], status_id: int):
-        return super().update_multiple_statuses(db, model_ids, status_id)
-
-    def archive(self, db: Session, model_id: int, archive_db: Session):
-        return super().archive(db, model_id, archive_db)
-
-    def delete(self, db: Session, model_id: int):
-        return super().delete(db, model_id)
-
 """
 
     # Write the generated repo content to a Python file

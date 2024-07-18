@@ -26,7 +26,7 @@ def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
 
 # Retrieve a list of {name_plural}.
 @router.get("/")
-async def list_route(request: Request, db: Session = get_db):
+async def list_route(request: Request, db: Session = Depends(get_db)):
     results = await repo.list(db, request)
     return results
 
