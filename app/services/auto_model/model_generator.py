@@ -183,11 +183,9 @@ class ModelGenerator:
         directory_path = os.path.join(
             os.getcwd(), 'app', 'models', *self.data['api_endpoint'].split('/'))
         file_path = os.path.join(directory_path, filename)
-        print('file_path:', file_path)
 
         existing_relationships = self._extract_existing_relationships(file_path)
-        return 'existing_relationship'
-
+        
         content = self._build_model_content(imports_str, fields, existing_relationships)
         self._write_model_file(content)
         try:
