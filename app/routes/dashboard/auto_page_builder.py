@@ -28,8 +28,9 @@ async def get_page_endpoint(page_id: str, db: Session = Depends(get_db)):
 @router.post("/auto-page-builder")
 async def store_endpoint(auto_page_data: AutoPageBuilderRequest, db: Session = Depends(get_db)):
     generated_data = prepare_data(auto_page_data)
+    print(generated_data)
 
-    existing_page = Repo.get_page_by_name(db, generated_data['name_singular'])
+    existing_page = Repo.get_page_by_table_name(db, generated_data['table_name_singular'])
     if existing_page:
         raise HTTPException(status_code=422, detail="A similar AutoPageBuilder configuration exists")
 
