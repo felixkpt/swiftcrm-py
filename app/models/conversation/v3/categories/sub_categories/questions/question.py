@@ -6,7 +6,7 @@ class ConversationV3CategoriesSubCategoriesQuestion(Base):
     __tablename__ = 'conversation_v3_categories_sub_categories_questions'
     id = Column(Integer, primary_key=True, autoincrement=True)
     category_id = Column(Integer, ForeignKey('conversation_v3_categories.id'))
-    sub_category_id = Column(Integer)
+    sub_category_id = Column(Integer, ForeignKey('conversation_v3_categories_sub_categories.id'))
     question = Column(Text(None))
     marks = Column(Integer)
     status_id = Column(Integer, nullable=False, server_default='1')
