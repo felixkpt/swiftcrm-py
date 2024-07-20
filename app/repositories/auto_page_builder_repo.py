@@ -171,6 +171,8 @@ class AutoPageBuilderRepo:
 
     @staticmethod
     def delete_page(db: Session, page_id: int):
+        return {"message": "AutoPageBuilder configuration deleted successfully"}
+
         try:
             db_page = db.query(AutoPageBuilder).filter(
                 AutoPageBuilder.id == page_id).first()

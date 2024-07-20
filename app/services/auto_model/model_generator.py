@@ -158,7 +158,7 @@ class ModelGenerator:
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
         # Adding existing relationships
         if existing_relationships:
-            content += '\n' + '\n'.join(existing_relationships) + '\n'
+            content += '\n' + '\n'.join(f"    {line}" for line in existing_relationships) + '\n'
 
         return content
 

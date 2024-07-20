@@ -49,12 +49,12 @@ async def update_endpoint(page_id: int, auto_page_data: AutoPageBuilderRequest, 
     if not existing_page:
         raise HTTPException(status_code=404, detail="AutoPageBuilder configuration not found")
 
-    try:
-        auto_model_handler(generated_data, db, page_id)
-        Repo.update_page(db, page_id, auto_page_data)
-        return {"message": "AutoPageBuilder configuration updated successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update AutoPageBuilder configuration: {str(e)}")
+    # try:
+    auto_model_handler(generated_data, db, page_id)
+    Repo.update_page(db, page_id, auto_page_data)
+    return {"message": "AutoPageBuilder configuration updated successfully"}
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=f"Failed to update AutoPageBuilder configuration: {str(e)}")
 
 @router.delete("/auto-page-builder/{page_id}", response_model=dict)
 async def delete_endpoint(page_id: int, db: Session = Depends(get_db)):

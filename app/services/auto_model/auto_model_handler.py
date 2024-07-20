@@ -10,46 +10,46 @@ from app.database.connection import get_db
 
 def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
-    try:
-        print("STEP 1: Starting model generation\n")
-        model_generator = ModelGenerator(data, db)
-        res = model_generator.generate_model()
-        print("STEP 1: Model generation completed\n")
+    # try:
+    print("STEP 1: Starting model generation\n")
+    model_generator = ModelGenerator(data, db)
+    res = model_generator.generate_model()
+    print("STEP 1: Model generation completed\n")
 
-        if res:
-            print("STEP 2: Generating repository\n")
-            generate_repo(data)
-            print("STEP 2: Repository generation completed\n")
+    if res:
+        print("STEP 2: Generating repository\n")
+        generate_repo(data)
+        print("STEP 2: Repository generation completed\n")
 
-            print("STEP 3: Generating schema\n")
-            generate_schema(data)
-            print("STEP 3: Schema generation completed\n")
+        print("STEP 3: Generating schema\n")
+        generate_schema(data)
+        print("STEP 3: Schema generation completed\n")
 
-            print("STEP 4: Generating routes\n")
-            generate_routes(data)
-            print("STEP 4: Routes generation completed\n")
+        print("STEP 4: Generating routes\n")
+        generate_routes(data)
+        print("STEP 4: Routes generation completed\n")
 
-            # Run Git Add and Commit
-            try:
-                subprocess.run(['git', 'add', '.'], check=True)
-                commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
-                subprocess.run(['git', 'commit', '-m', commit_message], check=True)
-                print("STEP 5: Git add and commit completed\n")
-            except subprocess.CalledProcessError as e:
-                print(f"Error running Git commands: {e}")
-                raise e
-        else:
-            print("Model generation failed, stopping process.\n")
-
-    except Exception as e:
-        return
-        # Stash changes if any step fails
+        # Run Git Add and Commit
         try:
-            stash_message = f"Autobuilder: Stash changes due to {action_type.capitalize()} {data['name_singular'].lower()} failure - {str(e)}"
-            subprocess.run(['git', 'stash', 'push', '-m', stash_message], check=True)
-            print(f"Changes stashed: {stash_message}\n")
-        except subprocess.CalledProcessError as stash_error:
-            print(f"Error stashing changes: {stash_error}")
+            subprocess.run(['git', 'add', '.'], check=True)
+            commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
+            subprocess.run(['git', 'commit', '-m', commit_message], check=True)
+            print("STEP 5: Git add and commit completed\n")
+        except subprocess.CalledProcessError as e:
+            print(f"Error running Git commands: {e}")
+            raise e
+    else:
+        print("Model generation failed, stopping process.\n")
 
-        print(f"Error in auto_model_handler: {e}\n")
-        raise e
+    # except Exception as e:
+    #     return
+    #     # Stash changes if any step fails
+    #     try:
+    #         stash_message = f"Autobuilder: Stash changes due to {action_type.capitalize()} {data['name_singular'].lower()} failure - {str(e)}"
+    #         subprocess.run(['git', 'stash', 'push', '-m', stash_message], check=True)
+    #         print(f"Changes stashed: {stash_message}\n")
+    #     except subprocess.CalledProcessError as stash_error:
+    #         print(f"Error stashing changes: {stash_error}")
+
+    #     print(f"Error in auto_model_handler: {e}\n")
+    #     raise e

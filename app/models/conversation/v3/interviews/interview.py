@@ -16,6 +16,7 @@ class ConversationV3Interview(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-category = relationship("ConversationV3Category", back_populates="interviews")
-sub_category = relationship("ConversationV3CategoriesSubCategory", back_populates="interviews")
-messages = relationship("ConversationV3Message", back_populates="interview")
+    # user = relationship("AdminUser", back_populates="interviews")
+    category = relationship("ConversationV3Category", back_populates="interviews")
+    sub_category = relationship("ConversationV3CategoriesSubCategory", back_populates="interviews")
+    messages = relationship("ConversationV3Message", back_populates="interview")

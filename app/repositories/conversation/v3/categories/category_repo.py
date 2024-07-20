@@ -5,10 +5,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.categories.category import ConversationV3Category as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
-from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
+from app.services.search_repo import get_query_params, apply_filters, add_metadata
+from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
-
 
 class CategoryRepo(BaseRepo):
     
@@ -20,6 +19,7 @@ class CategoryRepo(BaseRepo):
 
         query = db.query(Model)
         query = apply_filters(query, Model, search_fields, query_params)
+        query = self.repo_specific_filters(query, Model, query_params)  # Apply declared filters
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -27,11 +27,19 @@ class CategoryRepo(BaseRepo):
         metadata = add_metadata(query, query_params)
         
         results = {
-            "records": query.all(),
+            "data": query.all(),
             "metadata": metadata
         }
 
         return results
+
+    def repo_specific_filters(self, query, Model, query_params):
+        # Abstracted filter method
+
+        value = query_params.get('name', None)
+        if value is not None:
+            query = query.filter(Model.name == value)
+
 
     def create(self, db: Session, model_request):
         required_fields = ['name', 'description']
