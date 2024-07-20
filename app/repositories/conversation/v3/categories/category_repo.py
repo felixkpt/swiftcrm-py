@@ -37,7 +37,7 @@ class CategoryRepo(BaseRepo):
 
     def repo_specific_filters(self, query, Model, query_params):
 
-        value = query_params.get('name', '')
+        value = query_params.get('name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name.ilike(f'%{value}%'))
 

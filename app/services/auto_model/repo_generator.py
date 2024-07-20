@@ -36,7 +36,7 @@ def generate_repo(data):
                 repo_specific_filters += f"            query = query.filter(Model.{field.name} == int(value))\n"
             else:
                 # For other fields, handle as string
-                repo_specific_filters += f"        value = query_params.get('{field.name}', '')\n"
+                repo_specific_filters += f"        value = query_params.get('{field.name}', '').strip()\n"
                 repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
                 repo_specific_filters += f"            query = query.filter(Model.{field.name}.ilike(f'%{{value}}%'))\n"
 
