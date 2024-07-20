@@ -5,6 +5,7 @@ from app.requests.middleware.auth import auth_middleware
 from app.auto_routes_handler import auto_register_routes
 from fastapi import FastAPI
 from app.repositories.conversation.v1.database_seeder import setup_database
+from app.websocket.websocket_route_handlers import websocket_routes
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -49,6 +50,8 @@ async def set_database():
     res = setup_database()
     return {"message": res}
 
+# Include WebSocket routes
+app.include_router(websocket_routes)
 
 if __name__ == "__main__":
     import uvicorn

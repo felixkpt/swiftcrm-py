@@ -45,4 +45,5 @@ async def route_list_interviews_by_category_sub_category_id(
 @router.get("/interview/results/{interview_id}")
 async def get_interview_session_results(interview_id: str):
     results = Repo.get_interview_results(interview_id)
+
     return results

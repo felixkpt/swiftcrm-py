@@ -3,7 +3,7 @@ from app.database.old_connection import execute_query
 from app.repositories.conversation.v2.shared import SharedRepo
 from app.services.conversation.v2.openai_requests import fetch_openai_interview_scores
 from collections import defaultdict
-
+from app.events.notifications import notify_new_interview_results
 
 class InterviewRepo:
 
@@ -113,6 +113,8 @@ class InterviewRepo:
         percentage_score = (total_score / max_score) * \
             100 if max_score > 0 else 0
         percentage_score = round(percentage_score)
+
+        notify_new_interview_results(interview_id)
 
         return {
             "results": scores,
