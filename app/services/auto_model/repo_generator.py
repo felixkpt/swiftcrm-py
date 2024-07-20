@@ -59,6 +59,7 @@ from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
+from app.events.notifications import notify_model_updated  # Import the notification function
 
 
 class {model_name_pascal}Repo(BaseRepo):
