@@ -193,9 +193,9 @@ class AutoPageBuilderRepo:
 
     @staticmethod
     def get_pages(db: Session):
-        data = db.query(AutoPageBuilder).all()
+        records = db.query(AutoPageBuilder).all()
         results = {
-            'data': data,
+            'records': records,
             'metadata': None,
         }
         return results

@@ -27,7 +27,7 @@ class CategoryRepo(BaseRepo):
         metadata = add_metadata(query, query_params)
         
         results = {
-            "data": query.all(),
+            "records": query.all(),
             "metadata": metadata
         }
 
