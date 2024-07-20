@@ -46,7 +46,7 @@ class SubCategoryRepo(BaseRepo):
 
         return query
 
-    def create(self, db: Session, model_request):
+    async def create(self, db: Session, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -62,7 +62,7 @@ class SubCategoryRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            notify_model_updated(Model.__tablename__, 'A new record was created')
+            await notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)

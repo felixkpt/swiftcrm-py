@@ -90,7 +90,7 @@ class {model_name_pascal}Repo(BaseRepo):
 {repo_specific_filters}
         return query
 
-    def create(self, db: Session, model_request):
+    async def create(self, db: Session, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
         unique_fields = {[field.name for field in fields if field.isUnique]}
         Validator.validate_required_fields(model_request, required_fields)
@@ -101,7 +101,7 @@ class {model_name_pascal}Repo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            notify_model_updated(Model.__tablename__, 'A new record was created')
+            await notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
