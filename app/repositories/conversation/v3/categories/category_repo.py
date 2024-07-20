@@ -39,7 +39,7 @@ class CategoryRepo(BaseRepo):
 
         value = query_params.get('name', '')
         if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.name == value)
+            query = query.filter(Model.name.ilike(f'%{value}%'))
 
         return query
 

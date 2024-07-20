@@ -29,13 +29,22 @@ def generate_repo(data):
     for field in fields:
         if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
             added = True
-            repo_specific_filters += f"        value = query_params.get('{field.name}', '')\n"
-            repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
-            repo_specific_filters += f"            query = query.filter(Model.{field.name} == value)\n"
+            if field.name.endswith('_id'):
+                # For fields ending with _id, handle as numeric
+                repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
+                repo_specific_filters += f"        if value is not None and value.isdigit():\n"
+                repo_specific_filters += f"            query = query.filter(Model.{field.name} == int(value))\n"
+            else:
+                # For other fields, handle as string
+                repo_specific_filters += f"        value = query_params.get('{field.name}', '')\n"
+                repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
+                repo_specific_filters += f"            query = query.filter(Model.{field.name}.ilike(f'%{{value}}%'))\n"
+
     if added:
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
+
 
 
     model_path_name = name_singular.lower()
