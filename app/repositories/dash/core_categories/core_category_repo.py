@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.dash.core_categories.core_category import DashCoreCategory as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 
@@ -17,7 +17,7 @@ class CoreCategoryRepo(BaseRepo):
         search_fields = ['user_id', 'sub_category_id']
 
         query = db.query(Model)
-        query = apply_filters(query, Model, search_fields, query_params)
+        query = apply_common_filters(query, Model, search_fields, query_params)
 
         value = query_params.get('user_id', None)
         if value is not None:

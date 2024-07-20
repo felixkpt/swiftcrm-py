@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.categories.sub_categories.questions.question import ConversationV3CategoriesSubCategoriesQuestion as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 
@@ -19,8 +19,7 @@ class QuestionRepo(BaseRepo):
         search_fields = ['category_id', 'sub_category_id', 'question', 'marks']
 
         query = db.query(Model)
-        query = apply_filters(query, Model, search_fields, query_params)
-
+        query = apply_common_filters(query, Model, search_fields, query_params)
         query = self.repo_specific_filters(query, Model, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']

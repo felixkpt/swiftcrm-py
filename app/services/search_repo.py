@@ -2,7 +2,7 @@
 from sqlalchemy import or_
 from fastapi import Request
 
-def apply_filters(query, Model, search_fields, query_params):
+def apply_common_filters(query, Model, search_fields, query_params):
     # Apply search filters
     if query_params and query_params.get('search'):
         search_filters = [

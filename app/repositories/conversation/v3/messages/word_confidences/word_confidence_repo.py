@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.messages.word_confidences.word_confidence import ConversationV3MessagesWordConfidence as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 
@@ -19,7 +19,7 @@ class WordConfidenceRepo(BaseRepo):
         search_fields = ['message_id', 'word', 'start_time_seconds', 'end_time_seconds', 'confidence']
 
         query = db.query(Model)
-        query = apply_filters(query, Model, search_fields, query_params)
+        query = apply_common_filters(query, Model, search_fields, query_params)
 
         value = query_params.get('message_id', None)
         if value is not None:

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.messages.message import ConversationV3Message as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 
@@ -19,7 +19,7 @@ class MessageRepo(BaseRepo):
         search_fields = ['user_id', 'category_id', 'sub_category_id', 'role', 'mode', 'interview_id', 'question_id', 'question_scores', 'content', 'audio_uri']
 
         query = db.query(Model)
-        query = apply_filters(query, Model, search_fields, query_params)
+        query = apply_common_filters(query, Model, search_fields, query_params)
 
         value = query_params.get('user_id', None)
         if value is not None:
