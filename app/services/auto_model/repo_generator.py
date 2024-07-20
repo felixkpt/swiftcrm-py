@@ -72,6 +72,7 @@ class {model_name_pascal}Repo(BaseRepo):
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
+        # Abstracted filter method
 {repo_specific_filters}
 
     def create(self, db: Session, model_request):

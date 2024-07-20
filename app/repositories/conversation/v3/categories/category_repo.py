@@ -34,6 +34,7 @@ class CategoryRepo(BaseRepo):
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
+        # Abstracted filter method
 
         value = query_params.get('name', None)
         if value is not None:
