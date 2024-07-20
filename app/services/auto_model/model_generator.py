@@ -184,7 +184,7 @@ class ModelGenerator:
         filename = f"{self.data['name_singular'].lower()}.py"
         directory_path = os.path.join(
             os.getcwd(), 'app', 'models', *self.data['api_endpoint'].split('/'))
-        file_path = os.path.join(directory_path, filename)
+        file_path = os.path.join(directory_path, filename).replace('-', '_')
 
         existing_relationships = self._extract_existing_relationships(file_path)
         
