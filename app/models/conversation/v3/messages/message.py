@@ -18,3 +18,9 @@ class ConversationV3Message(Base):
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    user = relationship("AdminUser", back_populates="messages")
+    category = relationship("ConversationV3Category", back_populates="messages")
+    sub_category = relationship("ConversationV3CategoriesSubCategory", back_populates="messages")
+    interview = relationship("ConversationV23Interview", back_populates="messages")
+    word_confidences = relationship("ConversationV3WordConfidence", back_populates="message")
