@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 class ConversationV3Interview(Base):
     __tablename__ = 'conversation_v3_interviews'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer)
+    user_id = Column(Integer, ForeignKey('admin_users.id'))
     category_id = Column(Integer, ForeignKey('conversation_v3_categories.id'))
     sub_category_id = Column(Integer, ForeignKey('conversation_v3_categories_sub_categories.id'))
     question_id = Column(Integer, ForeignKey('conversation_v3_categories_sub_categories_questions.id'))
@@ -16,7 +16,7 @@ class ConversationV3Interview(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    user = relationship("AdminUser", back_populates="interviews")
-    category = relationship("ConversationV3Category", back_populates="interviews")
-    sub_category = relationship("ConversationV3CategoriesSubCategory", back_populates="interviews")
-    messages = relationship("ConversationV3Message", back_populates="interview")
+# user = relationship("AdminUser", back_populates="interviews")
+category = relationship("ConversationV3Category", back_populates="interviews")
+sub_category = relationship("ConversationV3CategoriesSubCategory", back_populates="interviews")
+messages = relationship("ConversationV3Message", back_populates="interview")
