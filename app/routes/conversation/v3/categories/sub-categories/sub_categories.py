@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from app.repositories.conversation.v3.categories.sub_categories.sub_category_repo import SubCategoryRepo as Repo
 from app.requests.schemas.conversation.v3.categories.sub_categories.sub_category import SubCategorySchema as ModelSchema
 from app.database.connection import get_db
-from app.events.notifications import NotificationService  # Import the notification function
+from app.events.notifications import NotificationService  # Import NotificationService
 
 router = APIRouter()
 
 repo = Repo()  # Instantiate model repository class
-notification = NotificationService()
+notification = NotificationService() # Instantiate notification class
 
 # Create a new Sub_category instance.
 @router.post("/", response_model=ModelSchema)
