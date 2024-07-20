@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
 from app.repositories.conversation.v1.conversation_repo import ConversationRepo as Repo
-from app.repositories.conversation.v3.categories.category_repo import CategoryRepo as catsRepo
+from app.repositories.conversation.v2.categories.category_repo import CategoryRepo as catsRepo
 from app.repositories.conversation.v2.messages.message_repo import MessageRepo
 from app.repositories.conversation.v2.database_seeder import seeder_handler_with_builder
 from app.database.connection import get_db
