@@ -11,7 +11,7 @@ repo = Repo()  # Instantiate model repository class
 
 # Create a new Sub_category instance.
 @router.post("/", response_model=ModelSchema)
-def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
+async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
     return repo.create(db=db, model_request=modelRequest)
 
 # Retrieve a list of Sub_categories.
@@ -30,7 +30,7 @@ def view_route(model_id: int, db: Session = Depends(get_db)):
 
 # Update an existing Sub_category by ID.
 @router.put("/{model_id}", response_model=ModelSchema)
-def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
+async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"Sub_category not found")
