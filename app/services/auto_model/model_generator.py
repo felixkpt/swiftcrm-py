@@ -1,5 +1,4 @@
 import os
-import re
 import subprocess
 from app.services.auto_model.saves_file import handler
 from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
@@ -160,6 +159,7 @@ class ModelGenerator:
         if existing_relationships:
             content += '\n' + '\n'.join(f"    {line}" for line in existing_relationships) + '\n'
 
+        print('existing_relationships,', existing_relationships)
         return content
 
     def _write_model_file(self, content):
