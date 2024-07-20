@@ -68,7 +68,7 @@ class {model_name_pascal}Repo(BaseRepo):
         metadata = add_metadata(query, query_params)
         
         results = {{
-            "records": query.all(),
+            "data": query.all(),
             "metadata": metadata
         }}
 
