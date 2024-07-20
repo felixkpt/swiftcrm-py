@@ -1,6 +1,6 @@
 import os
 import subprocess
-from app.services.auto_model.saves_file import handler
+from app.services.auto_model.saves_file import handler, generate_file_path
 from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
 from app.services.auto_model.helpers import generate_model_and_api_names
 from sqlalchemy.orm import Session
@@ -85,7 +85,7 @@ class ModelGenerator:
         if self.data.get('options') and self.data['options'].get('timestamps'):
             imports.add('DateTime')
             imports.add('func')
-        
+
         return ', '.join(sorted(imports))
 
     def _add_relationships(self, fields):
@@ -108,7 +108,6 @@ class ModelGenerator:
 
     def _extract_existing_relationships(self, file_path):
         relationships = []
-        print('file_path', file_path)
 
         if os.path.exists(file_path):
             with open(file_path, 'r') as file:
@@ -142,7 +141,7 @@ class ModelGenerator:
                     column_args += ", unique=True"
                 if field.get('dropdownSource', False):
                     auto_page = Repo.get_page_by_apiEndpoint(
-                    self.db, field['dropdownSource'])
+                        self.db, field['dropdownSource'])
                     if auto_page:
                         column_args += f", ForeignKey('{auto_page.table_name_plural}.id')"
 
@@ -159,7 +158,9 @@ class ModelGenerator:
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
         # Adding existing relationships
         if existing_relationships:
-            content += '\n' + '\n'.join(f"    {line}" for line in existing_relationships) + '\n'
+            content += '\n' + \
+                '\n'.join(
+                    f"    {line}" for line in existing_relationships) + '\n'
 
         print('existing_relationships,', existing_relationships)
         return content
@@ -181,14 +182,16 @@ class ModelGenerator:
         imports_str = self._collect_imports(fields)
 
         # Get existing relationships
+        path = self.data['api_endpoint'].replace('-', '_')
         filename = f"{self.data['name_singular'].lower()}.py"
-        directory_path = os.path.join(
-            os.getcwd(), 'app', 'models', *self.data['api_endpoint'].split('/'))
-        file_path = os.path.join(directory_path, filename).replace('-', '_')
+        res = generate_file_path(path, 'models', filename)
+        file_path = res['file_path']
 
-        existing_relationships = self._extract_existing_relationships(file_path)
-        
-        content = self._build_model_content(imports_str, fields, existing_relationships)
+        existing_relationships = self._extract_existing_relationships(
+            file_path)
+
+        content = self._build_model_content(
+            imports_str, fields, existing_relationships)
         self._write_model_file(content)
         try:
             subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
