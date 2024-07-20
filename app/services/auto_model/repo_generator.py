@@ -27,7 +27,7 @@ def generate_repo(data):
     added = False
     repo_specific_filters = ""
     for field in fields:
-        if field.name != 'id' and field.name.endswith('_id'):
+        if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
             added = True
             repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
             repo_specific_filters += f"        if value is not None:\n"
@@ -38,7 +38,7 @@ def generate_repo(data):
         repo_specific_filters = ''
 
     model_path_name = name_singular.lower()
-        
+
     content = f"""
 from datetime import datetime
 from fastapi import Request
@@ -62,7 +62,7 @@ class {model_name_pascal}Repo(BaseRepo):
         query = db.query(Model)
         query = apply_filters(query, Model, search_fields, query_params)
 
-        query = repo_specific_filters(query, Model, search_fields, query_params)
+        query = self.repo_specific_filters(query, Model, search_fields, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])

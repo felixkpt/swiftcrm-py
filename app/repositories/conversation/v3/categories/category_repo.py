@@ -21,7 +21,7 @@ class CategoryRepo(BaseRepo):
         query = db.query(Model)
         query = apply_filters(query, Model, search_fields, query_params)
 
-        query = repo_specific_filters(query, Model, search_fields, query_params)
+        query = self.repo_specific_filters(query, Model, search_fields, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -36,6 +36,10 @@ class CategoryRepo(BaseRepo):
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
+
+        value = query_params.get('name', None)
+        if value is not None:
+            query = query.filter(Model.name == value)
 
         return query
 
