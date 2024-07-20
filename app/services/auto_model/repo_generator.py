@@ -1,5 +1,6 @@
 from app.services.auto_model.saves_file import handler
 
+
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
@@ -23,13 +24,15 @@ def generate_repo(data):
             inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
 
     # Generate filter conditions
+    added = False
     repo_specific_filters = ""
     for field in fields:
-        if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
+        if field.name != 'id' and field.name.endswith('_id'):
+            added = True
             repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
             repo_specific_filters += f"        if value is not None:\n"
             repo_specific_filters += f"            query = query.filter(Model.{field.name} == value)\n"
-    if repo_specific_filters:
+    if added:
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
@@ -43,9 +46,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_filters, add_metadata
-from app.requests.response.response_helper import ResponseHelper
+from app.services.search_repo import get_query_params, apply_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
+
 
 class {model_name_pascal}Repo(BaseRepo):
     
@@ -57,7 +61,8 @@ class {model_name_pascal}Repo(BaseRepo):
 
         query = db.query(Model)
         query = apply_filters(query, Model, search_fields, query_params)
-        query = self.repo_specific_filters(query, Model, query_params)  # Apply declared filters
+
+        query = repo_specific_filters(query, Model, search_fields, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -72,8 +77,8 @@ class {model_name_pascal}Repo(BaseRepo):
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
-        # Abstracted filter method
 {repo_specific_filters}
+        return query
 
     def create(self, db: Session, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
