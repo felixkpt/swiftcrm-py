@@ -108,6 +108,8 @@ class ModelGenerator:
 
     def _extract_existing_relationships(self, file_path):
         relationships = []
+        print('file_path', file_path)
+
         if os.path.exists(file_path):
             with open(file_path, 'r') as file:
                 lines = file.readlines()
