@@ -62,7 +62,7 @@ class SubCategoryRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            await notify_model_updated(Model.__tablename__, 'A new record was created')
+            notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
