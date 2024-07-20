@@ -20,10 +20,7 @@ class SubCategoryRepo(BaseRepo):
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
-
-        value = query_params.get('category_id', None)
-        if value is not None:
-            query = query.filter(Model.category_id == value)
+        query = self.repo_specific_filters(query, Model, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -36,6 +33,17 @@ class SubCategoryRepo(BaseRepo):
         }
 
         return results
+
+    def repo_specific_filters(self, query, Model, query_params):
+
+        value = query_params.get('name', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.name.ilike(f'%{value}%'))
+        value = query_params.get('category_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.category_id == int(value))
+
+        return query
 
     def create(self, db: Session, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
