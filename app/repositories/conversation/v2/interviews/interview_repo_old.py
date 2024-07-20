@@ -3,7 +3,6 @@ from app.database.old_connection import execute_query
 from app.repositories.conversation.v2.shared import SharedRepo
 from app.services.conversation.v2.openai_requests import fetch_openai_interview_scores
 from collections import defaultdict
-from app.events.notifications import notify_new_interview_results
 
 class InterviewRepo:
 

@@ -21,7 +21,7 @@ repo = Repo()  # Instantiate model repository class
 
 # Create a new {name_singular} instance.
 @router.post("/", response_model=ModelSchema)
-async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
+def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
     return repo.create(db=db, model_request=modelRequest)
 
 # Retrieve a list of {name_plural}.
@@ -40,7 +40,7 @@ def view_route(model_id: int, db: Session = Depends(get_db)):
 
 # Update an existing {name_singular} by ID.
 @router.put("/{{model_id}}", response_model=ModelSchema)
-async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
+def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"{name_singular} not found")
