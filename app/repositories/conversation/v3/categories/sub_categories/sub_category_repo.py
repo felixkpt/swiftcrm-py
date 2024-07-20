@@ -5,15 +5,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.categories.sub_categories.sub_category import ConversationV3CategoriesSubCategory as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_common_filters, add_metadata
-from app.requests.response.response_helper import ResponseHelper
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
-from app.events.notifications import NotificationService  # Import NotificationService
+
 
 class SubCategoryRepo(BaseRepo):
     
     model = Model
-    notification_service = NotificationService()  # Initialize NotificationService
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
@@ -62,7 +61,6 @@ class SubCategoryRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            self.notification_service.notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)

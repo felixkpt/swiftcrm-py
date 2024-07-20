@@ -1,5 +1,5 @@
 from app.services.auto_model.saves_file import handler
-from app.events.notifications import NotificationService  # Import the NotificationService
+
 
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
@@ -30,10 +30,12 @@ def generate_repo(data):
         if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
             added = True
             if field.name.endswith('_id'):
+                # For fields ending with _id, handle as numeric
                 repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
                 repo_specific_filters += f"        if value is not None and value.isdigit():\n"
                 repo_specific_filters += f"            query = query.filter(Model.{field.name} == int(value))\n"
             else:
+                # For other fields, handle as string
                 repo_specific_filters += f"        value = query_params.get('{field.name}', '').strip()\n"
                 repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
                 repo_specific_filters += f"            query = query.filter(Model.{field.name}.ilike(f'%{{value}}%'))\n"
@@ -42,6 +44,8 @@ def generate_repo(data):
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
+
+
 
     model_path_name = name_singular.lower()
 
@@ -52,15 +56,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_common_filters, add_metadata
-from app.requests.response.response_helper import ResponseHelper
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
-from app.events.notifications import NotificationService  # Import NotificationService
+
 
 class {model_name_pascal}Repo(BaseRepo):
     
     model = Model
-    notification_service = NotificationService()  # Initialize NotificationService
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
@@ -97,7 +100,6 @@ class {model_name_pascal}Repo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            self.notification_service.notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)

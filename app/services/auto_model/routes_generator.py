@@ -14,10 +14,12 @@ from sqlalchemy.orm import Session
 from app.repositories.{api_endpoint_slugged+'.'+name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
 from app.requests.schemas.{api_endpoint_slugged+'.'+name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
 from app.database.connection import get_db
+from app.events.notifications import NotificationService  # Import the notification function
 
 router = APIRouter()
 
 repo = Repo()  # Instantiate model repository class
+notification = NotificationService()
 
 # Create a new {name_singular} instance.
 @router.post("/", response_model=ModelSchema)
