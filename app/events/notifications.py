@@ -1,8 +1,6 @@
 # events/notifications.py
-from app.websocket.websocket_manager import WebSocketManager
-
 class NotificationService:
-    def __init__(self, websocket_manager: WebSocketManager):
+    def __init__(self, websocket_manager):
         self.websocket_manager = websocket_manager
 
     async def notify_model_updated(self, model_id: str, message: str):
