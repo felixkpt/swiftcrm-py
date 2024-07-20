@@ -37,8 +37,8 @@ class CategoryRepo(BaseRepo):
 
     def repo_specific_filters(self, query, Model, query_params):
 
-        value = query_params.get('name', None)
-        if value is not None:
+        value = query_params.get('name', '')
+        if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name == value)
 
         return query

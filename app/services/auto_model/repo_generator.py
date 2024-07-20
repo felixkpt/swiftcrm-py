@@ -23,19 +23,20 @@ def generate_repo(data):
         elif field.name != 'id' and field.name != 'created_at':
             inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
 
-    # Generate filter conditions
+    # Generate repo filter conditions
     added = False
     repo_specific_filters = ""
     for field in fields:
         if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
             added = True
-            repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
-            repo_specific_filters += f"        if value is not None:\n"
+            repo_specific_filters += f"        value = query_params.get('{field.name}', '')\n"
+            repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
             repo_specific_filters += f"            query = query.filter(Model.{field.name} == value)\n"
     if added:
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
+
 
     model_path_name = name_singular.lower()
 
