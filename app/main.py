@@ -21,7 +21,6 @@ cors_middleware(app)
 
 # Add root endpoint
 
-
 @app.get("/")
 def read_root():
     return {"message": "Welcome to SwiftCRM-PY!"}

@@ -1,5 +1,6 @@
 from app.services.auto_model.saves_file import handler
 
+
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
@@ -44,6 +45,8 @@ def generate_repo(data):
     else:
         repo_specific_filters = ''
 
+
+
     model_path_name = name_singular.lower()
 
     content = f"""
@@ -53,10 +56,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_common_filters, add_metadata
-from app.requests.response.response_helper import ResponseHelper
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
-from app.events.notifications import notify_model_updated  # Import notification function
+
 
 class {model_name_pascal}Repo(BaseRepo):
     
@@ -86,7 +89,7 @@ class {model_name_pascal}Repo(BaseRepo):
 {repo_specific_filters}
         return query
 
-    async def create(self, db: Session, model_request):
+    def create(self, db: Session, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
         unique_fields = {[field.name for field in fields if field.isUnique]}
         Validator.validate_required_fields(model_request, required_fields)
@@ -97,14 +100,13 @@ class {model_name_pascal}Repo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            await notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
         return db_query
 
-    async def update(self, db: Session, model_id: int, model_request):
+    def update(self, db: Session, model_id: int, model_request):
         required_fields = {[field.name for field in fields if field.isRequired]}
         unique_fields = {[field.name for field in fields if field.isUnique]}
         Validator.validate_required_fields(model_request, required_fields)
@@ -113,10 +115,11 @@ class {model_name_pascal}Repo(BaseRepo):
         db_query = db.query(Model).filter(Model.id == model_id).first()
         if db_query:
 {inserts_args2}            db.commit()
-            await notify_model_updated(Model.__tablename__, 'Record was updated')
+            db.refresh(db_query)
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
+
 """
 
     # Write the generated repo content to a Python file
