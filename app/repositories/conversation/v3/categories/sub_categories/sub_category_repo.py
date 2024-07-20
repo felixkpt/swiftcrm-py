@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.conversation.v3.categories.sub_categories.sub_category import ConversationV3CategoriesSubCategory as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
-from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
+from app.services.search_repo import get_query_params, apply_common_filters, add_metadata
+from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
-
+from app.events.notifications import notify_model_updated  # Import notification function
 
 class SubCategoryRepo(BaseRepo):
     
@@ -45,7 +45,7 @@ class SubCategoryRepo(BaseRepo):
 
         return query
 
-    def create(self, db: Session, model_request):
+    async def create(self, db: Session, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -61,13 +61,14 @@ class SubCategoryRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
+            await notify_model_updated(Model.__tablename__, 'A new record was created')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
         return db_query
 
-    def update(self, db: Session, model_id: int, model_request):
+    async def update(self, db: Session, model_id: int, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -80,8 +81,7 @@ class SubCategoryRepo(BaseRepo):
             db_query.category_id = model_request.category_id
             db_query.learn_instructions = model_request.learn_instructions
             db.commit()
-            db.refresh(db_query)
+            await notify_model_updated(Model.__tablename__, 'Record was updated')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
-
