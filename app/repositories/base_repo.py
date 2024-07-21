@@ -22,7 +22,7 @@ class BaseRepo:
             db_query.status_id = status_id
             db.commit()
             db.refresh(db_query)
-            await self.notification.notify_model_updated(self.model.__tablename__, 'Record was status updated!')
+            await self.notification.notify_model_updated(db, self.model.__tablename__, 'Record was status updated!')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
@@ -34,7 +34,7 @@ class BaseRepo:
             for record in db_query:
                 record.status_id = status_id
             db.commit()
-            await self.notification.notify_model_updated(self.model.__tablename__, 'Records statuses updated!')
+            await self.notification.notify_model_updated(db, self.model.__tablename__, 'Records statuses updated!')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_ids)
@@ -47,7 +47,7 @@ class BaseRepo:
             db.delete(db_query)
             db.commit()
             archive_db.commit()
-            await self.notification.notify_model_updated(self.model.__tablename__, 'Record was archived!')
+            await self.notification.notify_model_updated(db, self.model.__tablename__, 'Record was archived!')
             return {"message": "Record archived successfully"}
         else:
             return ResponseHelper.handle_not_found_error(model_id)
@@ -58,7 +58,7 @@ class BaseRepo:
         if db_query:
             db.delete(db_query)
             db.commit()
-            await self.notification.notify_model_updated(self.model.__tablename__, 'Record was deleted!')
+            await self.notification.notify_model_updated(db, self.model.__tablename__, 'Record was deleted!')
             return {"message": "Record deleted successfully"}
         else:
             return ResponseHelper.handle_not_found_error(model_id)
