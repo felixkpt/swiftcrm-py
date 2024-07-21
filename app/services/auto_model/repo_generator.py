@@ -55,7 +55,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
-from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
+from app.services.search_repo import get_query_params, apply_common_filters, set_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService  # Import NotificationService
@@ -71,13 +71,14 @@ class {model_name_pascal}Repo(BaseRepo):
         search_fields = {[field.name for field in fields if field.isRequired]}
 
         query = db.query(Model)
+        metadata = set_metadata(query, query_params)
+        
         query = apply_common_filters(query, Model, search_fields, query_params)
         query = self.repo_specific_filters(query, Model, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
 
-        metadata = add_metadata(query, query_params)
         
         results = {{
             "records": query.all(),

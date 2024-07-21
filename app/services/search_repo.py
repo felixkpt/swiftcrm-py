@@ -17,8 +17,10 @@ def apply_common_filters(query, Model, search_fields, query_params):
             query = query.order_by(getattr(Model, query_params['order_by']).desc())
         else:
             query = query.order_by(getattr(Model, query_params['order_by']))
+    else:
+        query = query.order_by(Model.id.desc())  # Default ordering by id in descending order
 
-     # Apply status filter
+    # Apply status filter
     if 'status_id' in query_params:
         status_id = query_params['status_id']
         if status_id != 0:
@@ -33,14 +35,14 @@ def get_query_params(request: Request, default_search_fields=['name', 'descripti
     query_params = {
         'search': params.get("search", ""),
         'search_fields': default_search_fields,
-        'order_by': params.get("order_by", ""),
-        'order_direction': params.get("order_direction", ""),
+        'order_by': params.get("order_by", "id"),
+        'order_direction': params.get("order_direction", "desc"),
         'page': int(params.get("page", 1)),
         'per_page': int(params.get("per_page", 10)),
     }
-    return {**query_params,**request.query_params}
+    return {**query_params, **request.query_params}
 
-def add_metadata(query, query_params):
+def set_metadata(query, query_params):
     total_records = query.count()
     metadata = {
         "per_page": query_params['per_page'],
