@@ -21,10 +21,10 @@ class CategoryRepo(BaseRepo):
         search_fields = ['name', 'description']
 
         query = db.query(Model)
-        metadata = set_metadata(query, query_params)
-
+        
         query = apply_common_filters(query, Model, search_fields, query_params)
         query = self.repo_specific_filters(query, Model, query_params)
+        metadata = set_metadata(query, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
