@@ -8,11 +8,13 @@ from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, add_metadata  # Importing functions for querying, searching and sorting
 from app.requests.response.response_helper import ResponseHelper  # Importing ResponseHelper for consistent error handling
 from app.repositories.base_repo import BaseRepo
+from app.events.notifications import NotificationService  # Import NotificationService
 
 
 class InterviewRepo(BaseRepo):
     
     model = Model
+    notification = NotificationService()  # Instantiate notification class
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
@@ -20,19 +22,7 @@ class InterviewRepo(BaseRepo):
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
-
-        value = query_params.get('user_id', None)
-        if value is not None:
-            query = query.filter(Model.user_id == value)
-        value = query_params.get('category_id', None)
-        if value is not None:
-            query = query.filter(Model.category_id == value)
-        value = query_params.get('sub_category_id', None)
-        if value is not None:
-            query = query.filter(Model.sub_category_id == value)
-        value = query_params.get('question_id', None)
-        if value is not None:
-            query = query.filter(Model.question_id == value)
+        query = self.repo_specific_filters(query, Model, query_params)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -40,13 +30,39 @@ class InterviewRepo(BaseRepo):
         metadata = add_metadata(query, query_params)
         
         results = {
-            "data": query.all(),
+            "records": query.all(),
             "metadata": metadata
         }
 
         return results
 
-    def create(self, db: Session, model_request):
+    def repo_specific_filters(self, query, Model, query_params):
+
+        value = query_params.get('user_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.user_id == int(value))
+        value = query_params.get('category_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.category_id == int(value))
+        value = query_params.get('sub_category_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.sub_category_id == int(value))
+        value = query_params.get('question_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.question_id == int(value))
+        value = query_params.get('scores', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.scores.ilike(f'%{value}%'))
+        value = query_params.get('max_scores', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.max_scores.ilike(f'%{value}%'))
+        value = query_params.get('percentage_score', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.percentage_score.ilike(f'%{value}%'))
+
+        return query
+
+    async def create(self, db: Session, model_request):
         required_fields = ['user_id', 'category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -66,13 +82,14 @@ class InterviewRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
+            await self.notification.notify_model_updated(Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
         return db_query
 
-    def update(self, db: Session, model_id: int, model_request):
+    async def update(self, db: Session, model_id: int, model_request):
         required_fields = ['user_id', 'category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
@@ -90,7 +107,7 @@ class InterviewRepo(BaseRepo):
             db_query.percentage_score = model_request.percentage_score
             db.commit()
             db.refresh(db_query)
+            await self.notification.notify_model_updated(Model.__tablename__, 'Record was updated!')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
-
