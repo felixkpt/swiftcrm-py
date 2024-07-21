@@ -39,7 +39,9 @@ def generate_table_names(api_endpoint_slugged, name_singular, name_plural):
 def generate_class_name(api_endpoint, name_singular):
     # Remove trailing name_singular from api_endpoint if present
     if api_endpoint.endswith(name_singular):
-        api_endpoint = api_endpoint[:-(len(name_singular) + 1)]
+        res = api_endpoint[:-(len(name_singular) + 1)]
+        if len(res) > 0:
+            api_endpoint = res
 
     parts = api_endpoint.split('/')
     other_segments = '/'.join(parts[:-1])  # Join all parts except the last one
@@ -49,7 +51,7 @@ def generate_class_name(api_endpoint, name_singular):
 
     # Singularize the last segment using inflect
     are_similar = last_segment_singular == name_singular.lower()
-    
+
     # Construct the class_name by replacing '/' with '-' and appending name_singular
     if are_similar:
         class_name = other_segments.replace(
@@ -65,20 +67,19 @@ def generate_class_name(api_endpoint, name_singular):
 
 
 def generate_model_and_api_names(data):
-    model_name = data.modelName
+    model_name = data.name_singular
     api_endpoint = data.apiEndpoint
     name_singular, name_plural, model_name_pascal = get_model_names(
         model_name)
 
     api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
-
     tables = generate_table_names(
         api_endpoint_slugged.replace('.', '_'), name_singular.lower(), name_plural.lower(),)
     table_name_singular = tables['table_name_singular']
     table_name_plural = tables['table_name_plural']
 
     class_name = generate_class_name(api_endpoint, name_singular.lower())
-
+   
     fields = data.fields or None
 
     return {

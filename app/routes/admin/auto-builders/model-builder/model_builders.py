@@ -5,16 +5,38 @@ from app.repositories.admin.auto_builders.model_builder.model_builder_repo impor
 from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest as ModelSchema
 from app.database.connection import get_db
 from app.events.notifications import NotificationService  # Import NotificationService
+from app.services.auto_model.helpers import generate_model_and_api_names
+from app.services.auto_model.auto_model_handler import auto_model_handler
 
 router = APIRouter()
 
 repo = Repo()  # Instantiate model repository class
 notification = NotificationService() # Instantiate notification class
 
+def prepare_data(model_request: ModelSchema):
+    generated_data = generate_model_and_api_names(model_request)
+    model_request.name_singular = generated_data['name_singular']
+    model_request.name_plural = generated_data['name_plural']
+    model_request.table_name_singular = generated_data['table_name_singular']
+    model_request.table_name_plural = generated_data['table_name_plural']
+    model_request.class_name = generated_data['class_name']
+    return generated_data
+
 # Create a new Model_builder instance.
 @router.post("/", response_model=None)
 async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
-    return await repo.create(db=db, model_request=modelRequest)
+    generated_data = prepare_data(modelRequest)
+    print(generated_data)
+
+    existing_page = Repo.get_page_by_table_name(db, generated_data['table_name_singular'])
+    if existing_page:
+        raise HTTPException(status_code=422, detail="A similar AutoPageBuilder configuration exists")
+
+    try:
+        await repo.create(db=db, model_request=modelRequest)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
+
 
 # Retrieve a list of Model_builders.
 @router.get("/")
@@ -25,7 +47,6 @@ async def list_route(request: Request, db: Session = Depends(get_db)):
 # Retrieve a single Model_builder by ID.
 @router.get("/{model_id}")
 def view_route(model_id: int, db: Session = Depends(get_db)):
-    print('should fget!')
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"Model_builder not found")
