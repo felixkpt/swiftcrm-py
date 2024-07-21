@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.repositories.admin.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo as Repo
-# from app.requests.schemas.admin.auto_builders.model_builder.model_builder import ModelBuilderSchema as ModelSchema
 from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest as ModelSchema
 from app.database.connection import get_db
 from app.events.notifications import NotificationService  # Import NotificationService

@@ -1,5 +1,4 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field
 from app.requests.schemas.admin.auto_builders.model_builder.model_builder import ModelBuilderSchema
 from app.requests.schemas.admin.auto_builders.model_builder.model_headers.model_header import ModelHeaderSchema
 from app.requests.schemas.admin.auto_builders.model_builder.model_fields.model_field import ModelFieldSchema

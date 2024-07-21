@@ -18,7 +18,7 @@ class ModelFieldRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'dropdownSource', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'dropdownDependsOn', 'desktopWidth', 'mobileWidth']
+        search_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'desktopWidth', 'mobileWidth']
 
         query = db.query(Model)
         
@@ -57,9 +57,6 @@ class ModelFieldRepo(BaseRepo):
         value = query_params.get('defaultValue', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.defaultValue.ilike(f'%{value}%'))
-        value = query_params.get('dropdownSource', '').strip()
-        if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.dropdownSource.ilike(f'%{value}%'))
         value = query_params.get('isVisibleInList', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.isVisibleInList.ilike(f'%{value}%'))
@@ -72,6 +69,9 @@ class ModelFieldRepo(BaseRepo):
         value = query_params.get('isUnique', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.isUnique.ilike(f'%{value}%'))
+        value = query_params.get('dropdownSource', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.dropdownSource.ilike(f'%{value}%'))
         value = query_params.get('desktopWidth', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.desktopWidth.ilike(f'%{value}%'))
@@ -82,7 +82,7 @@ class ModelFieldRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'dropdownSource', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'dropdownDependsOn', 'desktopWidth', 'mobileWidth']
+        required_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'desktopWidth', 'mobileWidth']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -96,11 +96,11 @@ class ModelFieldRepo(BaseRepo):
             label=model_request.label,
             dataType=model_request.dataType,
             defaultValue=model_request.defaultValue,
-            dropdownSource=model_request.dropdownSource,
             isVisibleInList=model_request.isVisibleInList,
             isVisibleInSingleView=model_request.isVisibleInSingleView,
             isRequired=model_request.isRequired,
             isUnique=model_request.isUnique,
+            dropdownSource=model_request.dropdownSource,
             dropdownDependsOn=model_request.dropdownDependsOn,
             desktopWidth=model_request.desktopWidth,
             mobileWidth=model_request.mobileWidth,
@@ -116,7 +116,7 @@ class ModelFieldRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'dropdownSource', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'dropdownDependsOn', 'desktopWidth', 'mobileWidth']
+        required_fields = ['model_builder_id', 'name', 'type', 'label', 'dataType', 'defaultValue', 'isVisibleInList', 'isVisibleInSingleView', 'isRequired', 'isUnique', 'desktopWidth', 'mobileWidth']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -130,11 +130,11 @@ class ModelFieldRepo(BaseRepo):
             db_query.label = model_request.label
             db_query.dataType = model_request.dataType
             db_query.defaultValue = model_request.defaultValue
-            db_query.dropdownSource = model_request.dropdownSource
             db_query.isVisibleInList = model_request.isVisibleInList
             db_query.isVisibleInSingleView = model_request.isVisibleInSingleView
             db_query.isRequired = model_request.isRequired
             db_query.isUnique = model_request.isUnique
+            db_query.dropdownSource = model_request.dropdownSource
             db_query.dropdownDependsOn = model_request.dropdownDependsOn
             db_query.desktopWidth = model_request.desktopWidth
             db_query.mobileWidth = model_request.mobileWidth
