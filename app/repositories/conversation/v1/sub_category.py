@@ -1,6 +1,6 @@
 # app/models/subcategory.py
 from typing import Dict, Any, List
-from app.requests.schemas.conversation.v1.sub_category import QuestionRequest
+from app.requests.schemas.conversation.v2.categories.sub_categories.questions.question import QuestionSchema
 from app.database.old_connection import execute_query, execute_insert
 from app.repositories.conversation.v1.category import CategoryRepo
 import json
@@ -24,12 +24,12 @@ class SubCategoryRepo:
         execute_query(query, (sub_category.name, sub_category.slug, sub_category.learn_instructions, sub_category_id))
 
     @staticmethod
-    def add_question_to_sub_category(sub_cat_id: int, question: QuestionRequest):
+    def add_question_to_sub_category(sub_cat_id: int, question: QuestionSchema):
         query = "INSERT INTO conversation_v1_questions (sub_category_id, question, marks) VALUES (%s, %s, %s)"
         execute_insert(query, (sub_cat_id, question.question, question.marks))
 
     @staticmethod
-    def add_questions_to_sub_category(sub_cat_id: int, questions: List[QuestionRequest]):
+    def add_questions_to_sub_category(sub_cat_id: int, questions: List[QuestionSchema]):
         for question in questions:
             SubCategoryRepo.add_question_to_sub_category(sub_cat_id, question)
 
@@ -97,7 +97,7 @@ class SubCategoryRepo:
         return len(result) > 0
 
     @staticmethod
-    def update_question(sub_category_id: int, question: QuestionRequest):
+    def update_question(sub_category_id: int, question: QuestionSchema):
         query = "UPDATE conversation_v1_questions SET question = %s, marks = %s WHERE id = %s"
         execute_query(query, (question.question, question.marks, sub_category_id))
 

@@ -1,7 +1,7 @@
 import os
 import subprocess
 from app.services.auto_model.saves_file import handler, generate_file_path
-from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo as Repo
+from app.repositories.auto_page_builder.auto_page_builder_repo import AutoPageBuilderRepo as Repo
 from app.services.auto_model.helpers import generate_model_and_api_names
 from sqlalchemy.orm import Session
 

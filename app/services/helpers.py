@@ -1,5 +1,5 @@
 import os
-from app.requests.schemas.auto_page_builder import AutoPageBuilderRequest
+from app.requests.schemas.auto_page_builder.auto_page_builder import AutoPageBuilderRequest
 import inflect
 from langdetect import detect, LangDetectException
 

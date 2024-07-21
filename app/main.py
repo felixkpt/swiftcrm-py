@@ -4,7 +4,6 @@ from app.requests.middleware.cors import cors_middleware
 from app.requests.middleware.auth import auth_middleware
 from app.auto_routes_handler import auto_register_routes
 from fastapi import FastAPI
-from app.repositories.conversation.v1.database_seeder import setup_database
 from app.websocket.websocket_route_handlers import websocket_routes
 
 # Initialize the FastAPI app
@@ -41,12 +40,6 @@ def list_routes():
         }
         routes.append(route_info)
     return routes
-
-
-@app.get("/setup-database")
-async def set_database():
-    res = setup_database()
-    return {"message": res}
 
 # Include WebSocket routes
 app.include_router(websocket_routes)

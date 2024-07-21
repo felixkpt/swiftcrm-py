@@ -1,7 +1,7 @@
 import bcrypt
 from app.models.conversation.v2.categories.sub_categories.sub_category import ConversationV2CategoriesSubCategory
 from app.models.conversation.v2.categories.sub_categories.questions.question import ConversationV2CategoriesSubCategoriesQuestion
-from app.models.admin.users.user import AdminUser
+# from app.models.admin.users.user import AdminUser
 from app.models.conversation.v2.categories.category import ConversationV2Category
 
 class ModelAdapter:

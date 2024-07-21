@@ -12,3 +12,5 @@ sqlalchemy
 alembic
 inflect
 wheel
+google-cloud-speech
+google-cloud-storage
