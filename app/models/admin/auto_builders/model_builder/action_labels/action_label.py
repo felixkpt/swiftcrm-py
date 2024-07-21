@@ -13,3 +13,6 @@ class AdminAutoBuildersModelBuilderActionLabel(Base):
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    model_builder = relationship(
+        "AdminAutoBuildersModelBuilder", back_populates="action_labels")
