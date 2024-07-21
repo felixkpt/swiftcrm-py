@@ -40,13 +40,13 @@ def get_query_params(request: Request, default_search_fields=['name', 'descripti
         'page': int(params.get("page", 1)),
         'per_page': int(params.get("per_page", 10)),
     }
-    return {**query_params, **request.query_params}
+    return {**request.query_params,**query_params,}
 
 def set_metadata(query, query_params):
     total_records = query.count()
     metadata = {
         "per_page": query_params['per_page'],
-        "page": query_params['page'],
+        "page": int(query_params['page'] or 1),
         "order_by": query_params.get('order_by', None),
         "order_direction": query_params.get('order_direction', None),
         "total_records": total_records,
