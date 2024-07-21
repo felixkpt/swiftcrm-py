@@ -35,6 +35,8 @@ async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db))
         auto_model_handler(generated_data, db)
         modelRequest.table_name_singular = generated_data['table_name_singular']
         modelRequest.table_name_plural = generated_data['table_name_plural']
+        modelRequest.class_name = generated_data['class_name']
+
         await repo.create(db=db, model_request=modelRequest)
 
     except Exception as e:
@@ -67,6 +69,7 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     
     modelRequest.table_name_singular = generated_data['table_name_singular']
     modelRequest.table_name_plural = generated_data['table_name_plural']
+    modelRequest.class_name = generated_data['class_name']
     await repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
     return {"message": "AutoPageBuilder configuration updated successfully"}
