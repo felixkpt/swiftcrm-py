@@ -55,6 +55,7 @@ class CategoryRepo(BaseRepo):
             created_at=current_time,
             updated_at=current_time,
             name=model_request.name,
+            description=model_request.description,
         )
         db.add(db_query)
         try:
@@ -76,6 +77,7 @@ class CategoryRepo(BaseRepo):
         if db_query:
             db_query.updated_at = current_time
             db_query.name = model_request.name
+            db_query.description = model_request.description
             db.commit()
             db.refresh(db_query)
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
