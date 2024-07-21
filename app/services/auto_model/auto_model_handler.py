@@ -3,12 +3,13 @@ from .model_generator import ModelGenerator
 from app.services.auto_model.repo_generator import generate_repo
 from .schema_generator import generate_schema
 from .routes_generator import generate_routes
-from app.requests.schemas.auto_page_builder.auto_page_builder import AutoPageBuilderRequest
+from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 
-def auto_model_handler(data: AutoPageBuilderRequest, db: Session = Depends(get_db), id: int = None):
+def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
     # try:
     print("STEP 1: Starting model generation\n")
