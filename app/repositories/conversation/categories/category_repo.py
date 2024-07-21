@@ -18,7 +18,7 @@ class CategoryRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['name']
+        search_fields = ['name', 'description']
 
         query = db.query(Model)
         
@@ -46,7 +46,7 @@ class CategoryRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name']
+        required_fields = ['name', 'description']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -68,7 +68,7 @@ class CategoryRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name']
+        required_fields = ['name', 'description']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
