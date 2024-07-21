@@ -3,7 +3,7 @@ from app.models.base import Base
 from sqlalchemy.orm import relationship
 
 class AdminAutoBuildersModelBuilderModelField(Base):
-    __tablename__ = 'admin_auto_buildersmodel_builder _model_fields'
+    __tablename__ = 'admin_auto_buildersmodel_builder_model_fields'
     id = Column(Integer, primary_key=True, autoincrement=True)
     model_builder_id = Column(Integer, ForeignKey('admin_auto_buildersmodel_builder model_builder s.id'))
     name = Column(String(255))
