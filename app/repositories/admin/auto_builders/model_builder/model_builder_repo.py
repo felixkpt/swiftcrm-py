@@ -25,7 +25,9 @@ class ModelBuilderRepo(BaseRepo):
                          'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
         query = apply_common_filters(
             db.query(Model), Model, search_fields, query_params)
+        query = self.repo_specific_filters(query, Model, query_params)
         metadata = set_metadata(query, query_params)
+
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
         return {"records": query.all(), "metadata": metadata}
