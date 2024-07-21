@@ -67,7 +67,7 @@ def generate_class_name(api_endpoint, name_singular):
 
 
 def generate_model_and_api_names(data):
-    model_name = data.name_singular
+    model_name = data.name_singular or data.modelName
     api_endpoint = data.apiEndpoint
     name_singular, name_plural, model_name_pascal = get_model_names(
         model_name)
