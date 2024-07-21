@@ -11,7 +11,7 @@ def generate_schema(data):
     type_mapping = {
         'string': 'str',
         'integer': 'int',
-        'boolean': 'int',
+        'boolean': 'bool',
         'longtext': 'str',
     }
 
