@@ -14,8 +14,8 @@ class ModelFieldSchema(BaseModel):
     isUnique: Optional[bool] = Field(None, max_length=None)
     dropdownSource: Optional[str] = Field(None, max_length=255)
     dropdownDependsOn: Optional[str] = Field(None, max_length=None)
-    desktopWidth: str = Field(..., max_length=255)
-    mobileWidth: str = Field(..., max_length=255)
+    desktopWidth: Optional[str] = Field(None, max_length=255)
+    mobileWidth: Optional[str] = Field(None, max_length=255)
 
     class Config:
         from_attributes = True
