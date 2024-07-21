@@ -25,14 +25,14 @@ def prepare_data(model_request: ModelSchema):
 # Create a new Model_builder instance.
 @router.post("/", response_model=None)
 async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
-    generated_data = prepare_data(modelRequest)
-    print(generated_data)
 
     existing_page = Repo.get_page_by_table_name(db, generated_data['table_name_singular'])
     if existing_page:
         raise HTTPException(status_code=422, detail="A similar AutoPageBuilder configuration exists")
 
     try:
+        generated_data = prepare_data(modelRequest)
+        auto_model_handler(generated_data, db)
         await repo.create(db=db, model_request=modelRequest)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
@@ -58,7 +58,11 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"Model_builder not found")
-    return await repo.update(db=db, model_id=model_id, model_request=modelRequest)
+    
+    generated_data = prepare_data(modelRequest)
+    auto_model_handler(generated_data, db, model_id)
+    await repo.update(db=db, model_id=model_id, model_request=modelRequest)
+    return {"message": "AutoPageBuilder configuration updated successfully"}
 
 # Retrieve counts or statistics related to Model_builders.
 @router.get("/counts")
