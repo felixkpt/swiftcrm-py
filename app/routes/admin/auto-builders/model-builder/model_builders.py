@@ -36,7 +36,7 @@ async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db))
         modelRequest.table_name_singular = generated_data['table_name_singular']
         modelRequest.table_name_plural = generated_data['table_name_plural']
         await repo.create(db=db, model_request=modelRequest)
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to store AutoPageBuilder configuration: {str(e)}")
 
@@ -56,7 +56,7 @@ def view_route(model_id: int, db: Session = Depends(get_db)):
     return result
 
 # Update an existing Model_builder by ID.
-@router.put("/{model_id}", response_model=ModelSchema)
+@router.put("/{model_id}", response_model=None)
 async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
@@ -64,6 +64,7 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     
     generated_data = prepare_data(modelRequest)
     auto_model_handler(generated_data, db, model_id)
+    return {}
     
     modelRequest.table_name_singular = generated_data['table_name_singular']
     modelRequest.table_name_plural = generated_data['table_name_plural']
