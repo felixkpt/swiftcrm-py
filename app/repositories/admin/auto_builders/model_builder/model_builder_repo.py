@@ -67,10 +67,10 @@ class ModelBuilderRepo(BaseRepo):
                 created_headers.append(created_header)
             
             created_action_labels = []
-            # for action_label in model_request.actionLabels:
-            #     action_label.model_builder_id = new_model.id
-            #     created_action_label = await ActionLabelRepo().create(db, action_label)
-            #     created_action_labels.append(created_action_label)
+            for action_label in model_request.actionLabels:
+                action_label.model_builder_id = new_model.id
+                created_action_label = await ActionLabelRepo().create(db, action_label)
+                created_action_labels.append(created_action_label)
 
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
