@@ -14,14 +14,16 @@ from app.repositories.admin.auto_builders.model_builder.action_labels.action_lab
 
 
 class ModelBuilderRepo(BaseRepo):
-    
+
     model = Model
     notification = NotificationService()
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
-        query = apply_common_filters(db.query(Model), Model, search_fields, query_params)
+        search_fields = ['name_singular', 'name_plural', 'modelURI',
+                         'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        query = apply_common_filters(
+            db.query(Model), Model, search_fields, query_params)
         metadata = set_metadata(query, query_params)
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -35,10 +37,12 @@ class ModelBuilderRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        required_fields = ['name_singular', 'name_plural', 'modelURI',
+                           'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields)
         current_time = datetime.now()
         new_model = Model(
             created_at=current_time,
@@ -50,23 +54,48 @@ class ModelBuilderRepo(BaseRepo):
             db.commit()
             db.refresh(new_model)
             # Store fields, headers, and action labels using their respective repositories
+            created_fields = []
             for field in model_request.fields:
-                await ModelFieldRepo().create(db, new_model.id, field)
+                field.model_builder_id = new_model.id
+                created_field = await ModelFieldRepo().create(db, field)
+                created_fields.append(created_field)
+            
+            created_headers = []
             for header in model_request.headers:
-                await ModelHeaderRepo().create(db, new_model.id, header)
+                header.model_builder_id = new_model.id
+                created_header = await ModelHeaderRepo().create(db, header)
+                created_headers.append(created_header)
+            
+            created_action_labels = []
             for action_label in model_request.actionLabels:
-                await ActionLabelRepo().create(db, new_model.id, action_label)
+                action_label.model_builder_id = new_model.id
+                created_action_label = await ActionLabelRepo().create(db, action_label)
+                created_action_labels.append(created_action_label)
+
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
-        return new_model
+        
+        # Convert the model to a dictionary
+        model_data = {column.name: getattr(new_model, column.name) for column in new_model.__table__.columns}
+        # Combine and return the main model with its related objects
+        combined_result = {
+            **model_data,
+            "fields": created_fields,
+            "headers": created_headers,
+            "action_labels": created_action_labels
+        }
+        return combined_result
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        required_fields = ['name_singular', 'name_plural', 'modelURI',
+                           'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields, model_id)
+        
         db_model = db.query(Model).filter(Model.id == model_id).first()
         if db_model:
             current_time = datetime.now()
@@ -75,18 +104,47 @@ class ModelBuilderRepo(BaseRepo):
             db_model.updated_at = current_time
             db.commit()
             db.refresh(db_model)
+            
             # Clear existing fields, headers, and action labels
-            db.query(ModelFieldRepo.model).filter(ModelFieldRepo.model.auto_page_builder_id == model_id).delete()
-            db.query(ModelHeaderRepo.model).filter(ModelHeaderRepo.model.auto_page_builder_id == model_id).delete()
-            db.query(ActionLabelRepo.model).filter(ActionLabelRepo.model.auto_page_builder_id == model_id).delete()
+            db.query(ModelFieldRepo.model).filter(
+                ModelFieldRepo.model.model_builder_id == model_id).delete()
+            db.query(ModelHeaderRepo.model).filter(
+                ModelHeaderRepo.model.model_builder_id == model_id).delete()
+            db.query(ActionLabelRepo.model).filter(
+                ActionLabelRepo.model.model_builder_id == model_id).delete()
             db.commit()
+            
             # Store updated fields, headers, and action labels
+            created_fields = []
             for field in model_request.fields:
-                await ModelFieldRepo().create(db, model_id, field)
+                field.model_builder_id = model_id
+                created_field = await ModelFieldRepo().create(db, field)
+                created_fields.append(created_field)
+            
+            created_headers = []
             for header in model_request.headers:
-                await ModelHeaderRepo().create(db, model_id, header)
+                header.model_builder_id = model_id
+                created_header = await ModelHeaderRepo().create(db, header)
+                created_headers.append(created_header)
+            
+            created_action_labels = []
             for action_label in model_request.actionLabels:
-                await ActionLabelRepo().create(db, model_id, action_label)
+                action_label.model_builder_id = model_id
+                created_action_label = await ActionLabelRepo().create(db, action_label)
+                created_action_labels.append(created_action_label)
+
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
-            return db_model
+            
+            # Convert the model to a dictionary
+            model_data = {column.name: getattr(db_model, column.name) for column in db_model.__table__.columns}
+
+            # Combine and return the updated model with its related objects
+            combined_result = {
+                **model_data,
+                "fields": created_fields,
+                "headers": created_headers,
+                "action_labels": created_action_labels
+            }
+            return combined_result
+        
         return ResponseHelper.handle_not_found_error(model_id)

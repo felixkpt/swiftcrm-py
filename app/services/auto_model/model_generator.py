@@ -19,6 +19,7 @@ class ModelGenerator:
         self.type_mapping = {
             'string': {'name': 'String', 'length': 255},
             'integer': {'name': 'Integer', 'length': None},
+            'boolean': {'name': 'Integer', 'length': 1},
             'text': {'name': 'Text', 'length': None},
             'longtext': {'name': 'Text', 'length': None},
             'json': {'name': 'JSON', 'length': None},
