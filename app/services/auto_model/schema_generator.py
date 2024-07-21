@@ -28,6 +28,7 @@ class {model_name_pascal}Schema(BaseModel):
     content += """
     class Config:
         from_attributes = True
+        protected_namespaces = ()
 """
 
     path = api_endpoint.replace('-', '_')

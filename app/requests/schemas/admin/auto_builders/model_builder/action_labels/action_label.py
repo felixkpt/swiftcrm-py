@@ -9,3 +9,4 @@ class ActionLabelSchema(BaseModel):
 
     class Config:
         from_attributes = True
+        protected_namespaces = ()

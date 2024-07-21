@@ -3,9 +3,9 @@ from app.models.base import Base
 from sqlalchemy.orm import relationship
 
 class AdminAutoBuildersModelBuilderModelField(Base):
-    __tablename__ = 'admin_auto_builders_model_builder_model_fields'
+    __tablename__ = 'admin_auto_buildersmodel_builder _model_fields'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    model_builder_id = Column(Integer, ForeignKey('admin_auto_builders_model_builder_model_builders.id'))
+    model_builder_id = Column(Integer, ForeignKey('admin_auto_buildersmodel_builder model_builder s.id'))
     name = Column(String(255))
     type = Column(String(255))
     label = Column(String(255))
@@ -23,4 +23,4 @@ class AdminAutoBuildersModelBuilderModelField(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    model_builder = relationship("AdminAutoBuildersModelBuilder", back_populates="fields")
+    model_builder  = relationship("AdminAutoBuildersModelBuilder", back_populates="fields")

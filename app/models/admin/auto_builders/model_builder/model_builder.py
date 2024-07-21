@@ -3,7 +3,7 @@ from app.models.base import Base
 from sqlalchemy.orm import relationship
 
 class AdminAutoBuildersModelBuilder(Base):
-    __tablename__ = 'admin_auto_builders_model_builder_model_builders'
+    __tablename__ = 'admin_auto_buildersmodel_builder model_builder s'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name_singular = Column(String(255))
     name_plural = Column(String(255))
@@ -17,9 +17,9 @@ class AdminAutoBuildersModelBuilder(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     headers = relationship("AdminAutoBuildersModelBuilderModelHeader",
-                           back_populates="model_builder", cascade="all, delete-orphan")
+                           back_populates="model_builder ", cascade="all, delete-orphan")
     fields = relationship("AdminAutoBuildersModelBuilderModelField",
-                          back_populates="model_builder", cascade="all, delete-orphan")
+                          back_populates="model_builder ", cascade="all, delete-orphan")
     action_labels = relationship("AdminAutoBuildersModelBuilderActionLabel",
-                                 back_populates="model_builder", cascade="all, delete-orphan")
+                                 back_populates="model_builder ", cascade="all, delete-orphan")
  
