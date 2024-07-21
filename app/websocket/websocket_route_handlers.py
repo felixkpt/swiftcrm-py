@@ -1,14 +1,19 @@
 # handlers/websocket_handlers.py
 from fastapi import APIRouter, WebSocketDisconnect, WebSocket
 from app.websocket.websocket_manager import WebSocketManager
+from typing import List
 
 router = APIRouter()
 
 manager = WebSocketManager()
 
+connections: List[WebSocket] = []
+
 @router.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket)
+    connections.append(websocket)
+
     try:
         while True:
             data = await websocket.receive_text()

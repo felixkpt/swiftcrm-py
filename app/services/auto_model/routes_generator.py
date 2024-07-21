@@ -23,8 +23,8 @@ notification = NotificationService() # Instantiate notification class
 
 # Create a new {name_singular} instance.
 @router.post("/", response_model=ModelSchema)
-def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
-    return repo.create(db=db, model_request=modelRequest)
+async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
+    return await repo.create(db=db, model_request=modelRequest)
 
 # Retrieve a list of {name_plural}.
 @router.get("/")
@@ -42,11 +42,11 @@ def view_route(model_id: int, db: Session = Depends(get_db)):
 
 # Update an existing {name_singular} by ID.
 @router.put("/{{model_id}}", response_model=ModelSchema)
-def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
+async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"{name_singular} not found")
-    return repo.update(db=db, model_id=model_id, model_request=modelRequest)
+    return await repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
 # Retrieve counts or statistics related to {name_plural}.
 @router.get("/counts")
@@ -56,27 +56,27 @@ async def counts_route(request: Request, db: Session = Depends(get_db)):
 
 # Update the status of a {name_singular} by ID.
 @router.put("/{{model_id}}/status/{{status_id}}")
-def update_status_route(model_id: int, status_id: int, db: Session = Depends(get_db)):
+async def update_status_route(model_id: int, status_id: int, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"{name_singular} not found")
-    return repo.update_status(db=db, model_id=model_id, status_id=status_id)
+    return await repo.update_status(db=db, model_id=model_id, status_id=status_id)
 
 # Update statuses of multiple {name_plural}.
 @router.put("/statuses")
-def update_statuses_route(request: Request, status_id: int, db: Session = Depends(get_db)):
-    result = repo.update_multiple_statuses(db, request, status_id=status_id)
+async def update_statuses_route(request: Request, status_id: int, db: Session = Depends(get_db)):
+    result = await repo.update_multiple_statuses(db, request, status_id=status_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"{name_singular} not found")
     return result
 
 # Delete a {name_singular} by ID.
 @router.delete("/{{model_id}}")
-def delete_route(model_id: int, db: Session = Depends(get_db)):
+async def delete_route(model_id: int, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"{name_singular} not found")
-    return repo.delete(db=db, model_id=model_id)
+    return await repo.delete(db=db, model_id=model_id)
 """
 
     filename = f'{name_plural.lower()}.py'

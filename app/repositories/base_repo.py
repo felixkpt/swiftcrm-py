@@ -15,7 +15,7 @@ class BaseRepo:
             return ResponseHelper.handle_not_found_error(model_id)
         return result
 
-    def update_status(self, db: Session, model_id: int, status_id: int):
+    async def update_status(self, db: Session, model_id: int, status_id: int):
         db_query = db.query(self.model).filter(
             self.model.id == model_id).first()
         if db_query:
@@ -26,7 +26,7 @@ class BaseRepo:
         else:
             return ResponseHelper.handle_not_found_error(model_id)
 
-    def update_multiple_statuses(self, db: Session, model_ids: list[int], status_id: int):
+    async def update_multiple_statuses(self, db: Session, model_ids: list[int], status_id: int):
         db_query = db.query(self.model).filter(
             self.model.id.in_(model_ids)).all()
         if db_query:
@@ -37,7 +37,7 @@ class BaseRepo:
         else:
             return ResponseHelper.handle_not_found_error(model_ids)
 
-    def archive(self, db: Session, model_id: int, archive_db: Session):
+    async def archive(self, db: Session, model_id: int, archive_db: Session):
         db_query = db.query(self.model).filter(
             self.model.id == model_id).first()
         if db_query:
@@ -49,7 +49,7 @@ class BaseRepo:
         else:
             return ResponseHelper.handle_not_found_error(model_id)
 
-    def delete(self, db: Session, model_id: int):
+    async def delete(self, db: Session, model_id: int):
         db_query = db.query(self.model).filter(
             self.model.id == model_id).first()
         if db_query:

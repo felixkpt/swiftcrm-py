@@ -29,7 +29,6 @@ def read_root():
 # Automatically generate and register routes
 auto_register_routes(app)
 
-
 @app.get("/list-routes")
 def list_routes():
     routes = []
@@ -51,6 +50,7 @@ async def set_database():
 
 # Include WebSocket routes
 app.include_router(websocket_routes)
+
 
 if __name__ == "__main__":
     import uvicorn
