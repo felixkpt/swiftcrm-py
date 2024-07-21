@@ -1,5 +1,5 @@
 from app.websocket.websocket_route_handlers import connections
-from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo
+from app.repositories.auto_page_builder.auto_page_builder_repo import AutoPageBuilderRepo
 
 class NotificationService:
     async def notify_model_updated(self, db, table_name: str, message: str):
