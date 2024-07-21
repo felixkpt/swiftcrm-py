@@ -28,6 +28,10 @@ class AutoPageBuilderRepo:
     @staticmethod
     def get_page_by_table_name(db: Session, table_name_singular: str):
         return db.query(AutoPageBuilder).filter(AutoPageBuilder.table_name_singular == table_name_singular).first()
+    
+    @staticmethod
+    def get_page_by_table_name_plural(db: Session, table_name_plural: str):
+        return db.query(AutoPageBuilder).filter(AutoPageBuilder.table_name_plural == table_name_plural).first()
 
     @staticmethod
     def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):

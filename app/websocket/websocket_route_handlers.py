@@ -9,7 +9,7 @@ manager = WebSocketManager()
 
 connections: List[WebSocket] = []
 
-@router.websocket("/ws/{client_id}")
+@router.websocket("/ws/notifications/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await manager.connect(websocket)
     connections.append(websocket)
