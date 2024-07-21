@@ -64,11 +64,11 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     
     generated_data = prepare_data(modelRequest)
     auto_model_handler(generated_data, db, model_id)
-    return {}
     
     modelRequest.table_name_singular = generated_data['table_name_singular']
     modelRequest.table_name_plural = generated_data['table_name_plural']
     await repo.update(db=db, model_id=model_id, model_request=modelRequest)
+    return {}
 
     return {"message": "AutoPageBuilder configuration updated successfully"}
 
