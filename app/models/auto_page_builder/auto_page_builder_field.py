@@ -14,16 +14,16 @@ class AutoPageBuilderField(Base):
     label = Column(String(255), nullable=False)
     dataType = Column(String(50))
     defaultValue = Column(Text)
-    isRequired = Column(Integer, nullable=False, default=0)
     isVisibleInList = Column(Integer, nullable=False, default=0)
     isVisibleInSingleView = Column(Integer, nullable=False, default=0)
+    isRequired = Column(Integer, nullable=False, default=0)
     isUnique = Column(Integer, nullable=False, default=0)
     dropdownSource = Column(String(255), nullable=True)
     dropdownDependsOn = Column(JSON, nullable=True)
+    desktopWidth = Column(Integer, default=12)  # Default desktop width
+    mobileWidth = Column(Integer, default=12)    # Default mobile width
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False,
                         server_default=func.now(), onupdate=func.now())
-    desktopWidth = Column(Integer, default=12)  # Default desktop width
-    mobileWidth = Column(Integer, default=12)    # Default mobile width
 
     page_builder = relationship("AutoPageBuilder", back_populates="fields")
