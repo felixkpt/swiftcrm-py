@@ -161,13 +161,13 @@ class ModelBuilderRepo(BaseRepo):
             first()
 
     def get_page_by_name(db: Session, name_singular: str):
-        return db.query(ModelBuilderRepo).filter(ModelBuilderRepo.name_singular == name_singular).first()
+        return db.query(Model).filter(Model.name_singular == name_singular).first()
 
     def get_page_by_table_name(db: Session, table_name_singular: str):
-        return db.query(ModelBuilderRepo).filter(ModelBuilderRepo.table_name_singular == table_name_singular).first()
+        return db.query(Model).filter(Model.table_name_singular == table_name_singular).first()
     
     def get_page_by_table_name_plural(db: Session, table_name_plural: str):
-        return db.query(ModelBuilderRepo).filter(ModelBuilderRepo.table_name_plural == table_name_plural).first()
+        return db.query(Model).filter(Model.table_name_plural == table_name_plural).first()
 
     def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
-        return db.query(ModelBuilderRepo).filter(ModelBuilderRepo.apiEndpoint == apiEndpoint).first()
+        return db.query(Model).filter(Model.apiEndpoint == apiEndpoint).first()

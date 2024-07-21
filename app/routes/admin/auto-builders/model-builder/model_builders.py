@@ -26,12 +26,12 @@ def prepare_data(model_request: ModelSchema):
 @router.post("/", response_model=None)
 async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
 
+    generated_data = prepare_data(modelRequest)
     existing_page = Repo.get_page_by_table_name(db, generated_data['table_name_singular'])
     if existing_page:
         raise HTTPException(status_code=422, detail="A similar AutoPageBuilder configuration exists")
 
     try:
-        generated_data = prepare_data(modelRequest)
         auto_model_handler(generated_data, db)
         await repo.create(db=db, model_request=modelRequest)
     except Exception as e:
