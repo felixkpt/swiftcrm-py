@@ -5,7 +5,7 @@ class ActionLabelSchema(BaseModel):
     key: str = Field(..., max_length=255)
     label: str = Field(..., max_length=255)
     actionType: str = Field(..., max_length=255)
-    show: str = Field(..., max_length=None)
+    show: bool = Field(..., max_length=None)
 
     class Config:
         from_attributes = True

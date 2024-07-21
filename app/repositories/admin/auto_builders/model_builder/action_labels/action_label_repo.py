@@ -18,7 +18,7 @@ class ActionLabelRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['model_builder_id', 'key', 'label', 'actionType', 'show']
+        search_fields = ['model_builder_id', 'key', 'label', 'actionType']
 
         query = db.query(Model)
         
@@ -58,7 +58,7 @@ class ActionLabelRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['model_builder_id', 'key', 'label', 'actionType', 'show']
+        required_fields = ['model_builder_id', 'key', 'label', 'actionType']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -83,7 +83,7 @@ class ActionLabelRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['model_builder_id', 'key', 'label', 'actionType', 'show']
+        required_fields = ['model_builder_id', 'key', 'label', 'actionType']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
