@@ -17,9 +17,9 @@ class AdminAutoBuildersModelBuilder(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     headers = relationship("AdminAutoBuildersModelBuilderModelHeader",
-                           back_populates="model_builder ", cascade="all, delete-orphan")
+                           back_populates="model_builder", cascade="all, delete-orphan")
     fields = relationship("AdminAutoBuildersModelBuilderModelField",
-                          back_populates="model_builder ", cascade="all, delete-orphan")
+                          back_populates="model_builder", cascade="all, delete-orphan")
     action_labels = relationship("AdminAutoBuildersModelBuilderActionLabel",
-                                 back_populates="model_builder ", cascade="all, delete-orphan")
+                                 back_populates="model_builder", cascade="all, delete-orphan")
  
