@@ -18,7 +18,7 @@ class ModelBuilderRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        search_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint']
 
         query = db.query(Model)
         
@@ -64,7 +64,7 @@ class ModelBuilderRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -91,7 +91,7 @@ class ModelBuilderRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
