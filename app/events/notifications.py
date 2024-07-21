@@ -4,11 +4,16 @@ from app.repositories.auto_page_builder_repo import AutoPageBuilderRepo
 
 class NotificationService:
     async def notify_model_updated(self, db, table_name: str, message: str):
-        model_id = AutoPageBuilderRepo.get_page_by_table_name_plural(db, table_name).id
+        model_id = AutoPageBuilderRepo.get_page_by_table_name_plural(db, table_name).name_plural
         # Notify WebSocket clients
         print(connections)
         for connection in connections:
-            await connection.send_json({
-                "model_id": model_id,
-                "message": message,
-            })
+            try:
+                await connection.send_json({
+                    "model_id": model_id,
+                    "message": message,
+                })
+                print(f'Notified user: {connection}')
+            except Exception as e:
+                print(f'NotificationService Error: {e}')
+
