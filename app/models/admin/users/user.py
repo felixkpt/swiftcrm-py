@@ -12,7 +12,4 @@ class AdminUser(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-
-    messages = relationship("ConversationV2Message", back_populates="user")
-    interviews = relationship("ConversationV2Interview", back_populates="user")
-    # refresh_tokens = relationship("RefreshToken", back_populates="user")
+    refresh_tokens = relationship("RefreshToken", back_populates="user")
