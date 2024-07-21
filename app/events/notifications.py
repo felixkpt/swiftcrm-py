@@ -4,7 +4,7 @@ from app.repositories.auto_page_builder_repo import AutoPageBuilder
 
 class NotificationService:
     async def notify_model_updated(self, db, table_name: str, message: str):
-        model_id = AutoPageBuilder.get_page_by_table_name(db, table_name)
+        model_id = AutoPageBuilder.get_page_by_table_name(db, table_name).id
         # Notify WebSocket clients
         print(connections)
         for connection in connections:

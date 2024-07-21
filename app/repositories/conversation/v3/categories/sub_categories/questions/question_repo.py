@@ -67,7 +67,7 @@ class QuestionRepo(BaseRepo):
         db.add(db_query)
         try:
             db.commit()
-            await self.notification.notify_model_updated(Model.__tablename__, 'Record was created!')
+            await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
@@ -89,7 +89,7 @@ class QuestionRepo(BaseRepo):
             db_query.marks = model_request.marks
             db.commit()
             db.refresh(db_query)
-            await self.notification.notify_model_updated(Model.__tablename__, 'Record was updated!')
+            await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
