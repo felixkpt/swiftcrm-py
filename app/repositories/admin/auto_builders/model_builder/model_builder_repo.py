@@ -102,6 +102,8 @@ class ModelBuilderRepo(BaseRepo):
             current_time = datetime.now()
             for field in required_fields:
                 setattr(db_model, field, getattr(model_request, field))
+                print("ATRBS::", getattr(model_request, field))
+
             db_model.updated_at = current_time
             db.commit()
             db.refresh(db_model)
