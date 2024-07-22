@@ -58,11 +58,11 @@ class CustomerRepo(BaseRepo):
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
         db_query = Model(
-            created_at=current_time,
-            updated_at=current_time,
-            name=str(model_request.name).strip(),
-            email=str(model_request.email).strip(),
-            phone_number=str(model_request.phone_number).strip(),
+            created_at = current_time,
+            updated_at = current_time,
+            name = str(model_request.name).strip(),
+            email = str(model_request.email).strip(),
+            phone_number = str(model_request.phone_number).strip(),
         )
         db.add(db_query)
         try:
