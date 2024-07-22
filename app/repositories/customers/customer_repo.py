@@ -83,9 +83,9 @@ class CustomerRepo(BaseRepo):
         db_query = db.query(Model).filter(Model.id == model_id).first()
         if db_query:
             db_query.updated_at = current_time
-            db_query.name = model_request.name
-            db_query.email = model_request.email
-            db_query.phone_number = model_request.phone_number
+            db_query.name = model_request.name.strip()
+            db_query.email = model_request.email.strip()
+            db_query.phone_number = model_request.phone_number.strip()
             db.commit()
             db.refresh(db_query)
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
