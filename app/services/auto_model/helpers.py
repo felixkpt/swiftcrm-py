@@ -99,7 +99,7 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
         table_name_plural = api_cleaned + '_' + name_plural
 
     # Convert the class_name to PascalCase
-    class_name = trim_name(STR.pascal(class_name)).capitalize()
+    class_name = trim_name(STR.pascal(class_name))
     table_name_singular = trim_name(table_name_singular)
     table_name_plural = trim_name(table_name_plural)
 
