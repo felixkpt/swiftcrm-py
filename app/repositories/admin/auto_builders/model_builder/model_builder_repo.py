@@ -40,7 +40,8 @@ class ModelBuilderRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['modelDisplayName', 'name_singular', 'name_plural', 'modelURI', 'apiEndpoint']
+        required_fields = ['modelDisplayName', 'name_singular',
+                           'name_plural', 'modelURI', 'apiEndpoint']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(
@@ -49,7 +50,7 @@ class ModelBuilderRepo(BaseRepo):
         new_model = Model(
             created_at=current_time,
             updated_at=current_time,
-            **{field: getattr(model_request, field) for field in required_fields}
+            **{field: getattr(model_request, field, None) for field in Model.__table__.columns.keys() if field not in ['id', 'created_at', 'updated_at']}
         )
         db.add(new_model)
         try:
@@ -61,13 +62,13 @@ class ModelBuilderRepo(BaseRepo):
                 field.model_builder_id = new_model.id
                 created_field = await ModelFieldRepo().create(db, field)
                 created_fields.append(created_field)
-            
+
             created_headers = []
             for header in model_request.headers:
                 header.model_builder_id = new_model.id
                 created_header = await ModelHeaderRepo().create(db, header)
                 created_headers.append(created_header)
-            
+
             created_action_labels = []
             for action_label in model_request.actionLabels:
                 action_label.model_builder_id = new_model.id
@@ -78,9 +79,10 @@ class ModelBuilderRepo(BaseRepo):
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
-        
+
         # Convert the model to a dictionary
-        model_data = {column.name: getattr(new_model, column.name) for column in new_model.__table__.columns}
+        model_data = {column.name: getattr(
+            new_model, column.name) for column in new_model.__table__.columns}
         # Combine and return the main model with its related objects
         combined_result = {
             **model_data,
@@ -91,23 +93,23 @@ class ModelBuilderRepo(BaseRepo):
         return combined_result
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name_singular', 'name_plural', 'modelURI', 'apiEndpoint']
+        required_fields = ['name_singular',
+                           'name_plural', 'modelURI', 'apiEndpoint']
         unique_fields = ['table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(
             db, Model, model_request, unique_fields, model_id)
-        
+
         db_model = db.query(Model).filter(Model.id == model_id).first()
         if db_model:
             current_time = datetime.now()
-            for field in required_fields:
-                setattr(db_model, field, getattr(model_request, field))
-                print("ATRBS::", getattr(model_request, field))
-
+            for field in Model.__table__.columns.keys():
+                if field not in ['id', 'created_at', 'updated_at']:
+                    setattr(db_model, field, getattr(model_request, field, getattr(db_model, field)))
             db_model.updated_at = current_time
             db.commit()
             db.refresh(db_model)
-            
+
             # Clear existing fields, headers, and action labels
             db.query(ModelFieldRepo.model).filter(
                 ModelFieldRepo.model.model_builder_id == model_id).delete()
@@ -116,20 +118,20 @@ class ModelBuilderRepo(BaseRepo):
             db.query(ActionLabelRepo.model).filter(
                 ActionLabelRepo.model.model_builder_id == model_id).delete()
             db.commit()
-            
+
             # Store updated fields, headers, and action labels
             created_fields = []
             for field in model_request.fields:
                 field.model_builder_id = model_id
                 created_field = await ModelFieldRepo().create(db, field)
                 created_fields.append(created_field)
-            
+
             created_headers = []
             for header in model_request.headers:
                 header.model_builder_id = model_id
                 created_header = await ModelHeaderRepo().create(db, header)
                 created_headers.append(created_header)
-            
+
             created_action_labels = []
             for action_label in model_request.actionLabels:
                 action_label.model_builder_id = model_id
@@ -137,9 +139,10 @@ class ModelBuilderRepo(BaseRepo):
                 created_action_labels.append(created_action_label)
 
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
-            
+
             # Convert the model to a dictionary
-            model_data = {column.name: getattr(db_model, column.name) for column in db_model.__table__.columns}
+            model_data = {column.name: getattr(
+                db_model, column.name) for column in db_model.__table__.columns}
 
             # Combine and return the updated model with its related objects
             combined_result = {
@@ -149,9 +152,9 @@ class ModelBuilderRepo(BaseRepo):
                 "action_labels": created_action_labels
             }
             return combined_result
-        
+
         return ResponseHelper.handle_not_found_error(model_id)
-    
+
     @staticmethod
     def get(db: Session, model_id: int):
         print('model_id, mod', model_id)
@@ -169,7 +172,7 @@ class ModelBuilderRepo(BaseRepo):
 
     def get_page_by_table_name(db: Session, table_name_singular: str):
         return db.query(Model).filter(Model.table_name_singular == table_name_singular).first()
-    
+
     def get_page_by_table_name_plural(db: Session, table_name_plural: str):
         return db.query(Model).filter(Model.table_name_plural == table_name_plural).first()
 
