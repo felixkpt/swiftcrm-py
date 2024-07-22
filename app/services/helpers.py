@@ -32,7 +32,7 @@ def format_error(key, detail):
 
 
 def generate_model_files(data: AutoPageBuilderRequest):
-    modelName = data.modelName
+    modelName = data.modelDisplayName
     modelURI = data.modelURI
     fieldsRaw = data.fields
 
