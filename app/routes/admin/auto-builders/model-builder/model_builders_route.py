@@ -75,6 +75,8 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     modelRequest.table_name_singular = generated_data['table_name_singular']
     modelRequest.table_name_plural = generated_data['table_name_plural']
 
+    print('generated_data:',generated_data)
+
     await repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
     return {"message": "AutoPageBuilder configuration updated successfully"}
