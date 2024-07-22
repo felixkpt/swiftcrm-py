@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 class ModelBuilderSchema(BaseModel):
-    display_name: str = Field(..., max_length=255)
+    modelDisplayName: str = Field(..., max_length=255)
     name_singular: str = Field(..., max_length=255)
     name_plural: str = Field(..., max_length=255)
     modelURI: str = Field(..., max_length=255)
