@@ -4,7 +4,7 @@ def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
     fields = data['fields']
-    name_singular = data['name_singular']
+    name_singular = data['name_singular'].replace('-', '_')
     model_name_pascal = data['model_name_pascal']
     class_name = data['class_name']
 

@@ -9,6 +9,9 @@ from sqlalchemy.orm import Session
 class ModelGenerator:
     def __init__(self, data, db: Session):
 
+        data['name_singular'] = data['name_singular'].replace('-', '_')
+        data['name_plural'] = data['name_plural'].replace('-', '_')
+
         self.data = data
         if 'options' not in self.data:
             self.data['options'] = {}
@@ -98,7 +101,7 @@ class ModelGenerator:
                     self.db, rship_tbl_name)
                 if auto_page:
                     generated_data = generate_model_and_api_names(auto_page)
-                    name_singular = generated_data['name_singular']
+                    name_singular = generated_data['name_singular'].replace('-', '_')
                     class_name = generated_data['class_name']
                     # back_populates = self.data['name_singular'].lower()
                     back_populates = None

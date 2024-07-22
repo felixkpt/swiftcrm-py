@@ -4,7 +4,7 @@ def generate_routes(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
     model_name_pascal = data['model_name_pascal']
-    name_singular = data['name_singular']
+    name_singular = data['name_singular'].replace('-', '_')
     name_plural = data['name_plural']
 
     # Define CRUD routes for the specified model
