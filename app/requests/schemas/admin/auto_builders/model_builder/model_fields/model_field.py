@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-
+from typing import Union, List
 class ModelFieldSchema(BaseModel):
     model_builder_id: int = Field(..., max_length=None)
     name: str = Field(..., max_length=255)
@@ -13,7 +13,7 @@ class ModelFieldSchema(BaseModel):
     isRequired: Optional[bool] = Field(None, max_length=None)
     isUnique: Optional[bool] = Field(None, max_length=None)
     dropdownSource: Optional[str] = Field(None, max_length=255)
-    dropdownDependsOn: Optional[str] = Field(None, max_length=None)
+    dropdownDependsOn: Optional[Union[str, List[str]]] = Field(None, max_length=None)
     desktopWidth: Optional[int] = Field(None, max_length=None)
     mobileWidth: Optional[int] = Field(None, max_length=None)
 
