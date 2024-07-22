@@ -13,7 +13,7 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
     
-    messages = relationship("Message", back_populates="user")
-    interviews = relationship("Interview", back_populates="user")
+    # messages = relationship("Message", back_populates="user")
+    # interviews = relationship("Interview", back_populates="user")
     refresh_tokens = relationship("RefreshToken", back_populates="user")
 
