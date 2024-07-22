@@ -42,7 +42,8 @@ class ModelBuilderRepo(BaseRepo):
     async def create(self, db: Session, model_request):
         required_fields = ['modelDisplayName', 'name_singular',
                            'name_plural', 'modelURI', 'apiEndpoint']
-        unique_fields = ['table_name_singular', 'table_name_plural']
+        unique_fields = ['modelURI', 'apiEndpoint',
+                         'table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(
             db, Model, model_request, unique_fields)
@@ -95,7 +96,8 @@ class ModelBuilderRepo(BaseRepo):
     async def update(self, db: Session, model_id: int, model_request):
         required_fields = ['name_singular',
                            'name_plural', 'modelURI', 'apiEndpoint']
-        unique_fields = ['table_name_singular', 'table_name_plural']
+        unique_fields = ['modelURI', 'apiEndpoint',
+                         'table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(
             db, Model, model_request, unique_fields, model_id)
@@ -105,7 +107,8 @@ class ModelBuilderRepo(BaseRepo):
             current_time = datetime.now()
             for field in Model.__table__.columns.keys():
                 if field not in ['id', 'created_at', 'updated_at']:
-                    setattr(db_model, field, getattr(model_request, field, getattr(db_model, field)))
+                    setattr(db_model, field, getattr(
+                        model_request, field, getattr(db_model, field)))
             db_model.updated_at = current_time
             db.commit()
             db.refresh(db_model)
