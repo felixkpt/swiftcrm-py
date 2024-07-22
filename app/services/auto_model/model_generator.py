@@ -168,7 +168,7 @@ class ModelGenerator:
 
     def _write_model_file(self, content):
         path = self.data['api_endpoint'].replace('-', '_')
-        filename = f"{self.data['name_singular'].lower()}.py"
+        filename = f"{self.data['name_singular'].lower()}_model.py"
         directory_path = handler(path, 'models', filename, content)
         init_py_path = os.path.join(directory_path, '__init__.py')
         with open(init_py_path, 'a') as init_py:
