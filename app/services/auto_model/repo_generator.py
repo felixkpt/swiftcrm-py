@@ -14,7 +14,7 @@ def generate_repo(data):
             inserts_args1 += f"            {field.name}=current_time,\n"
         elif field.name != 'id':
             if field.type == 'string':
-                inserts_args1 += f"            {field.name}=model_request.{field.name}.strip(),\n"
+                inserts_args1 += f"            {field.name}=str(model_request.{field.name}).strip(),\n"
             else:
                 inserts_args1 += f"            {field.name}=model_request.{field.name},\n"
 
@@ -24,7 +24,7 @@ def generate_repo(data):
             inserts_args2 += f"            db_query.{field.name} = current_time\n"
         elif field.name != 'id' and field.name != 'created_at':
             if field.dataType == 'string' or field.dataType == 'textarea':
-                inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}.strip()\n"
+                inserts_args2 += f"            db_query.{field.name} = str(model_request.{field.name}).strip()\n"
             else:
                 inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
 
