@@ -50,7 +50,7 @@ def generate_repo(data):
     else:
         repo_specific_filters = ''
 
-    model_path_name = name_singular.lower()
+    model_path_name = name_singular.lower()+'_model'
 
     content = f"""
 from datetime import datetime

@@ -184,7 +184,7 @@ class ModelGenerator:
 
         # Get existing relationships
         path = self.data['api_endpoint'].replace('-', '_')
-        filename = f"{self.data['name_singular'].lower()}.py"
+        filename = f"{self.data['name_singular'].lower()}_model.py"
         res = generate_file_path(path, 'models', filename)
         file_path = res['file_path']
 
