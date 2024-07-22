@@ -2,8 +2,8 @@ from sqlalchemy import Column, DateTime, Integer, String, Text, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
-class SocialMediaConversationCategory(Base):
-    __tablename__ = 'social_media_conversation_categories_categorys'
+class SocialMediaConversationcategory(Base):
+    __tablename__ = 'social_mediaconversationcategories'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), unique=True)
     description = Column(Text(None))

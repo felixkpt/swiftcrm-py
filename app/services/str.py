@@ -3,12 +3,12 @@ import re
 
 class STR:
     @staticmethod
-    def slug(string):
+    def slug(string, separator = '_'):
         # Convert to lower case and remove leading/trailing whitespace
         string = string.strip().lower()
         # Replace spaces, hyphens, and invalid characters with underscores
-        string = re.sub(r'[^\w\s-]', '', string.replace('-', '_'))
-        string = re.sub(r'[\s]+', '_', string)
+        string = re.sub(r'[^\w\s-]', '', string.replace('-', separator))
+        string = re.sub(r'[\s]+', separator, string)
         return string
 
     @staticmethod

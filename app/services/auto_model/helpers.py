@@ -39,50 +39,55 @@ def generate_table_names(api_endpoint_slugged, name_singular, name_plural):
     return {'table_name_singular': table_name_singular, 'table_name_plural': table_name_plural}
 
 
-def generate_class_name(api_endpoint, name_singular):
-    # Remove trailing name_singular from api_endpoint if present
-    if api_endpoint.endswith(name_singular):
-        res = api_endpoint[:-(len(name_singular) + 1)]
+def generate_class_name(api_endpoint, name_singular, name_plural):
+    api_endpoint = api_endpoint.lower()
+    name_plural = name_plural.lower()
+    # Remove trailing name_plural from api_endpoint if present
+    if api_endpoint.endswith(name_plural):
+        res = api_endpoint[:-(len(name_plural) + 1)]
         if len(res) > 0:
             api_endpoint = res
 
     parts = api_endpoint.split('/')
     other_segments = '/'.join(parts[:-1])  # Join all parts except the last one
-    last_segment = parts[-1]
-    last_segment_singular = (inflect.engine().singular_noun(
-        last_segment) or last_segment).lower().replace('-', '_')
+    last_segment = parts[-1].lower().replace('-', '_')
 
-    # Singularize the last segment using inflect
-    are_similar = last_segment_singular == name_singular.lower()
+    are_similar = last_segment == name_plural
 
-    # Construct the class_name by replacing '/' with '-' and appending name_singular
+    # Construct the class_name by replacing '/' with '-' and appending name_plural
     if are_similar:
         class_name = other_segments.replace(
             '/', '-').replace('.', '-') + '_' + name_singular
+        # Construct the table_name
+        table_name_singular = name_singular
+        table_name_plural = name_plural
     else:
         class_name = api_endpoint.replace(
             '/', '-').replace('.', '-') + name_singular
 
+        table_name_singular = STR.slug(api_endpoint) + '_' + name_singular
+        table_name_plural = STR.slug(api_endpoint) + name_plural
+
     # Convert the class_name to PascalCase
     class_name = STR.pascal(class_name)
 
-    return class_name
+    return {'class_name': class_name, 'table_name_singular': table_name_singular, 'table_name_plural': table_name_plural}
 
 
 def generate_model_and_api_names(data):
-    model_name = data.name_singular or data.modelDisplayName
+    model_name = data.modelDisplayName
     api_endpoint = data.apiEndpoint
     name_singular, name_plural, model_name_pascal = get_model_names(
         model_name)
 
     api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
-    tables = generate_table_names(
-        api_endpoint_slugged.replace('.', '_'), name_singular.lower(), name_plural.lower(),)
-    table_name_singular = tables['table_name_singular']
-    table_name_plural = tables['table_name_plural']
 
-    class_name = generate_class_name(api_endpoint, name_singular.lower())
-   
+    res = generate_class_name(api_endpoint, name_singular, name_plural)
+
+    class_name = res['class_name']
+    table_name_singular = res['table_name_singular']
+    table_name_plural = res['table_name_plural']
+
     fields = data.fields or None
 
     return {
