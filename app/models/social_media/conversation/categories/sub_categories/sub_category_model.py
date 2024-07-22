@@ -2,7 +2,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
-class Socialmediaconversationcategoriessubcategory(Base):
+class SocialMediaConversationCategoriesSubCategory(Base):
     __tablename__ = 'social_media_conversation_categories_sub_categories'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
