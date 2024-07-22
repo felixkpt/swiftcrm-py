@@ -28,10 +28,13 @@ def generate_table_names(api_endpoint_slugged, name_singular, name_plural):
                                                     (len(name_plural)+1)]
 
     # Construct the table_name
-    table_name_singular = api_endpoint_slugged.replace(
-        '.', '_') + '_' + name_singular
-    table_name_plural = api_endpoint_slugged.replace(
-        '.', '_') + '_' + name_plural
+    table_name_singular = name_singular
+    table_name_plural = name_plural
+    if len(api_endpoint_slugged) > 0:
+        table_name_singular = api_endpoint_slugged.replace(
+            '.', '_') + '_' + name_singular
+        table_name_plural = api_endpoint_slugged.replace(
+            '.', '_') + '_' + name_plural
 
     return {'table_name_singular': table_name_singular, 'table_name_plural': table_name_plural}
 
