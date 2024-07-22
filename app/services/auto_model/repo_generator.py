@@ -1,6 +1,5 @@
 from app.services.auto_model.saves_file import handler
 
-
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_slugged = data['api_endpoint_slugged']
@@ -14,14 +13,20 @@ def generate_repo(data):
         if field.name == 'created_at' or field.name == 'updated_at':
             inserts_args1 += f"            {field.name}=current_time,\n"
         elif field.name != 'id':
-            inserts_args1 += f"            {field.name}=model_request.{field.name},\n"
+            if field.type == 'string':
+                inserts_args1 += f"            {field.name}=model_request.{field.name}.strip(),\n"
+            else:
+                inserts_args1 += f"            {field.name}=model_request.{field.name},\n"
 
     inserts_args2 = ""
     for field in fields:
         if field.name == 'updated_at':
             inserts_args2 += f"            db_query.{field.name} = current_time\n"
         elif field.name != 'id' and field.name != 'created_at':
-            inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
+            if field.type == 'string':
+                inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}.strip()\n"
+            else:
+                inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
 
     # Generate repo filter conditions
     added = False
@@ -44,7 +49,6 @@ def generate_repo(data):
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
-
 
     model_path_name = name_singular.lower()
 
