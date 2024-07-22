@@ -60,9 +60,9 @@ class CustomerRepo(BaseRepo):
         db_query = Model(
             created_at=current_time,
             updated_at=current_time,
-            name=model_request.name,
-            email=model_request.email,
-            phone_number=model_request.phone_number,
+            name=str(model_request.name).strip(),
+            email=str(model_request.email).strip(),
+            phone_number=str(model_request.phone_number).strip(),
         )
         db.add(db_query)
         try:

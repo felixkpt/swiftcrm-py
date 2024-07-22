@@ -13,7 +13,7 @@ def generate_repo(data):
         if field.name == 'created_at' or field.name == 'updated_at':
             inserts_args1 += f"            {field.name}=current_time,\n"
         elif field.name != 'id':
-            if field.type == 'string':
+            if field.dataType == 'string' or field.dataType == 'textarea':
                 inserts_args1 += f"            {field.name}=str(model_request.{field.name}).strip(),\n"
             else:
                 inserts_args1 += f"            {field.name}=model_request.{field.name},\n"
