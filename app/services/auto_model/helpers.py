@@ -66,7 +66,7 @@ def generate_class_name(api_endpoint, name_singular, name_plural):
             '/', '-').replace('.', '-') + name_singular
 
         table_name_singular = STR.slug(api_endpoint) + '_' + name_singular
-        table_name_plural = STR.slug(api_endpoint) + name_plural
+        table_name_plural = STR.slug(api_endpoint) + '_' + name_plural
 
     # Convert the class_name to PascalCase
     class_name = STR.pascal(class_name)
