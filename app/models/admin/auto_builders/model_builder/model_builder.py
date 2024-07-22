@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 class AdminAutoBuildersModelBuilder(Base):
     __tablename__ = 'admin_auto_builders_model_builder_model_builders'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    uuid = Column(String(255))
     modelDisplayName = Column(String(255))
     name_singular = Column(String(255))
     name_plural = Column(String(255))

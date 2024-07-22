@@ -2,6 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 class ModelBuilderSchema(BaseModel):
+    uuid: str = Field(..., max_length=255)
     modelDisplayName: str = Field(..., max_length=255)
     name_singular: Optional[str] = Field(None, max_length=255)
     name_plural: Optional[str] = Field(None, max_length=255)
