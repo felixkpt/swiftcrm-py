@@ -7,7 +7,7 @@ class STR:
         # Convert to lower case and remove leading/trailing whitespace
         string = string.strip().lower()
         # Replace spaces, hyphens, and invalid characters with underscores
-        string = re.sub(r'[^\w\s-]', '', string.replace('-', separator))
+        string = re.sub(r'[^\w\s-]', separator, string.replace('-', separator))
         string = re.sub(r'[\s]+', separator, string)
         return string
 

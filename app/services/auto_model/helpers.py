@@ -4,43 +4,25 @@ from app.services.str import STR
 
 def get_model_names(model_name):
     # Convert modelName to slug with underscore and capitalize
-    model_name_slug = STR.slug(model_name).capitalize()
+    cleaned_name = STR.slug(model_name, '-').capitalize()
 
     # Singularize the model_name if possible, otherwise use as is
-    singularized = inflect.engine().singular_noun(model_name_slug)
-    name_singular = singularized or model_name_slug
+    singularized = inflect.engine().singular_noun(cleaned_name)
+    name_singular = singularized or cleaned_name
 
     # PascalCase conversion for singular model name
     model_name_pascal = STR.pascal(name_singular)
 
     # Pluralize the singular model name to generate pluralized version
     name_plural = inflect.engine().plural(
-        name_singular) if not singularized else model_name_slug
+        name_singular) if not singularized else cleaned_name
 
     return name_singular, name_plural, model_name_pascal,
 
 
-def generate_table_names(api_endpoint_slugged, name_singular, name_plural):
-    # Check if api_endpoint_slugged ends with name_plural
-    if api_endpoint_slugged.endswith(name_plural):
-        # Remove the trailing name_plural from api_endpoint_slugged
-        api_endpoint_slugged = api_endpoint_slugged[:-
-                                                    (len(name_plural)+1)]
-
-    # Construct the table_name
-    table_name_singular = name_singular
-    table_name_plural = name_plural
-    if len(api_endpoint_slugged) > 0:
-        table_name_singular = api_endpoint_slugged.replace(
-            '.', '_') + '_' + name_singular
-        table_name_plural = api_endpoint_slugged.replace(
-            '.', '_') + '_' + name_plural
-
-    return {'table_name_singular': table_name_singular, 'table_name_plural': table_name_plural}
-
-
-def generate_class_name(api_endpoint, name_singular, name_plural):
+def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
     api_endpoint = api_endpoint.lower()
+    name_singular = name_singular.lower()
     name_plural = name_plural.lower()
     # Remove trailing name_plural from api_endpoint if present
     if api_endpoint.endswith(name_plural):
@@ -54,19 +36,20 @@ def generate_class_name(api_endpoint, name_singular, name_plural):
 
     are_similar = last_segment == name_plural
 
+    print('are_similar::', are_similar)
     # Construct the class_name by replacing '/' with '-' and appending name_plural
     if are_similar:
         class_name = other_segments.replace(
-            '/', '-').replace('.', '-') + '_' + name_singular
+            '/', ' ').replace('.', ' ') + ' ' + name_singular
         # Construct the table_name
         table_name_singular = name_singular
         table_name_plural = name_plural
     else:
-        class_name = api_endpoint.replace(
-            '/', '-').replace('.', '-') + name_singular
+        api_cleaned = STR.slug(api_endpoint)
+        class_name = api_cleaned + '_' + name_singular
 
-        table_name_singular = STR.slug(api_endpoint) + '_' + name_singular
-        table_name_plural = STR.slug(api_endpoint) + '_' + name_plural
+        table_name_singular = api_cleaned + '_' + name_singular
+        table_name_plural = api_cleaned + '_' + name_plural
 
     # Convert the class_name to PascalCase
     class_name = STR.pascal(class_name)
@@ -77,12 +60,13 @@ def generate_class_name(api_endpoint, name_singular, name_plural):
 def generate_model_and_api_names(data):
     model_name = data.modelDisplayName
     api_endpoint = data.apiEndpoint
+    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
+
     name_singular, name_plural, model_name_pascal = get_model_names(
         model_name)
 
-    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
-
-    res = generate_class_name(api_endpoint, name_singular, name_plural)
+    res = generate_class_and_tbl_names(
+        api_endpoint, name_singular, name_plural)
 
     class_name = res['class_name']
     table_name_singular = res['table_name_singular']
@@ -92,11 +76,11 @@ def generate_model_and_api_names(data):
 
     return {
         'api_endpoint': api_endpoint,
+        'api_endpoint_slugged': api_endpoint_slugged,
         'model_name': model_name,
         'name_singular': name_singular,
         'name_plural': name_plural,
         'model_name_pascal': model_name_pascal,
-        'api_endpoint_slugged': api_endpoint_slugged,
         'table_name_singular': table_name_singular,
         'table_name_plural': table_name_plural,
         'class_name': class_name,
