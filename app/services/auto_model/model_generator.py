@@ -112,7 +112,10 @@ class ModelGenerator:
             f"class {self.data['class_name']}(Base):\n"
             f"    __tablename__ = '{self.data['table_name_plural']}'\n"
         )
+        
         for field in fields:
+            if field.get('name', False) == 'user_id': continue
+
             data_type = field['dataType'].lower() if field['dataType'] else ''
             sqlalchemy_type = self.type_mapping.get(
                 data_type, {'name': 'String'})
