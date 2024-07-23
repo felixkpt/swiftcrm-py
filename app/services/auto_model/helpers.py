@@ -1,15 +1,15 @@
 import inflect
 from app.services.str import STR
 import hashlib
-import string
+
 
 def get_model_names(model_name):
     """
     Generate different name formats for a given model name.
-    
+
     Args:
         model_name (str): The original model name.
-    
+
     Returns:
         tuple: A tuple containing the singular model name, plural model name, and PascalCase model name.
     """
@@ -24,57 +24,69 @@ def get_model_names(model_name):
     model_name_pascal = STR.pascal(name_singular)
 
     # Pluralize the singular model name to generate pluralized version
-    name_plural = inflect.engine().plural(name_singular) if not singularized else cleaned_name
+    name_plural = inflect.engine().plural(
+        name_singular) if not singularized else cleaned_name
 
     return name_singular, name_plural, model_name_pascal
+
 
 def generate_deterministic_random_string(input_string, length=4):
     """
     Generate a deterministic random string based on the input string.
-    
+
     Args:
         input_string (str): The input string to seed the random generation.
         length (int, optional): Length of the random string. Defaults to 4.
-    
+
     Returns:
         str: A deterministic random string of specified length.
     """
     # Create a hash of the input string
     hash_object = hashlib.md5(input_string.encode())
     hash_hex = hash_object.hexdigest()
-    
-    # Use a slice of the hash to generate the random string
-    random_string = hash_hex[:length]
-    
-    # Ensure the string is the correct length and in lowercase
-    return random_string[:length].lower()
 
-def trim_name(name, max_length=40):
+    # Use a slice of the hash to generate the random string
+    random_string = hash_hex[:length - 1]  # Leave space for the first letter
+
+    # Prepend the first character of the input_string
+    first_char = input_string[0].lower()
+    deterministic_string = first_char + random_string[:length - 1]
+
+    # Ensure the string is the correct length
+    return deterministic_string[:length]
+
+# Example usage
+print(generate_deterministic_random_string("example", 6))  # Output might be something like 'e1a2b3'
+
+
+def trim_name(name, seed_name=None, max_length=40):
     """
     Trim a name to a specified maximum length, prepending a deterministic random string if trimmed.
-    
+
     Args:
         name (str): The original name.
         max_length (int, optional): Maximum length of the trimmed name. Defaults to 56.
-    
+
     Returns:
         str: The trimmed name.
     """
     if len(name) > max_length:
-        random_string = generate_deterministic_random_string(name)
-        trimmed_name = random_string + name[-(max_length - len(random_string)):]
+        random_string = generate_deterministic_random_string(seed_name or name)
+        trimmed_name = random_string + \
+            name[-(max_length - len(random_string)):]
         return trimmed_name
     return name
+
 
 def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
     """
     Generate class and table names based on API endpoint and model names.
-    
+
     Args:
         api_endpoint (str): The API endpoint.
         name_singular (str): Singular form of the model name.
         name_plural (str): Plural form of the model name.
-    
+
     Returns:
         dict: A dictionary containing class name, singular table name, and plural table name.
     """
@@ -98,7 +110,8 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
     name_plural = name_plural.replace('-', '_')
 
     if are_similar:
-        class_name = other_segments.replace('/', ' ').replace('.', ' ') + ' ' + name_singular
+        class_name = other_segments.replace(
+            '/', ' ').replace('.', ' ') + ' ' + name_singular
         table_name_singular = name_singular
         table_name_plural = name_plural
     else:
@@ -108,9 +121,9 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
         table_name_plural = api_cleaned + '_' + name_plural
 
     # Convert the class_name to PascalCase
-    class_name = trim_name(STR.pascal(class_name))
-    table_name_singular = trim_name(table_name_singular)
-    table_name_plural = trim_name(table_name_plural)
+    class_name = trim_name(STR.pascal(class_name), table_name_singular, 40)
+    table_name_singular = trim_name(table_name_singular, None, 40)
+    table_name_plural = trim_name(table_name_plural, None, 40)
 
     return {
         'class_name': class_name,
@@ -118,13 +131,14 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
         'table_name_plural': table_name_plural
     }
 
+
 def generate_model_and_api_names(data):
     """
     Generate model and API names based on input data.
-    
+
     Args:
         data (object): Data containing model display name and API endpoint.
-    
+
     Returns:
         dict: A dictionary containing various name formats and fields.
     """
@@ -134,7 +148,8 @@ def generate_model_and_api_names(data):
 
     name_singular, name_plural, model_name_pascal = get_model_names(model_name)
 
-    res = generate_class_and_tbl_names(api_endpoint, name_singular, name_plural)
+    res = generate_class_and_tbl_names(
+        api_endpoint, name_singular, name_plural)
 
     class_name = res['class_name']
     table_name_singular = res['table_name_singular']
