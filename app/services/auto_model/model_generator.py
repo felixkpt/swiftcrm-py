@@ -17,6 +17,8 @@ class ModelGenerator:
             self.data['options'] = {}
         if 'timestamps' not in self.data['options']:
             self.data['options']['timestamps'] = True
+        if 'user_id' not in self.data['options']:
+            self.data['options']['user_id'] = True
 
         self.db = db
         self.type_mapping = {
@@ -160,6 +162,9 @@ class ModelGenerator:
         if self.data.get('options') and self.data['options'].get('timestamps'):
             content += "    created_at = Column(DateTime, server_default=func.now())\n"
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
+        if self.data.get('options') and self.data['options'].get('user_id'):
+            content += "    user_id = Column(Integer, ForeignKey('users.id'))\n"
+
         # Adding existing relationships
         if existing_relationships:
             content += '\n' + \
