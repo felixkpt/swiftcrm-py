@@ -69,7 +69,7 @@ def trim_name(name, seed_name=None, max_length=55):
     """
     if len(name) > max_length:
         random_string = generate_deterministic_random_string(seed_name or name)
-        trimmed_name = random_string + \
+        trimmed_name = random_string + '_' + \
             name[-(max_length - len(random_string)):]
         return trimmed_name
     return name
