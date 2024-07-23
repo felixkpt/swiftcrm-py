@@ -18,16 +18,12 @@ class UserRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['first_name', 'last_name', 'email', 'password', 'password_confirmation']
+        search_fields = ['first_name', 'last_name', 'email']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
         query = self.repo_specific_filters(query, Model, query_params)
         metadata = set_metadata(query, query_params)
-
-        # Get current user ID
-        current_user_id = user(request).id
-        query = query.filter(Model.user_id == current_user_id)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -53,13 +49,7 @@ class UserRepo(BaseRepo):
         value = query_params.get('phone_number', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.phone_number.ilike(f'%{value}%'))
-        value = query_params.get('password', '').strip()
-        if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.password.ilike(f'%{value}%'))
-        value = query_params.get('password_confirmation', '').strip()
-        if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.password_confirmation.ilike(f'%{value}%'))
-
+        
         return query
 
     async def create(self, db: Session, model_request):
@@ -68,7 +58,6 @@ class UserRepo(BaseRepo):
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
-        current_user_id = user().id
         db_query = Model(
             created_at = current_time,
             updated_at = current_time,
