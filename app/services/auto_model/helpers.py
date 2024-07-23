@@ -49,14 +49,11 @@ def generate_deterministic_random_string(input_string, length=4):
     random_string = hash_hex[:length - 1]  # Leave space for the first letter
 
     # Prepend the first character of the input_string
-    first_char = input_string[0].lower()
+    first_char = input_string[0]
     deterministic_string = first_char + random_string[:length - 1]
 
     # Ensure the string is the correct length
-    return deterministic_string[:length]
-
-# Example usage
-print(generate_deterministic_random_string("example", 6))  # Output might be something like 'e1a2b3'
+    return deterministic_string[:length].capitalize()
 
 
 def trim_name(name, seed_name=None, max_length=40):
@@ -122,8 +119,8 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
 
     # Convert the class_name to PascalCase
     class_name = trim_name(STR.pascal(class_name), table_name_singular, 40)
-    table_name_singular = trim_name(table_name_singular, None, 40)
-    table_name_plural = trim_name(table_name_plural, None, 40)
+    table_name_singular = trim_name(table_name_singular, None, 40).lower()
+    table_name_plural = trim_name(table_name_plural, None, 40).lower()
 
     return {
         'class_name': class_name,
