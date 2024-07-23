@@ -10,56 +10,56 @@ def generate_repo(data):
 
     inserts_args1 = ""
     for field in fields:
-        if field.name == 'user_id':
-            inserts_args1 += f"            {field.name} = current_user_id,\n"
-        elif field.name == 'created_at' or field.name == 'updated_at':
-            inserts_args1 += f"            {field.name} = current_time,\n"
-        elif field.name != 'id':
-            if field.dataType == 'string' or field.dataType == 'textarea':
-                inserts_args1 += f"            {field.name} = str(model_request.{field.name}).strip(),\n"
+        if field['name'] == 'user_id':
+            inserts_args1 += f"            {field['name']} = current_user_id,\n"
+        elif field['name'] == 'created_at' or field['name'] == 'updated_at':
+            inserts_args1 += f"            {field['name']} = current_time,\n"
+        elif field['name'] != 'id':
+            if field['dataType'] == 'string' or field['dataType'] == 'textarea':
+                inserts_args1 += f"            {field['name']} = str(model_request.{field['name']}).strip(),\n"
             else:
-                inserts_args1 += f"            {field.name} = model_request.{field.name},\n"
+                inserts_args1 += f"            {field['name']} = model_request.{field['name']},\n"
 
     inserts_args2 = ""
     for field in fields:
-        if field.name == 'updated_at':
-            inserts_args2 += f"            db_query.{field.name} = current_time\n"
-        elif field.name == 'user_id':
-            inserts_args2 += f"            db_query.{field.name} = current_user_id\n"
-        elif field.name != 'id' and field.name != 'created_at':
-            if field.dataType == 'string' or field.dataType == 'textarea':
-                inserts_args2 += f"            db_query.{field.name} = str(model_request.{field.name}).strip()\n"
+        if field['name'] == 'updated_at':
+            inserts_args2 += f"            db_query.{field['name']} = current_time\n"
+        elif field['name'] == 'user_id':
+            inserts_args2 += f"            db_query.{field['name']} = current_user_id\n"
+        elif field['name'] != 'id' and field['name'] != 'created_at':
+            if field['dataType'] == 'string' or field['dataType'] == 'textarea':
+                inserts_args2 += f"            db_query.{field['name']} = str(model_request.{field['name']}).strip()\n"
             else:
-                inserts_args2 += f"            db_query.{field.name} = model_request.{field.name}\n"
+                inserts_args2 += f"            db_query.{field['name']} = model_request.{field['name']}\n"
 
     # Generate repo filter conditions
     added = False
     repo_specific_filters = ""
     for field in fields:
-        if field.type == 'input' or (field.name != 'id' and field.name.endswith('_id')):
+        if field['type'] == 'input' or (field['name'] != 'id' and field['name'].endswith('_id')):
             added = True
-            if field.name.endswith('_id'):
-                repo_specific_filters += f"        value = query_params.get('{field.name}', None)\n"
+            if field['name'].endswith('_id'):
+                repo_specific_filters += f"        value = query_params.get('{field['name']}', None)\n"
                 repo_specific_filters += f"        if value is not None and value.isdigit():\n"
-                repo_specific_filters += f"            query = query.filter(Model.{field.name} == int(value))\n"
+                repo_specific_filters += f"            query = query.filter(Model.{field['name']} == int(value))\n"
             else:
-                repo_specific_filters += f"        value = query_params.get('{field.name}', '').strip()\n"
+                repo_specific_filters += f"        value = query_params.get('{field['name']}', '').strip()\n"
                 repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
-                repo_specific_filters += f"            query = query.filter(Model.{field.name}.ilike(f'%{{value}}%'))\n"
+                repo_specific_filters += f"            query = query.filter(Model.{field['name']}.ilike(f'%{{value}}%'))\n"
 
     if added:
         repo_specific_filters = '\n' + repo_specific_filters
     else:
         repo_specific_filters = ''
 
-    model_path_name = name_singular.lower()+'_model'
+    model_path_name = name_singular.lower() + '_model'
 
     content = f"""
 from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.{api_endpoint_slugged+'.'+model_path_name} import {class_name} as Model
+from app.models.{api_endpoint_slugged}.{model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
@@ -74,7 +74,7 @@ class {model_name_pascal}Repo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = {[field.name for field in fields if field.isRequired]}
+        search_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -100,8 +100,8 @@ class {model_name_pascal}Repo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = {[field.name for field in fields if field.isRequired]}
-        unique_fields = {[field.name for field in fields if field.isUnique]}
+        required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
+        unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
@@ -119,8 +119,8 @@ class {model_name_pascal}Repo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = {[field.name for field in fields if field.isRequired]}
-        unique_fields = {[field.name for field in fields if field.isUnique]}
+        required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
+        unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()

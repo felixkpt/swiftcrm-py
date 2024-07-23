@@ -4,14 +4,46 @@ from app.services.auto_model.repo_generator import generate_repo
 from .schema_generator import generate_schema
 from .routes_generator import generate_routes
 from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest
-
+from app.requests.schemas.admin.auto_builders.model_builder.model_fields.model_field import ModelFieldSchema
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 
+def convert_fields_to_dict(fields):
+    """Convert each field in the list to a dictionary if it's not already."""
+    return [field.dict() if isinstance(field, ModelFieldSchema) else field for field in fields]
+
 def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
-    # try:
+    
+    fields = convert_fields_to_dict(data.get('fields', []))
+
+    if fields:
+        fields.append({
+            'name': 'user_id',
+            'type': 'integer',
+            'label': 'Creator',
+            'isRequired': False,
+            'dataType': 'string'
+        })
+
+        fields.append({
+            'name': 'created_at',
+            'type': 'datetime',
+            'label': 'Updated',
+            'isRequired': False,
+            'dataType': 'string'
+        })
+
+        fields.append({
+            'name': 'updated_at',
+            'type': 'datetime',
+            'label': 'Updated',
+            'isRequired': False,
+            'dataType': 'string'
+        })
+        data['fields'] = fields
+
     print("STEP 1: Starting model generation\n")
     model_generator = ModelGenerator(data, db)
     res = model_generator.generate_model()
@@ -41,16 +73,3 @@ def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db),
             raise e
     else:
         print("Model generation failed, stopping process.\n")
-
-    # except Exception as e:
-    #     return
-    #     # Stash changes if any step fails
-    #     try:
-    #         stash_message = f"Autobuilder: Stash changes due to {action_type.capitalize()} {data['name_singular'].lower()} failure - {str(e)}"
-    #         subprocess.run(['git', 'stash', 'push', '-m', stash_message], check=True)
-    #         print(f"Changes stashed: {stash_message}\n")
-    #     except subprocess.CalledProcessError as stash_error:
-    #         print(f"Error stashing changes: {stash_error}")
-
-    #     print(f"Error in auto_model_handler: {e}\n")
-    #     raise e

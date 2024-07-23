@@ -30,25 +30,6 @@ class ModelGenerator:
             'json': {'name': 'JSON', 'length': None},
         }
 
-    def _generate_fields(self):
-        fields = self.data['fields']
-
-        return [
-            {
-                "name": field.name,
-                "type": field.type,
-                "label": field.label,
-                "isRequired": field.isRequired,
-                "dataType": field.dataType,
-                "defaultValue": field.defaultValue,
-                "isUnique": field.isUnique,
-                "dropdownSource": field.dropdownSource,
-                "isPrimaryKey": False,
-                "autoIncrements": False,
-            }
-            for field in fields
-        ]
-
     def _add_id_field(self, fields):
         id_field = next(
             (field for field in fields if field['name'] == 'id'), None)
@@ -186,7 +167,7 @@ class ModelGenerator:
 
     def generate_model(self):
 
-        fields = self._generate_fields()
+        fields = self.data['fields']
         fields = self._add_id_field(fields)
         fields = self._filter_ignore_fields(fields)
         imports_str = self._collect_imports(fields)
