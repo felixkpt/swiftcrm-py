@@ -1,6 +1,6 @@
 import inflect
 from app.services.str import STR
-import random
+import hashlib
 import string
 
 def get_model_names(model_name):
@@ -28,21 +28,30 @@ def get_model_names(model_name):
 
     return name_singular, name_plural, model_name_pascal
 
-def generate_random_string(length=4):
+def generate_deterministic_random_string(input_string, length=4):
     """
-    Generate a random string of lowercase letters.
+    Generate a deterministic random string based on the input string.
     
     Args:
+        input_string (str): The input string to seed the random generation.
         length (int, optional): Length of the random string. Defaults to 4.
     
     Returns:
-        str: A random string of specified length.
+        str: A deterministic random string of specified length.
     """
-    return ''.join(random.choices(string.ascii_lowercase, k=length))
+    # Create a hash of the input string
+    hash_object = hashlib.md5(input_string.encode())
+    hash_hex = hash_object.hexdigest()
+    
+    # Use a slice of the hash to generate the random string
+    random_string = hash_hex[:length]
+    
+    # Ensure the string is the correct length and in lowercase
+    return random_string[:length].lower()
 
 def trim_name(name, max_length=56):
     """
-    Trim a name to a specified maximum length, prepending a random string if trimmed.
+    Trim a name to a specified maximum length, prepending a deterministic random string if trimmed.
     
     Args:
         name (str): The original name.
@@ -52,8 +61,8 @@ def trim_name(name, max_length=56):
         str: The trimmed name.
     """
     if len(name) > max_length:
-        random_string = generate_random_string()
-        trimmed_name = random_string + name[-(max_length - 4):]
+        random_string = generate_deterministic_random_string(name)
+        trimmed_name = random_string + name[-(max_length - len(random_string)):]
         return trimmed_name
     return name
 
