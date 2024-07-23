@@ -4,8 +4,9 @@ from pydantic import BaseModel, Field
 class QuestionSchema(BaseModel):
     category_id: int = Field(..., max_length=None)
     sub_category_id: int = Field(..., max_length=None)
-    question: str = Field(..., max_length=255)
-    marks: int = Field(..., max_length=None)
+    question: str = Field(..., max_length=None)
+    marks: str = Field(..., max_length=255)
+    user_id: Optional[int] = Field(None, max_length=None)
 
     class Config:
         from_attributes = True
