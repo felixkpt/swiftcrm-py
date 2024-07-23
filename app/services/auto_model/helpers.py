@@ -30,7 +30,7 @@ def get_model_names(model_name):
     return name_singular, name_plural, model_name_pascal
 
 
-def generate_deterministic_random_string(input_string, length=4):
+def generate_deterministic_random_string(input_string, length=5):
     """
     Generate a deterministic random string based on the input string.
 
@@ -46,11 +46,11 @@ def generate_deterministic_random_string(input_string, length=4):
     hash_hex = hash_object.hexdigest()
 
     # Use a slice of the hash to generate the random string
-    random_string = hash_hex[:length - 1]  # Leave space for the first letter
+    random_string = hash_hex[:length - 3]  # Leave space for the 3 letters
 
-    # Prepend the first character of the input_string
-    first_char = input_string[0]
-    deterministic_string = first_char + random_string[:length - 1]
+    # Prepend the 3 characters of the input_string
+    first_char = input_string[:3]
+    deterministic_string = first_char + random_string[:length - 3]
 
     # Ensure the string is the correct length
     return deterministic_string[:length].capitalize()
