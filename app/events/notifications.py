@@ -5,7 +5,7 @@ class NotificationService:
         from app.repositories.admin.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo
         res = ModelBuilderRepo.get_page_by_table_name_plural(db, table_name)
         if res:
-            model_id = res.name_plural
+            model_id = res.uuid
             # Notify WebSocket clients
             print(connections)
             for client_id, connection in connections.items():
