@@ -49,7 +49,7 @@ def generate_deterministic_random_string(input_string, length=4):
     # Ensure the string is the correct length and in lowercase
     return random_string[:length].lower()
 
-def trim_name(name, max_length=56):
+def trim_name(name, max_length=40):
     """
     Trim a name to a specified maximum length, prepending a deterministic random string if trimmed.
     
