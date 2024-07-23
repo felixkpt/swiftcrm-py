@@ -9,23 +9,26 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
 
+
 def convert_fields_to_dict(fields):
     """Convert each field in the list to a dictionary if it's not already."""
     return [field.dict() if isinstance(field, ModelFieldSchema) else field for field in fields]
 
+
 def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
-    
+
     fields = convert_fields_to_dict(data.get('fields', []))
 
     if fields:
-        fields.append({
-            'name': 'user_id',
-            'type': 'integer',
-            'label': 'Creator',
-            'isRequired': False,
-            'dataType': 'string'
-        })
+        if data['table_name_singular'] != 'users':
+            fields.append({
+                'name': 'user_id',
+                'type': 'integer',
+                'label': 'Creator',
+                'isRequired': False,
+                'dataType': 'string'
+            })
 
         fields.append({
             'name': 'created_at',
