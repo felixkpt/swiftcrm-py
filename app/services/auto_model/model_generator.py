@@ -17,7 +17,7 @@ class ModelGenerator:
             self.data['options'] = {}
         if 'timestamps' not in self.data['options']:
             self.data['options']['timestamps'] = True
-        if 'user_id' not in self.data['options']:
+        if 'user_id' not in self.data['options'] and self.data['table_name_plural'] != 'users':
             self.data['options']['user_id'] = True
 
         self.db = db
@@ -125,7 +125,7 @@ class ModelGenerator:
 
     def _build_model_content(self, imports_str, fields, existing_relationships):
         content = (
-            f"from sqlalchemy import Column, {imports_str}\n"
+            f"from sqlalchemy import Column, ForeignKey, {imports_str}\n"
             "from app.models.base import Base\n"
             "from sqlalchemy.orm import relationship\n\n"
             f"class {self.data['class_name']}(Base):\n"
@@ -158,13 +158,14 @@ class ModelGenerator:
                 if field.get('isUnique', False):
                     column_args += ", unique=True"
                 content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
+        
+        if self.data.get('options') and self.data['options'].get('user_id'):
+            content += "    user_id = Column(Integer, ForeignKey('users.id'))\n"
         content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
         if self.data.get('options') and self.data['options'].get('timestamps'):
             content += "    created_at = Column(DateTime, server_default=func.now())\n"
             content += "    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())\n"
-        if self.data.get('options') and self.data['options'].get('user_id'):
-            content += "    user_id = Column(Integer, ForeignKey('users.id'))\n"
-
+        
         # Adding existing relationships
         if existing_relationships:
             content += '\n' + \
