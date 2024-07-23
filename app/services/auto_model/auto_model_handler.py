@@ -27,7 +27,7 @@ def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db),
                 'type': 'integer',
                 'label': 'Creator',
                 'isRequired': False,
-                'dataType': 'string'
+                'dataType': 'integer'
             })
 
         fields.append({
