@@ -3,7 +3,7 @@ from app.models.base import Base
 from sqlalchemy.orm import relationship
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'users_v1'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(255), unique=True, nullable=False)
