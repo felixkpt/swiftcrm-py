@@ -56,7 +56,7 @@ def generate_deterministic_random_string(input_string, length=5):
     return deterministic_string[:length].capitalize()
 
 
-def trim_name(name, seed_name=None, max_length=40):
+def trim_name(name, seed_name=None, max_length=55):
     """
     Trim a name to a specified maximum length, prepending a deterministic random string if trimmed.
 
@@ -118,9 +118,10 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
         table_name_plural = api_cleaned + '_' + name_plural
 
     # Convert the class_name to PascalCase
-    class_name = trim_name(STR.pascal(class_name), table_name_singular, 40)
-    table_name_singular = trim_name(table_name_singular, None, 40).lower()
-    table_name_plural = trim_name(table_name_plural, None, 40).lower()
+    limit = 50
+    class_name = trim_name(STR.pascal(class_name), table_name_singular, limit)
+    table_name_singular = trim_name(table_name_singular, None, limit).lower()
+    table_name_plural = trim_name(table_name_plural, None, limit).lower()
 
     return {
         'class_name': class_name,
