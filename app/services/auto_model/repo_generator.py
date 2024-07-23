@@ -10,10 +10,10 @@ def generate_repo(data):
 
     inserts_args1 = ""
     for field in fields:
-        if field.name == 'created_at' or field.name == 'updated_at':
-            inserts_args1 += f"            {field.name} = current_time,\n"
-        elif field.name == 'user_id':
+        if field.name == 'user_id':
             inserts_args1 += f"            {field.name} = current_user_id,\n"
+        elif field.name == 'created_at' or field.name == 'updated_at':
+            inserts_args1 += f"            {field.name} = current_time,\n"
         elif field.name != 'id':
             if field.dataType == 'string' or field.dataType == 'textarea':
                 inserts_args1 += f"            {field.name} = str(model_request.{field.name}).strip(),\n"
