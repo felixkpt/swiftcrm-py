@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 class SocialMediaConversationCategory(Base):
     __tablename__ = 'social_media_conversation_categories'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(255))
     name = Column(String(255), unique=True)
     description = Column(Text(None))
     user_id = Column(Integer, ForeignKey('users.id'))

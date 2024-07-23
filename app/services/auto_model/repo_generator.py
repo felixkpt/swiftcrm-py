@@ -7,7 +7,7 @@ def generate_repo(data):
     name_singular = data['name_singular'].replace('-', '_')
     model_name_pascal = data['model_name_pascal']
     class_name = data['class_name']
-    print('FFFFFF',fields, 'FFFFFF')
+
     inserts_args1 = ""
     for field in fields:
         if field.name == 'user_id':
