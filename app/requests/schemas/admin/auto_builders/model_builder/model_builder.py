@@ -11,6 +11,7 @@ class ModelBuilderSchema(BaseModel):
     table_name_singular: Optional[str] = Field(None, max_length=255)
     table_name_plural: Optional[str] = Field(None, max_length=255)
     class_name: Optional[str] = Field(None, max_length=255)
+    createFrontendViews: Optional[bool] = Field(True)
 
     class Config:
         from_attributes = True

@@ -14,6 +14,7 @@ class AdminAutoBuildersModelBuilder(Base):
     table_name_singular = Column(String(255), unique=True)
     table_name_plural = Column(String(255), unique=True)
     class_name = Column(String(255))
+    createFrontendViews = Column(Integer, nullable=False, server_default='1')
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())
