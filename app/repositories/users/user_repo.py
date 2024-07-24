@@ -18,12 +18,16 @@ class UserRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['first_name', 'last_name', 'email']
+        search_fields = ['first_name', 'email', 'phone_number', 'password', 'password_confirmation']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
         query = self.repo_specific_filters(query, Model, query_params)
         metadata = set_metadata(query, query_params)
+
+        # Get current user ID
+        current_user_id = user(request).id
+        query = query.filter(Model.user_id == current_user_id)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -49,24 +53,35 @@ class UserRepo(BaseRepo):
         value = query_params.get('phone_number', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.phone_number.ilike(f'%{value}%'))
-        
+        value = query_params.get('password', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.password.ilike(f'%{value}%'))
+        value = query_params.get('password_confirmation', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.password_confirmation.ilike(f'%{value}%'))
+        value = query_params.get('user_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.user_id == int(value))
+
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['first_name', 'last_name', 'email', 'password', 'password_confirmation']
+        required_fields = ['first_name', 'email', 'phone_number', 'password', 'password_confirmation']
         unique_fields = ['email']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
+        current_user_id = user().id
         db_query = Model(
-            created_at = current_time,
-            updated_at = current_time,
             first_name = str(model_request.first_name).strip(),
             last_name = str(model_request.last_name).strip(),
             email = str(model_request.email).strip(),
             phone_number = str(model_request.phone_number).strip(),
             password = model_request.password,
             password_confirmation = model_request.password_confirmation,
+            user_id = current_user_id,
+            created_at = current_time,
+            updated_at = current_time,
         )
         db.add(db_query)
         try:
@@ -79,7 +94,7 @@ class UserRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['first_name', 'last_name', 'email', 'password', 'password_confirmation']
+        required_fields = ['first_name', 'email', 'phone_number', 'password', 'password_confirmation']
         unique_fields = ['email']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -87,13 +102,14 @@ class UserRepo(BaseRepo):
         current_user_id = user().id
         db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
-            db_query.updated_at = current_time
             db_query.first_name = str(model_request.first_name).strip()
             db_query.last_name = str(model_request.last_name).strip()
             db_query.email = str(model_request.email).strip()
             db_query.phone_number = str(model_request.phone_number).strip()
             db_query.password = model_request.password
             db_query.password_confirmation = model_request.password_confirmation
+            db_query.user_id = current_user_id
+            db_query.updated_at = current_time
             db.commit()
             db.refresh(db_query)
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
