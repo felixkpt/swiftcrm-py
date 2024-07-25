@@ -111,7 +111,7 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
             '/', ' ').replace('.', ' ') + ' ' + name_singular
 
         other = other_segments.replace(
-            '/', '_').replace('.', '_') + '_'
+            '/', '_').replace('.', '_')
         table_name_singular = STR.slug(other + '_' + name_singular)
         table_name_plural = STR.slug(other + '_' + name_plural)
     else:
