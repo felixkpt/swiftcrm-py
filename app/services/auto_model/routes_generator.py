@@ -17,7 +17,7 @@ def generate_routes(data):
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.repositories.{api_endpoint_slugged+'.'+name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{api_endpoint_slugged+'.'+name_singular.lower()} import {model_name_pascal}Schema as ModelSchema
+from app.requests.schemas.{api_endpoint_slugged+'.'+name_singular.lower()}_schema import {model_name_pascal}Schema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()
