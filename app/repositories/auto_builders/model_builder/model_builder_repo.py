@@ -15,7 +15,6 @@ from app.repositories.auto_builders.model_builder.model_headers.model_header_rep
 from app.repositories.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
 from app.services.auto_model.auto_model_handler import auto_model_handler
 from app.services.auto_model.helpers import generate_model_and_api_names
-
 from app.auth import user  # Import user function
 
 
@@ -141,7 +140,6 @@ class ModelBuilderRepo(BaseRepo):
             
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
-            print('ERRRRR:::',e)
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)

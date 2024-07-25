@@ -14,6 +14,8 @@ from app.events.notifications import NotificationService
 from app.repositories.admin.auto_builders.model_builder.model_fields.model_field_repo import ModelFieldRepo
 from app.repositories.admin.auto_builders.model_builder.model_headers.model_header_repo import ModelHeaderRepo
 from app.repositories.admin.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
+from app.services.auto_model.auto_model_handler import auto_model_handler
+from app.services.auto_model.helpers import generate_model_and_api_names
 from app.auth import user  # Import user function
 
 
@@ -50,6 +52,14 @@ class {model_name_pascal}Repo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
+        generated_data = self.prepare_data(model_request)
+        auto_model_handler(generated_data, db)
+        model_request.name_singular = generated_data['name_singular']
+        model_request.name_plural = generated_data['name_plural']
+        model_request.class_name = generated_data['class_name']
+        model_request.table_name_singular = generated_data['table_name_singular']
+        model_request.table_name_plural = generated_data['table_name_plural']
+
         required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
         unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
         
@@ -72,6 +82,14 @@ class {model_name_pascal}Repo(BaseRepo):
 
 
     async def update(self, db: Session, model_id: int, model_request):
+        generated_data = self.prepare_data(model_request)
+        auto_model_handler(generated_data, db)
+        model_request.name_singular = generated_data['name_singular']
+        model_request.name_plural = generated_data['name_plural']
+        model_request.class_name = generated_data['class_name']
+        model_request.table_name_singular = generated_data['table_name_singular']
+        model_request.table_name_plural = generated_data['table_name_plural']
+
         required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
         unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
         Validator.validate_required_fields(model_request, required_fields)
@@ -122,6 +140,16 @@ class {model_name_pascal}Repo(BaseRepo):
 
     def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
         return db.query(Model).filter(Model.apiEndpoint == apiEndpoint).first()
+    
+    def prepare_data(self, model_request):
+        generated_data = generate_model_and_api_names(model_request)
+        model_request.name_singular = generated_data['name_singular']
+        model_request.name_plural = generated_data['name_plural']
+        model_request.table_name_singular = generated_data['table_name_singular']
+        model_request.table_name_plural = generated_data['table_name_plural']
+        model_request.class_name = generated_data['class_name']
+        return generated_data
+
 """
 
     return content
