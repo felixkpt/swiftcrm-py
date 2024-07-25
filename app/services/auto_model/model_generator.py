@@ -1,13 +1,13 @@
 import os
 import subprocess
 from app.services.auto_model.saves_file import handler, generate_file_path
-from app.repositories.admin.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo as Repo 
-from app.services.auto_model.helpers import generate_model_and_api_names
 from sqlalchemy.orm import Session
 
 
 class ModelGenerator:
     def __init__(self, data, db: Session):
+        from app.repositories.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo as Repo 
+        self.repo = Repo
 
         data['name_singular'] = data['name_singular'].replace('-', '_')
         data['name_plural'] = data['name_plural'].replace('-', '_')
@@ -76,11 +76,13 @@ class ModelGenerator:
         return ', '.join(sorted(imports))
 
     def _add_relationships(self, fields):
+        from app.services.auto_model.helpers import generate_model_and_api_names
+
         relationships = []
         for field in fields:
             if field.get('dropdownSource'):
                 rship_tbl_name = field['dropdownSource']
-                auto_page = Repo.get_page_by_table_name(
+                auto_page = self.repo.get_page_by_table_name(
                     self.db, rship_tbl_name)
                 if auto_page:
                     generated_data = generate_model_and_api_names(auto_page)
@@ -130,7 +132,7 @@ class ModelGenerator:
                 if field.get('isUnique', False):
                     column_args += ", unique=True"
                 if field.get('dropdownSource', False):
-                    auto_page = Repo.get_page_by_apiEndpoint(
+                    auto_page = self.repo.get_page_by_apiEndpoint(
                         self.db, field['dropdownSource'])
                     if auto_page:
                         column_args += f", ForeignKey('{auto_page.table_name_plural}.id')"
