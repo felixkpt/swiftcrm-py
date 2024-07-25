@@ -13,6 +13,7 @@ from app.events.notifications import NotificationService
 from app.repositories.admin.auto_builders.model_builder.model_fields.model_field_repo import ModelFieldRepo
 from app.repositories.admin.auto_builders.model_builder.model_headers.model_header_repo import ModelHeaderRepo
 from app.repositories.admin.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
+from app.auth import user  # Import user function
 
 
 class ModelBuilderRepo(BaseRepo):
