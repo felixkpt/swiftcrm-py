@@ -1,11 +1,11 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, String, func
+from sqlalchemy import Column, ForeignKey, DateTime, ForeignKey, Integer, String, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
 class AutoBuildersModelBuilderActionLabel(Base):
     __tablename__ = 'auto_builders_model_builder_action_labels'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    model_builder_id = Column(Integer)
+    model_builder_id = Column(Integer, ForeignKey('auto_builders_model_builder_model_builders.id'))
     key = Column(String(255))
     label = Column(String(255))
     actionType = Column(String(255))
