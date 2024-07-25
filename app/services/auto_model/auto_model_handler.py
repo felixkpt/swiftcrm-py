@@ -23,14 +23,13 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
     fields = convert_fields_to_dict(data.get('fields', []))
 
     if fields:
-        if data['table_name_singular'] != 'users':
-            fields.append({
-                'name': 'user_id',
-                'type': 'integer',
-                'label': 'Creator',
-                'isRequired': False,
-                'dataType': 'integer'
-            })
+        fields.append({
+            'name': 'user_id',
+            'type': 'integer',
+            'label': 'Creator',
+            'isRequired': False,
+            'dataType': 'integer'
+        })
 
         fields.append({
             'name': 'created_at',
@@ -67,8 +66,8 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
         generate_routes(data)
         print("STEP 4: Routes generation completed\n")
 
-        print('????',data['table_name_singular'] )
-        if data['table_name_singular'] == 'users':
+        print('????',data['table_name_plural'] )
+        if data['table_name_plural'] == 'users':
             print("SEEDING USER...")
             try:
                 factory = ModelFactory()
