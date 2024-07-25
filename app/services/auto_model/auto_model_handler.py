@@ -79,6 +79,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
                     'email': 'adminuser@mail.com',
                     'phone_number': '+254712345678',
                     'password': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+                    'password_confirmation': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                 }
                 admin_user_instance = factory.create_instance(
                     User, **admin_user_data)
