@@ -194,7 +194,7 @@ class ModelBuilderRepo(BaseRepo):
 
             # Convert the model to a dictionary
             model_data = {column.name: getattr(
-                db_model, column.name) for column in db_model.__table__.columns}
+                db_query, column.name) for column in db_query.__table__.columns}
 
             # Combine and return the updated model with its related objects
             combined_result = {
