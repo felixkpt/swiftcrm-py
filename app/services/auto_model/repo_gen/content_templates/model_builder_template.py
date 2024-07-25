@@ -1,4 +1,4 @@
-def get_content(model_path_name,model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2):
+def get_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2):
     content = f"""
 from datetime import datetime
 from sqlalchemy.orm import joinedload
