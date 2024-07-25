@@ -22,4 +22,4 @@ class AutoBuildersModelBuilderModelBuilder(Base):
 
     headers = relationship("AutoBuildersModelBuilderModelHeader", back_populates="model_builder", cascade="all, delete-orphan")
     fields = relationship("AutoBuildersModelBuilderModelField", back_populates="model_builder", cascade="all, delete-orphan")
-    action_labels = relationship("AdminAutoBuildersModelBuilderActionLabel", back_populates="model_builder", cascade="all, delete-orphan")
+    action_labels = relationship("AutoBuildersModelBuilderActionLabel", back_populates="model_builder", cascade="all, delete-orphan")
