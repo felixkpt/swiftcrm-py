@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, String, func
+from sqlalchemy import Column, ForeignKey, DateTime, ForeignKey, Integer, String, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
@@ -9,6 +9,7 @@ class User(Base):
     last_name = Column(String(255))
     email = Column(String(255), unique=True)
     phone_number = Column(String(255))
+    alternate_phone = Column(String(255))
     password = Column(String(255))
     password_confirmation = Column(String(255))
     user_id = Column(Integer, ForeignKey('users.id'))
