@@ -69,6 +69,7 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
         print('????',data['table_name_plural'] )
         if data['table_name_plural'] == 'users':
             print("SEEDING USER...")
+            repo = UserRepo()
             try:
                 factory = ModelFactory()
                 # Insert an admin user
@@ -80,7 +81,7 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
                 }
                 admin_user_instance = factory.create_instance(
                     User, **admin_user_data)
-                UserRepo.create(db, admin_user_instance)
+                repo.create(db, admin_user_instance)
             except Exception as e:
                 print("ERROR SEEDING USER:", e)
 
