@@ -85,7 +85,7 @@ class ModelBuilderRepo(BaseRepo):
 
     async def create(self, db: Session, model_request):
         generated_data = self.prepare_data(model_request)
-        auto_model_handler(generated_data, db)
+        await auto_model_handler(generated_data, db)
         model_request.name_singular = generated_data['name_singular']
         model_request.name_plural = generated_data['name_plural']
         model_request.class_name = generated_data['class_name']
