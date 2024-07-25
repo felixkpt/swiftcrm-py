@@ -1,8 +1,8 @@
 """Adding user and model builder tables
 
-Revision ID: 69a66c253263
+Revision ID: 486380a5a98a
 Revises: 
-Create Date: 2024-07-26 00:10:32.405731
+Create Date: 2024-07-26 01:02:25.966500
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '69a66c253263'
+revision: str = '486380a5a98a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,9 +34,11 @@ def upgrade() -> None:
     sa.Column('phone_number', sa.String(length=255), nullable=True),
     sa.Column('password', sa.String(length=255), nullable=True),
     sa.Column('password_confirmation', sa.String(length=255), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('status_id', sa.Integer(), server_default='1', nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -64,43 +66,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('table_name_singular'),
     sa.UniqueConstraint('uuid')
     )
-    op.create_table('auto_builders_model_builder_model_fields',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('model_builder_id', sa.Integer(), nullable=True),
-    sa.Column('name', sa.String(length=255), nullable=True),
-    sa.Column('type', sa.String(length=255), nullable=True),
-    sa.Column('label', sa.String(length=255), nullable=True),
-    sa.Column('dataType', sa.String(length=255), nullable=True),
-    sa.Column('defaultValue', sa.String(length=255), nullable=True),
-    sa.Column('isVisibleInList', sa.Integer(), nullable=True),
-    sa.Column('isVisibleInSingleView', sa.Integer(), nullable=True),
-    sa.Column('isRequired', sa.Integer(), nullable=True),
-    sa.Column('isUnique', sa.Integer(), nullable=True),
-    sa.Column('dropdownSource', sa.String(length=255), nullable=True),
-    sa.Column('dropdownDependsOn', sa.JSON(none_as_null=None), nullable=True),
-    sa.Column('desktopWidth', sa.Integer(), nullable=True),
-    sa.Column('mobileWidth', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('status_id', sa.Integer(), server_default='1', nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('auto_builders_model_builder_model_headers',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('model_builder_id', sa.Integer(), nullable=True),
-    sa.Column('key', sa.String(length=255), nullable=True),
-    sa.Column('label', sa.String(length=255), nullable=True),
-    sa.Column('isVisibleInList', sa.Integer(), nullable=True),
-    sa.Column('isVisibleInSingleView', sa.Integer(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('status_id', sa.Integer(), server_default='1', nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('refresh_tokens',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -125,15 +90,54 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('auto_builders_model_builder_model_fields',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('model_builder_id', sa.Integer(), nullable=True),
+    sa.Column('name', sa.String(length=255), nullable=True),
+    sa.Column('type', sa.String(length=255), nullable=True),
+    sa.Column('label', sa.String(length=255), nullable=True),
+    sa.Column('dataType', sa.String(length=255), nullable=True),
+    sa.Column('defaultValue', sa.String(length=255), nullable=True),
+    sa.Column('isVisibleInList', sa.Integer(), nullable=True),
+    sa.Column('isVisibleInSingleView', sa.Integer(), nullable=True),
+    sa.Column('isRequired', sa.Integer(), nullable=True),
+    sa.Column('isUnique', sa.Integer(), nullable=True),
+    sa.Column('dropdownSource', sa.String(length=255), nullable=True),
+    sa.Column('dropdownDependsOn', sa.JSON(none_as_null=None), nullable=True),
+    sa.Column('desktopWidth', sa.Integer(), nullable=True),
+    sa.Column('mobileWidth', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('status_id', sa.Integer(), server_default='1', nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['model_builder_id'], ['auto_builders_model_builder_model_builders.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('auto_builders_model_builder_model_headers',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('model_builder_id', sa.Integer(), nullable=True),
+    sa.Column('key', sa.String(length=255), nullable=True),
+    sa.Column('label', sa.String(length=255), nullable=True),
+    sa.Column('isVisibleInList', sa.Integer(), nullable=True),
+    sa.Column('isVisibleInSingleView', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('status_id', sa.Integer(), server_default='1', nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['model_builder_id'], ['auto_builders_model_builder_model_builders.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('auto_builders_model_builder_action_labels')
-    op.drop_table('refresh_tokens')
     op.drop_table('auto_builders_model_builder_model_headers')
     op.drop_table('auto_builders_model_builder_model_fields')
+    op.drop_table('auto_builders_model_builder_action_labels')
+    op.drop_table('refresh_tokens')
     op.drop_table('auto_builders_model_builder_model_builders')
     op.drop_table('users')
     op.drop_table('token_blacklist')
