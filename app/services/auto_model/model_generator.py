@@ -17,7 +17,7 @@ class ModelGenerator:
             self.data['options'] = {}
         if 'timestamps' not in self.data['options']:
             self.data['options']['timestamps'] = True
-        if 'user_id' not in self.data['options'] and self.data['table_name_plural'] != 'users':
+        if 'user_id' not in self.data['options']:
             self.data['options']['user_id'] = True
 
         self.db = db
