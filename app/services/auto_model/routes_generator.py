@@ -7,6 +7,11 @@ def generate_routes(data):
     name_singular = data['name_singular'].replace('-', '_')
     name_plural = data['name_plural']
 
+    customs = ['model_builder']
+
+    if name_singular.replace('-', '_').lower() in customs:
+        return
+
     # Define CRUD routes for the specified model
     content = f"""
 from fastapi import APIRouter, Depends, HTTPException, Request
