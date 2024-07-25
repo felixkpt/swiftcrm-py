@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 class AutoBuildersModelBuilderModelField(Base):
     __tablename__ = 'auto_builders_model_builder_model_fields'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    model_builder_id = Column(Integer, ForeignKey('auto_builders_model_builder_model_builders.id'))
+    model_builder_id = Column(Integer)
     name = Column(String(255))
     type = Column(String(255))
     label = Column(String(255))
