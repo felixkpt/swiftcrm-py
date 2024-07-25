@@ -15,4 +15,4 @@ class AutoBuildersModelBuilderModelHeader(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
     
-    model_builder  = relationship("AutoBuildersModelBuilderModelBuilder", back_populates="headers")
+    model_builder  = relationship("AutoBuildersModelBuilder", back_populates="headers")

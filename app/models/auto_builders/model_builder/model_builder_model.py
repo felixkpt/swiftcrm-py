@@ -2,8 +2,8 @@ from sqlalchemy import Column, ForeignKey, DateTime, Integer, String, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
-class AutoBuildersModelBuilderModelBuilder(Base):
-    __tablename__ = 'auto_builders_model_builder_model_builders'
+class AutoBuildersModelBuilder(Base):
+    __tablename__ = 'auto_builders_model_builders'
     id = Column(Integer, primary_key=True, autoincrement=True)
     uuid = Column(String(255), unique=True)
     modelDisplayName = Column(String(255))

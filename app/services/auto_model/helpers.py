@@ -101,18 +101,19 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
     other_segments = '/'.join(parts[:-1])  # Join all parts except the last one
     last_segment = parts[-1].lower().replace('-', '_')
 
-    are_similar = last_segment == name_plural
-
-    print('are similar??????', last_segment, name_plural)
-
     name_singular = name_singular.replace('-', '_')
     name_plural = name_plural.replace('-', '_')
+
+    are_similar = last_segment == name_singular or last_segment == name_plural
 
     if are_similar:
         class_name = other_segments.replace(
             '/', ' ').replace('.', ' ') + ' ' + name_singular
-        table_name_singular = name_singular
-        table_name_plural = name_plural
+
+        other = other_segments.replace(
+            '/', '_').replace('.', '_') + '_'
+        table_name_singular = STR.slug(other + '_' + name_singular)
+        table_name_plural = STR.slug(other + '_' + name_plural)
     else:
         api_cleaned = STR.slug(api_endpoint)
         class_name = api_cleaned + '_' + name_singular

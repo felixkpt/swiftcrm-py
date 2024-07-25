@@ -24,4 +24,4 @@ class AutoBuildersModelBuilderModelField(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
-    model_builder  = relationship("AutoBuildersModelBuilderModelBuilder", back_populates="fields")
+    model_builder  = relationship("AutoBuildersModelBuilder", back_populates="fields")
