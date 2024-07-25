@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.admin.auto_builders.model_builder.model_builder_model import AdminAutoBuildersModelBuilder as Model
+from app.models.{api_endpoint_slugged}.{model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
