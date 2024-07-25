@@ -210,9 +210,9 @@ class ModelBuilderRepo(BaseRepo):
     def get(db: Session, model_id: int):
         print('model_id, mod', model_id)
         return db.query(Model).options(
-                joinedload(Model.fields),
-                joinedload(Model.action_labels),
-                joinedload(Model.headers)
+            joinedload(Model.fields),
+            joinedload(Model.action_labels),
+            joinedload(Model.headers)
         ).filter(Model.id == model_id).first()
 
     def get_page_by_name(db: Session, name_singular: str):
