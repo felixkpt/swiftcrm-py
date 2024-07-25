@@ -1,6 +1,6 @@
 import subprocess
 from .model_generator import ModelGenerator
-from app.services.auto_model.repo_generator import generate_repo
+from app.services.auto_model.repo_gen.repo_generator import generate_repo
 from .schema_generator import generate_schema
 from .routes_generator import generate_routes
 from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest
