@@ -62,6 +62,7 @@ def generate_repo(data):
         print(f"{name_singular} is a custom content type.")
         content = get_custom_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2, name_singular)
     else:
+        print(f"{name_singular} is using default content type.")
         content = get_default_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2)
     
     # Write the generated repo content to a Python file
