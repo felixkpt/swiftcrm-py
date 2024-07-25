@@ -18,8 +18,6 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
 
     fields = convert_fields_to_dict(data.get('fields', []))
 
-    print('fields::', fields)
-
     if fields:
         if data['table_name_singular'] != 'users':
             fields.append({
