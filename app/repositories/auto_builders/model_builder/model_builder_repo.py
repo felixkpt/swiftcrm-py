@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.admin.auto_builders.model_builders2.model_builder2_model import AdminAutoBuildersModelBuilders2ModelBuilder2 as Model
+from app.models.auto_builders.model_builder.model_builder_model import AutoBuildersModelBuilderModelBuilder as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
@@ -11,14 +11,14 @@ from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 
-class ModelBuilder2Repo(BaseRepo):
+class ModelBuilderRepo(BaseRepo):
     
     model = Model
     notification = NotificationService()
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['uuid', 'modelDisplayName', 'name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
+        search_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -68,6 +68,9 @@ class ModelBuilder2Repo(BaseRepo):
         value = query_params.get('class_name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.class_name.ilike(f'%{value}%'))
+        value = query_params.get('createFrontendViews', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.createFrontendViews.ilike(f'%{value}%'))
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
@@ -75,8 +78,8 @@ class ModelBuilder2Repo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['uuid', 'modelDisplayName', 'name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
-        unique_fields = ['modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
+        required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
+        unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
@@ -91,6 +94,7 @@ class ModelBuilder2Repo(BaseRepo):
             table_name_singular = str(model_request.table_name_singular).strip(),
             table_name_plural = str(model_request.table_name_plural).strip(),
             class_name = str(model_request.class_name).strip(),
+            createFrontendViews = model_request.createFrontendViews,
             user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
@@ -106,8 +110,8 @@ class ModelBuilder2Repo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['uuid', 'modelDisplayName', 'name_singular', 'name_plural', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural', 'class_name']
-        unique_fields = ['modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
+        required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
+        unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
@@ -123,6 +127,7 @@ class ModelBuilder2Repo(BaseRepo):
             db_query.table_name_singular = str(model_request.table_name_singular).strip()
             db_query.table_name_plural = str(model_request.table_name_plural).strip()
             db_query.class_name = str(model_request.class_name).strip()
+            db_query.createFrontendViews = model_request.createFrontendViews
             db_query.user_id = current_user_id
             db_query.updated_at = current_time
             db.commit()
