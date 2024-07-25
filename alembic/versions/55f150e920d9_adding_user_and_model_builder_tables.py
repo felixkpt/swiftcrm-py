@@ -1,8 +1,8 @@
 """Adding user and model builder tables
 
-Revision ID: df1e886c698d
+Revision ID: 55f150e920d9
 Revises: 
-Create Date: 2024-07-26 01:35:49.527904
+Create Date: 2024-07-26 01:54:07.595391
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'df1e886c698d'
+revision: str = '55f150e920d9'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
