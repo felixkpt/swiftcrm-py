@@ -37,5 +37,5 @@ def generate_schema(data):
 """
 
     path = api_endpoint.replace('-', '_')
-    filename = f'{name_singular.lower()}.py'
+    filename = f'{name_singular.lower()}_schema.py'
     handler(path, 'requests/schemas', filename, content)
