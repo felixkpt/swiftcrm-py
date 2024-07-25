@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.repositories.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo as Repo
-from app.requests.schemas.auto_builders.model_builder.action_labels.action_label import ActionLabelSchema as ModelSchema
+from app.requests.schemas.auto_builders.model_builder.action_labels.action_label_schema import ActionLabelSchema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()
