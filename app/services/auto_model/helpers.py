@@ -103,7 +103,7 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
 
     are_similar = last_segment == name_plural
 
-    print('are similar??????', are_similar)
+    print('are similar??????', last_segment, name_plural)
 
     name_singular = name_singular.replace('-', '_')
     name_plural = name_plural.replace('-', '_')
