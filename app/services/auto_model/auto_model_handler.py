@@ -80,7 +80,7 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
                     User, **admin_user_data)
                 UserRepo.create(db, admin_user_instance)
             except Exception as e:
-                print(e)
+                print("ERROR SEEDING USER:", e)
 
         # Run Git Add and Commit
         try:
