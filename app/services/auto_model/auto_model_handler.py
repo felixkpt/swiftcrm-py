@@ -3,8 +3,6 @@ from .model_generator import ModelGenerator
 from app.services.auto_model.repo_gen.repo_generator import generate_repo
 from .schema_generator import generate_schema
 from .routes_generator import generate_routes
-from app.requests.schemas.admin.auto_builders.model_builder.model_builder_request import ModelBuilderRequest
-from app.requests.schemas.admin.auto_builders.model_builder.model_fields.model_field import ModelFieldSchema
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
@@ -12,13 +10,15 @@ from app.database.connection import get_db
 
 def convert_fields_to_dict(fields):
     """Convert each field in the list to a dictionary if it's not already."""
-    return [field.dict() if isinstance(field, ModelFieldSchema) else field for field in fields]
+    return [field.dict() for field in fields]
 
 
-def auto_model_handler(data: ModelBuilderRequest, db: Session = Depends(get_db), id: int = None):
+def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
 
     fields = convert_fields_to_dict(data.get('fields', []))
+
+    print('fields::', fields)
 
     if fields:
         if data['table_name_singular'] != 'users':
