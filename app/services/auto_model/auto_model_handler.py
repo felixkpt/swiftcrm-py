@@ -73,7 +73,8 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
                 factory = ModelFactory()
                 # Insert an admin user
                 admin_user_data = {
-                    'username': 'admin_user',
+                    'first_name': 'John',
+                    'last_name': 'Doe',
                     'email': 'adminuser@mail.com',
                     'password': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                 }
