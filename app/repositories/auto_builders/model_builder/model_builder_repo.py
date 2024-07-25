@@ -121,25 +121,25 @@ class ModelBuilderRepo(BaseRepo):
             
             db.refresh(db_query)
             # Store fields, headers, and action labels using their respective repositories
-            created_fields = []
-            for field in model_request.fields:
-                field.model_builder_id = db_query.id
-                created_field = await ModelFieldRepo().create(db, field)
-                created_fields.append(created_field)
+            # created_fields = []
+            # for field in model_request.fields:
+            #     field.model_builder_id = db_query.id
+            #     created_field = await ModelFieldRepo().create(db, field)
+            #     created_fields.append(created_field)
 
-            created_headers = []
-            for header in model_request.headers:
-                header.model_builder_id = db_query.id
-                created_header = await ModelHeaderRepo().create(db, header)
-                created_headers.append(created_header)
+            # created_headers = []
+            # for header in model_request.headers:
+            #     header.model_builder_id = db_query.id
+            #     created_header = await ModelHeaderRepo().create(db, header)
+            #     created_headers.append(created_header)
 
-            created_action_labels = []
-            for action_label in model_request.actionLabels:
-                action_label.model_builder_id = db_query.id
-                created_action_label = await ActionLabelRepo().create(db, action_label)
-                created_action_labels.append(created_action_label)
+            # created_action_labels = []
+            # for action_label in model_request.actionLabels:
+            #     action_label.model_builder_id = db_query.id
+            #     created_action_label = await ActionLabelRepo().create(db, action_label)
+            #     created_action_labels.append(created_action_label)
             
-            await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
+            # await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
