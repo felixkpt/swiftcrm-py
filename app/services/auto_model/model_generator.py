@@ -145,7 +145,7 @@ class ModelGenerator:
                     column_args += ", unique=True"
                 content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
         
-        if self.data.get('options') and self.data['options'].get('user_id'):
+        if self.data.get('options'):
             content += "    user_id = Column(Integer, ForeignKey('users.id'))\n"
         content += "    status_id = Column(Integer, nullable=False, server_default='1')\n"
         if self.data.get('options') and self.data['options'].get('timestamps'):
