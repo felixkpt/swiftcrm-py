@@ -79,7 +79,6 @@ class UserRepo(BaseRepo):
             phone_number = str(model_request.phone_number).strip(),
             password = model_request.password,
             password_confirmation = model_request.password_confirmation,
-            user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
         )
