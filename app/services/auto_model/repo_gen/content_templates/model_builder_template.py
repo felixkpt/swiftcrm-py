@@ -14,8 +14,8 @@ from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService
 from app.repositories.{path}.model_fields.model_field_repo import ModelFieldRepo
-from app.repositories.{path}.model_builder.model_headers.model_header_repo import ModelHeaderRepo
-from app.repositories.{path}.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
+from app.repositories.{path}.model_headers.model_header_repo import ModelHeaderRepo
+from app.repositories.{path}.action_labels.action_label_repo import ActionLabelRepo
 from app.services.auto_model.auto_model_handler import auto_model_handler
 from app.services.auto_model.helpers import generate_model_and_api_names
 from app.auth import user  # Import user function

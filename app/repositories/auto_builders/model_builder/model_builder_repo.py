@@ -245,7 +245,7 @@ class ModelBuilderRepo(BaseRepo):
 
     def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
         return db.query(Model).filter(Model.apiEndpoint == apiEndpoint).first()
-
+    
     def prepare_data(self, model_request):
         generated_data = generate_model_and_api_names(model_request)
         model_request.name_singular = generated_data['name_singular']
@@ -254,3 +254,4 @@ class ModelBuilderRepo(BaseRepo):
         model_request.table_name_plural = generated_data['table_name_plural']
         model_request.class_name = generated_data['class_name']
         return generated_data
+
