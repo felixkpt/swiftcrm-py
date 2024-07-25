@@ -1,3 +1,4 @@
+import bcrypt
 import subprocess
 from .model_generator import ModelGenerator
 from app.services.auto_model.repo_gen.repo_generator import generate_repo
@@ -6,6 +7,9 @@ from .routes_generator import generate_routes
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
+from app.models.users.user_model import User
+from app.patterns.models.factory import ModelFactory
+from app.repositories.users.user_repo import UserRepo
 
 
 def convert_fields_to_dict(fields):
@@ -62,6 +66,21 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
         print("STEP 4: Generating routes\n")
         generate_routes(data)
         print("STEP 4: Routes generation completed\n")
+
+        if data['table_name_singular'] == 'users':
+            try:
+                factory = ModelFactory()
+                # Insert an admin user
+                admin_user_data = {
+                    'username': 'admin_user',
+                    'email': 'adminuser@mail.com',
+                    'password': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+                }
+                admin_user_instance = factory.create_instance(
+                    User, **admin_user_data)
+                UserRepo.create(db, admin_user_instance)
+            except Exception as e:
+                print(e)
 
         # Run Git Add and Commit
         try:
