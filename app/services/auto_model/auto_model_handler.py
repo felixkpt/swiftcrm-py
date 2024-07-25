@@ -68,6 +68,7 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
         print("STEP 4: Routes generation completed\n")
 
         if data['table_name_singular'] == 'users':
+            print("SEEDING USER...")
             try:
                 factory = ModelFactory()
                 # Insert an admin user
