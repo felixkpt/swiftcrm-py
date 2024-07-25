@@ -104,14 +104,11 @@ class {model_name_pascal}Repo(BaseRepo):
     @staticmethod
     def get(db: Session, model_id: int):
         print('model_id, mod', model_id)
-        return db.query(Model).
-options(
+        return db.query(Model).options(
                 joinedload(Model.fields),
                 joinedload(Model.action_labels),
                 joinedload(Model.headers)
-        ).
-filter(Model.id == model_id).
-first()
+        ).filter(Model.id == model_id).first()
 
     def get_page_by_name(db: Session, name_singular: str):
         return db.query(Model).filter(Model.name_singular == name_singular).first()
