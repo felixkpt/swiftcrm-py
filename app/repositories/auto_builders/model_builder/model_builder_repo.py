@@ -107,23 +107,23 @@ class ModelBuilderRepo(BaseRepo):
         try:
             db.commit()
             
-            db.refresh(new_model)
+            db.refresh(db_query)
             # Store fields, headers, and action labels using their respective repositories
             created_fields = []
             for field in model_request.fields:
-                field.model_builder_id = new_model.id
+                field.model_builder_id = db_query.id
                 created_field = await ModelFieldRepo().create(db, field)
                 created_fields.append(created_field)
 
             created_headers = []
             for header in model_request.headers:
-                header.model_builder_id = new_model.id
+                header.model_builder_id = db_query.id
                 created_header = await ModelHeaderRepo().create(db, header)
                 created_headers.append(created_header)
 
             created_action_labels = []
             for action_label in model_request.actionLabels:
-                action_label.model_builder_id = new_model.id
+                action_label.model_builder_id = db_query.id
                 created_action_label = await ActionLabelRepo().create(db, action_label)
                 created_action_labels.append(created_action_label)
             
@@ -209,11 +209,11 @@ class ModelBuilderRepo(BaseRepo):
     @staticmethod
     def get(db: Session, model_id: int):
         print('model_id, mod', model_id)
-        return db.query(Model).             options(
+        return db.query(Model). options(
                 joinedload(Model.fields),
                 joinedload(Model.action_labels),
                 joinedload(Model.headers)
-        ).             filter(Model.id == model_id).             first()
+        ). filter(Model.id == model_id). first()
 
     def get_page_by_name(db: Session, name_singular: str):
         return db.query(Model).filter(Model.name_singular == name_singular).first()
