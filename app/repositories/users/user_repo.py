@@ -26,8 +26,8 @@ class UserRepo(BaseRepo):
         metadata = set_metadata(query, query_params)
 
         # Get current user ID
-        current_user_id = user(request).id
-        query = query.filter(Model.user_id == current_user_id)
+        # current_user_id = user(request).id
+        # query = query.filter(Model.user_id == current_user_id)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
@@ -79,6 +79,7 @@ class UserRepo(BaseRepo):
             phone_number = str(model_request.phone_number).strip(),
             password = model_request.password,
             password_confirmation = model_request.password_confirmation,
+            # user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
         )
