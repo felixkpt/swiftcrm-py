@@ -141,6 +141,7 @@ class ModelBuilderRepo(BaseRepo):
             
             # await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
+            print('ERRRRR:::',e)
             db.rollback()
             return ResponseHelper.handle_integrity_error(e)
         db.refresh(db_query)
