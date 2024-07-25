@@ -17,7 +17,7 @@ def convert_fields_to_dict(fields):
     return [field.dict() for field in fields]
 
 
-def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
+async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
     action_type = "create" if id is None else "edit"
 
     fields = convert_fields_to_dict(data.get('fields', []))
@@ -81,7 +81,7 @@ def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
                 }
                 admin_user_instance = factory.create_instance(
                     User, **admin_user_data)
-                repo.create(db, admin_user_instance)
+                await repo.create(db, admin_user_instance)
             except Exception as e:
                 print("ERROR SEEDING USER:", e)
 
