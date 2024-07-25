@@ -1,4 +1,6 @@
 def get_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2):
+    path = api_endpoint_slugged.replace('-', '_')
+
     content = f"""
 from datetime import datetime
 from sqlalchemy.orm import joinedload
@@ -11,9 +13,9 @@ from app.services.search_repo import get_query_params, apply_common_filters, set
 from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService
-from app.repositories.admin.auto_builders.model_builder.model_fields.model_field_repo import ModelFieldRepo
-from app.repositories.admin.auto_builders.model_builder.model_headers.model_header_repo import ModelHeaderRepo
-from app.repositories.admin.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
+from app.repositories.{path}.model_fields.model_field_repo import ModelFieldRepo
+from app.repositories.{path}.model_builder.model_headers.model_header_repo import ModelHeaderRepo
+from app.repositories.{path}.auto_builders.model_builder.action_labels.action_label_repo import ActionLabelRepo
 from app.services.auto_model.auto_model_handler import auto_model_handler
 from app.services.auto_model.helpers import generate_model_and_api_names
 from app.auth import user  # Import user function
