@@ -10,7 +10,7 @@ class MessageSchema(BaseModel):
     audio_uri: int = Field(..., max_length=None)
     interview_id: Optional[int] = Field(None, max_length=None)
     question_id: Optional[int] = Field(None, max_length=None)
-    question_scores: int = Field(..., max_length=None)
+    question_scores: Optional[int] = Field(None, max_length=None)
     user_id: Optional[int] = Field(None, max_length=None)
 
     class Config:

@@ -18,7 +18,7 @@ class MessageRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
+        search_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -71,7 +71,7 @@ class MessageRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
+        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -102,7 +102,7 @@ class MessageRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
+        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
