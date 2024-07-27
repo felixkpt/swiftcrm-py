@@ -83,7 +83,7 @@ class MessageRepo(BaseRepo):
             role = str(model_request.role).strip(),
             mode = str(model_request.mode).strip(),
             content = model_request.content,
-            audio_uri = model_request.audio_uri,
+            audio_uri = str(model_request.audio_uri).strip(),
             interview_id = model_request.interview_id,
             question_id = model_request.question_id,
             question_scores = model_request.question_scores,
@@ -115,7 +115,7 @@ class MessageRepo(BaseRepo):
             db_query.role = str(model_request.role).strip()
             db_query.mode = str(model_request.mode).strip()
             db_query.content = model_request.content
-            db_query.audio_uri = model_request.audio_uri
+            db_query.audio_uri = str(model_request.audio_uri).strip()
             db_query.interview_id = model_request.interview_id
             db_query.question_id = model_request.question_id
             db_query.question_scores = model_request.question_scores

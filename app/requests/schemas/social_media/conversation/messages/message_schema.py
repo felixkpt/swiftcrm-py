@@ -7,7 +7,7 @@ class MessageSchema(BaseModel):
     role: str = Field(..., max_length=255)
     mode: str = Field(..., max_length=255)
     content: str = Field(..., max_length=None)
-    audio_uri: int = Field(..., max_length=None)
+    audio_uri: str = Field(..., max_length=255)
     interview_id: Optional[int] = Field(None, max_length=None)
     question_id: Optional[int] = Field(None, max_length=None)
     question_scores: Optional[int] = Field(None, max_length=None)

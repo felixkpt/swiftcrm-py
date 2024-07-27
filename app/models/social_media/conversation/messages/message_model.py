@@ -10,7 +10,7 @@ class SocialMediaConversationMessage(Base):
     role = Column(String(255))
     mode = Column(String(255))
     content = Column(Text(None))
-    audio_uri = Column(Integer)
+    audio_uri = Column(String(255))
     interview_id = Column(Integer, ForeignKey('social_media_conversation_interviews.id'))
     question_id = Column(Integer, ForeignKey('soc4bversation_categories_sub_categories_questions.id'))
     question_scores = Column(Integer)
