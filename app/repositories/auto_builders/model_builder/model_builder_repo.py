@@ -25,7 +25,8 @@ class ModelBuilderRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
+        search_fields = ['modelDisplayName', 'modelURI',
+                         'apiEndpoint', 'createFrontendViews']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -85,6 +86,9 @@ class ModelBuilderRepo(BaseRepo):
 
     async def create(self, db: Session, model_request):
         generated_data = self.prepare_data(model_request)
+        if generated_data['name_singular'] == 'Model_builder':
+            return ResponseHelper.handle_integrity_error('Cannot create, Model_builder is preserved.')
+
         await auto_model_handler(generated_data, db)
         model_request.name_singular = generated_data['name_singular']
         model_request.name_plural = generated_data['name_plural']
@@ -92,32 +96,35 @@ class ModelBuilderRepo(BaseRepo):
         model_request.table_name_singular = generated_data['table_name_singular']
         model_request.table_name_plural = generated_data['table_name_plural']
 
-        required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
-        unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
-        
+        required_fields = ['modelDisplayName', 'modelURI',
+                           'apiEndpoint', 'createFrontendViews']
+        unique_fields = ['uuid', 'modelURI', 'apiEndpoint',
+                         'table_name_singular', 'table_name_plural']
+
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields)
         current_time = datetime.now()
         current_user_id = user().id
         db_query = Model(
-            uuid = str(model_request.uuid).strip(),
-            modelDisplayName = str(model_request.modelDisplayName).strip(),
-            name_singular = str(model_request.name_singular).strip(),
-            name_plural = str(model_request.name_plural).strip(),
-            modelURI = str(model_request.modelURI).strip(),
-            apiEndpoint = str(model_request.apiEndpoint).strip(),
-            table_name_singular = str(model_request.table_name_singular).strip(),
-            table_name_plural = str(model_request.table_name_plural).strip(),
-            class_name = str(model_request.class_name).strip(),
-            createFrontendViews = model_request.createFrontendViews,
-            user_id = current_user_id,
-            created_at = current_time,
-            updated_at = current_time,
+            uuid=str(model_request.uuid).strip(),
+            modelDisplayName=str(model_request.modelDisplayName).strip(),
+            name_singular=str(model_request.name_singular).strip(),
+            name_plural=str(model_request.name_plural).strip(),
+            modelURI=str(model_request.modelURI).strip(),
+            apiEndpoint=str(model_request.apiEndpoint).strip(),
+            table_name_singular=str(model_request.table_name_singular).strip(),
+            table_name_plural=str(model_request.table_name_plural).strip(),
+            class_name=str(model_request.class_name).strip(),
+            createFrontendViews=model_request.createFrontendViews,
+            user_id=current_user_id,
+            created_at=current_time,
+            updated_at=current_time,
         )
         db.add(db_query)
         try:
             db.commit()
-            
+
             db.refresh(db_query)
             # Store fields, headers, and action labels using their respective repositories
             created_fields = []
@@ -137,7 +144,7 @@ class ModelBuilderRepo(BaseRepo):
                 action_label.model_builder_id = db_query.id
                 created_action_label = await ActionLabelRepo().create(db, action_label)
                 created_action_labels.append(created_action_label)
-            
+
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was created!')
         except IntegrityError as e:
             db.rollback()
@@ -145,9 +152,11 @@ class ModelBuilderRepo(BaseRepo):
         db.refresh(db_query)
         return db_query
 
-
     async def update(self, db: Session, model_id: int, model_request):
         generated_data = self.prepare_data(model_request)
+        if generated_data['name_singular'] == 'Model_builder':
+            return ResponseHelper.handle_integrity_error('Cannot edit, Model_builder is preserved.')
+
         await auto_model_handler(generated_data, db)
         model_request.name_singular = generated_data['name_singular']
         model_request.name_plural = generated_data['name_plural']
@@ -155,22 +164,29 @@ class ModelBuilderRepo(BaseRepo):
         model_request.table_name_singular = generated_data['table_name_singular']
         model_request.table_name_plural = generated_data['table_name_plural']
 
-        required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
-        unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
+        required_fields = ['modelDisplayName', 'modelURI',
+                           'apiEndpoint', 'createFrontendViews']
+        unique_fields = ['uuid', 'modelURI', 'apiEndpoint',
+                         'table_name_singular', 'table_name_plural']
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
         current_user_id = user().id
-        db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
+        db_query = db.query(Model).filter(
+            Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
             db_query.uuid = str(model_request.uuid).strip()
-            db_query.modelDisplayName = str(model_request.modelDisplayName).strip()
+            db_query.modelDisplayName = str(
+                model_request.modelDisplayName).strip()
             db_query.name_singular = str(model_request.name_singular).strip()
             db_query.name_plural = str(model_request.name_plural).strip()
             db_query.modelURI = str(model_request.modelURI).strip()
             db_query.apiEndpoint = str(model_request.apiEndpoint).strip()
-            db_query.table_name_singular = str(model_request.table_name_singular).strip()
-            db_query.table_name_plural = str(model_request.table_name_plural).strip()
+            db_query.table_name_singular = str(
+                model_request.table_name_singular).strip()
+            db_query.table_name_plural = str(
+                model_request.table_name_plural).strip()
             db_query.class_name = str(model_request.class_name).strip()
             db_query.createFrontendViews = model_request.createFrontendViews
             db_query.user_id = current_user_id
@@ -178,7 +194,6 @@ class ModelBuilderRepo(BaseRepo):
             db.commit()
             db.refresh(db_query)
 
-            
             # Clear existing fields, headers, and action labels
             db.query(ModelFieldRepo.model).filter(
                 ModelFieldRepo.model.model_builder_id == model_id).delete()
@@ -206,7 +221,6 @@ class ModelBuilderRepo(BaseRepo):
                 action_label.model_builder_id = model_id
                 created_action_label = await ActionLabelRepo().create(db, action_label)
                 created_action_labels.append(created_action_label)
-                
 
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
 
@@ -245,7 +259,7 @@ class ModelBuilderRepo(BaseRepo):
 
     def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
         return db.query(Model).filter(Model.apiEndpoint == apiEndpoint).first()
-    
+
     def prepare_data(self, model_request):
         generated_data = generate_model_and_api_names(model_request)
         model_request.name_singular = generated_data['name_singular']
@@ -254,4 +268,3 @@ class ModelBuilderRepo(BaseRepo):
         model_request.table_name_plural = generated_data['table_name_plural']
         model_request.class_name = generated_data['class_name']
         return generated_data
-
