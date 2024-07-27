@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 class ModelFieldSchema(BaseModel):
@@ -13,7 +13,7 @@ class ModelFieldSchema(BaseModel):
     isRequired: Optional[bool] = Field(None, max_length=None)
     isUnique: Optional[bool] = Field(None, max_length=None)
     dropdownSource: Optional[str] = Field(None, max_length=255)
-    dropdownDependsOn: Optional[str] = Field(None, max_length=None)
+    dropdownDependsOn: Optional[List] = Field(None, max_length=None)
     desktopWidth: Optional[int] = Field(None, max_length=None)
     mobileWidth: Optional[int] = Field(None, max_length=None)
     user_id: Optional[int] = Field(None, max_length=None)
