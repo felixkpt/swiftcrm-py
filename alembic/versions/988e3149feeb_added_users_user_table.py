@@ -1,8 +1,8 @@
-"""Added: auto-builders > model-builder > action-labels action_label table
+"""Added: users user table
 
-Revision ID: 6c0b27ec763b
-Revises: d0b713c97bb4
-Create Date: 2024-07-27 18:04:46.750472
+Revision ID: 988e3149feeb
+Revises: 11901a2e3183
+Create Date: 2024-07-27 18:15:49.233978
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6c0b27ec763b'
-down_revision: Union[str, None] = 'd0b713c97bb4'
+revision: str = '988e3149feeb'
+down_revision: Union[str, None] = '11901a2e3183'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
