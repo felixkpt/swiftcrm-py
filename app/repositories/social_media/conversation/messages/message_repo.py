@@ -18,7 +18,7 @@ class MessageRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'interview_id', 'question_id', 'question_scores', 'audio_uri']
+        search_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -52,6 +52,9 @@ class MessageRepo(BaseRepo):
         value = query_params.get('mode', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.mode.ilike(f'%{value}%'))
+        value = query_params.get('audio_uri', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.audio_uri.ilike(f'%{value}%'))
         value = query_params.get('interview_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.interview_id == int(value))
@@ -61,9 +64,6 @@ class MessageRepo(BaseRepo):
         value = query_params.get('question_scores', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.question_scores.ilike(f'%{value}%'))
-        value = query_params.get('audio_uri', '').strip()
-        if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.audio_uri.ilike(f'%{value}%'))
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
@@ -71,7 +71,7 @@ class MessageRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'interview_id', 'question_id', 'question_scores', 'audio_uri']
+        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -83,10 +83,10 @@ class MessageRepo(BaseRepo):
             role = str(model_request.role).strip(),
             mode = str(model_request.mode).strip(),
             content = model_request.content,
+            audio_uri = model_request.audio_uri,
             interview_id = model_request.interview_id,
             question_id = model_request.question_id,
             question_scores = model_request.question_scores,
-            audio_uri = model_request.audio_uri,
             user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
@@ -102,7 +102,7 @@ class MessageRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'interview_id', 'question_id', 'question_scores', 'audio_uri']
+        required_fields = ['category_id', 'sub_category_id', 'role', 'mode', 'content', 'audio_uri', 'question_scores']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -115,10 +115,10 @@ class MessageRepo(BaseRepo):
             db_query.role = str(model_request.role).strip()
             db_query.mode = str(model_request.mode).strip()
             db_query.content = model_request.content
+            db_query.audio_uri = model_request.audio_uri
             db_query.interview_id = model_request.interview_id
             db_query.question_id = model_request.question_id
             db_query.question_scores = model_request.question_scores
-            db_query.audio_uri = model_request.audio_uri
             db_query.user_id = current_user_id
             db_query.updated_at = current_time
             db.commit()
