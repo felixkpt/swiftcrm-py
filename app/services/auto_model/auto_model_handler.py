@@ -48,7 +48,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         })
         data['fields'] = fields
 
-    print("STEP 1: Starting model generation\n")
+    print(f"STEP 1: Starting model generation for: {data['table_name_plural']} \n")
     model_generator = ModelGenerator(data, db)
     res = model_generator.generate_model()
     print("STEP 1: Model generation completed\n")
