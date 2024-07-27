@@ -4,7 +4,7 @@ class NotificationService:
     async def notify_model_updated(self, db, table_name: str, message: str):
         from app.repositories.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo
         res = ModelBuilderRepo.get_page_by_table_name_plural(db, table_name)
-        if res:
+        if res and res.createFrontendViews == 1:
             model_id = res.uuid
             # Notify WebSocket clients
             print(connections)
