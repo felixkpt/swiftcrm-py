@@ -16,9 +16,14 @@ class BaseRepo:
         return False
 
     def _apply_user_filter(self, query, user):
-        method = self._get_caller()
-        if self._user_can_view_all(self.model, method, user) or 'user_id' in [c.name for c in inspect(self.model).c]:
-            query = query.filter(self.model.user_id == user.id)
+        # method = self._get_caller()
+        # print('method:-->', method, 'user:-->', user)
+        # print('(self.model):-->', (self.model))
+        # print('inspect(self.model):-->', inspect(self.model))
+        # print('')
+
+        # if self._user_can_view_all(self.model, method, user) or 'user_id' in [c.name for c in inspect(self.model).c]:
+        #     query = query.filter(self.model.user_id == user.id)
         return query
 
     @staticmethod

@@ -111,7 +111,7 @@ async def seeder_handler_with_builder(db):
 
         # Add a sample message
         conversationRepo.add_message(
-            1, 1, 1, 'user', 'Test message', '/conversation/v1/download-audio/sdiosdisdo.mp3')
+            1, 1, 1, 'user', 'Test message', '/social-media/social-media/conversation/v1/download-audio/sdiosdisdo.mp3')
 
         db.close()
         msg = "Database setup successful!"
@@ -174,7 +174,7 @@ async def seeder_handler_with_factory(db):
 
         # Add a sample message
         conversationRepo.add_message(
-            1, 1, 1, 'user', 'Test message', '/conversation/v1/download-audio/sdiosdisdo.mp3')
+            1, 1, 1, 'user', 'Test message', '/social-media/social-media/conversation/v1/download-audio/sdiosdisdo.mp3')
 
         db.close()
         msg = "Database setup successful!"

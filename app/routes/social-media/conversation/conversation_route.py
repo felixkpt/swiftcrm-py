@@ -7,8 +7,9 @@ from app.database.connection import get_db
 
 router = APIRouter()
 
-repo = Repo()  # Instantiate model repository class
-messageRepo = MessageRepo()  # Instantiate model repository class
+# Instantiate model repository classes
+repo = Repo()
+messageRepo = MessageRepo()
 
 @router.get("/seeder")
 async def set_database(db: Session = Depends(get_db)):

@@ -1,7 +1,6 @@
 from google.cloud import texttospeech, speech, storage
 from google.oauth2 import service_account
 import os
-import tempfile
 
 # Load environment variables
 GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv('GOOGLE_CLOUD_STORAGE_BUCKET')
