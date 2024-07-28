@@ -8,10 +8,11 @@ from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
+from app.repositories.social_media.conversation.messages.extends_message_repo import ExtendsMessageRepo
 from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 
-class MessageRepo(BaseRepo):
+class MessageRepo(BaseRepo, ExtendsMessageRepo):
     
     model = Model
     notification = NotificationService()

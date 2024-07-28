@@ -73,7 +73,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
             try:
                 factory = ModelFactory()
                 # Insert an admin user
-                admin_user_data = {
+                user_data = {
                     'first_name': 'John',
                     'last_name': 'Doe',
                     'email': 'adminuser@mail.com',
@@ -81,9 +81,9 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
                     'password': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                     'password_confirmation': bcrypt.hashpw('adminuser@mail.com'.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
                 }
-                admin_user_instance = factory.create_instance(
-                    User, **admin_user_data)
-                await repo.create(db, admin_user_instance)
+                user_instance = factory.create_instance(
+                    User, **user_data)
+                await repo.create(db, user_instance)
             except Exception as e:
                 print("ERROR SEEDING USER:", e)
 

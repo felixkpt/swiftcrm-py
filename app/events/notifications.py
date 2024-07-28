@@ -6,6 +6,7 @@ class NotificationService:
         res = ModelBuilderRepo.get_page_by_table_name_plural(db, table_name)
         if res and res.createFrontendViews == 1:
             model_id = res.uuid
+            model_name = res.name_singular
             # Notify WebSocket clients
             print(connections)
             for client_id, connection in connections.items():
@@ -14,6 +15,7 @@ class NotificationService:
                     await connection.send_json({
                         "client_id": client_id,
                         "model_id": model_id,
+                        "model_name": model_name,
                         "message": message,
                     })
                     print(f'Notified user: {client_id}')

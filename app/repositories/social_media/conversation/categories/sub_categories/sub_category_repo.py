@@ -54,7 +54,7 @@ class SubCategoryRepo(BaseRepo):
 
     async def create(self, db: Session, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
-        unique_fields = ['name']
+        unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
@@ -79,7 +79,7 @@ class SubCategoryRepo(BaseRepo):
 
     async def update(self, db: Session, model_id: int, model_request):
         required_fields = ['name', 'category_id', 'learn_instructions']
-        unique_fields = ['name']
+        unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
