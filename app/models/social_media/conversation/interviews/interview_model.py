@@ -7,7 +7,7 @@ class SocialMediaConversationInterview(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     category_id = Column(Integer, ForeignKey('social_media_conversation_categories.id'))
     sub_category_id = Column(Integer, ForeignKey('soc7e_media_conversation_categories_sub_categories.id'))
-    question_id = Column(Integer, ForeignKey('soc4bversation_categories_sub_categories_questions.id'))
+    current_question_id = Column(Integer, ForeignKey('soc4bversation_categories_sub_categories_questions.id'))
     scores = Column(Integer)
     max_scores = Column(Integer)
     percentage_score = Column(Integer)

@@ -18,7 +18,7 @@ class InterviewRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
+        search_fields = ['category_id', 'sub_category_id', 'current_question_id', 'scores', 'max_scores', 'percentage_score']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -46,9 +46,9 @@ class InterviewRepo(BaseRepo):
         value = query_params.get('sub_category_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.sub_category_id == int(value))
-        value = query_params.get('question_id', None)
+        value = query_params.get('current_question_id', None)
         if value is not None and value.isdigit():
-            query = query.filter(Model.question_id == int(value))
+            query = query.filter(Model.current_question_id == int(value))
         value = query_params.get('scores', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.scores.ilike(f'%{value}%'))
@@ -65,7 +65,7 @@ class InterviewRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
+        required_fields = ['category_id', 'sub_category_id', 'current_question_id', 'scores', 'max_scores', 'percentage_score']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -74,7 +74,7 @@ class InterviewRepo(BaseRepo):
         db_query = Model(
             category_id = model_request.category_id,
             sub_category_id = model_request.sub_category_id,
-            question_id = model_request.question_id,
+            current_question_id = model_request.current_question_id,
             scores = model_request.scores,
             max_scores = model_request.max_scores,
             percentage_score = model_request.percentage_score,
@@ -93,7 +93,7 @@ class InterviewRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['category_id', 'sub_category_id', 'question_id', 'scores', 'max_scores', 'percentage_score']
+        required_fields = ['category_id', 'sub_category_id', 'current_question_id', 'scores', 'max_scores', 'percentage_score']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -103,7 +103,7 @@ class InterviewRepo(BaseRepo):
         if db_query:
             db_query.category_id = model_request.category_id
             db_query.sub_category_id = model_request.sub_category_id
-            db_query.question_id = model_request.question_id
+            db_query.current_question_id = model_request.current_question_id
             db_query.scores = model_request.scores
             db_query.max_scores = model_request.max_scores
             db_query.percentage_score = model_request.percentage_score

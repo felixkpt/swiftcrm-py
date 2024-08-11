@@ -1,4 +1,4 @@
-# app/services/openai_requests.py
+# app/services/social_media/conversation/openai_requests.py
 import openai
 from decouple import Config, RepositoryEnv
 import re
@@ -34,7 +34,7 @@ def convert_audio_to_text(audio_file):
 # Get response to our Messages
 
 
-def get_chat_response(messages, interview_id, message_content, sub_cat_id, mode):
+def get_chat_message_response(messages, interview_id, message_content, sub_cat_id, mode):
     user_message = {'role': 'user', 'content': message_content}
     messages.append(user_message)
 

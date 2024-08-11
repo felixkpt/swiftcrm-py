@@ -48,7 +48,7 @@ class ExtendsMessageRepo():
                 metadata['is_completed'] = progress.get('is_completed', False)
 
             response = {
-                'results': results,
+                'records': results,
                 'metadata': metadata
             }
 

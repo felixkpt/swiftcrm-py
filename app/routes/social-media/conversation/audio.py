@@ -8,6 +8,12 @@ from app.services.social_media.conversation.audio_handler import process_audio_a
 from app.repositories.social_media.conversation.categories.sub_categories.sub_category_repo import SubCategoryRepo
 from app.database.connection import get_db
 import tempfile
+from fastapi import APIRouter, Request, HTTPException
+from google.cloud import storage
+from starlette.responses import StreamingResponse
+# Load environment variables
+GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv('GOOGLE_CLOUD_STORAGE_BUCKET')
+GCS_PROJECT_FOLDER = os.getenv('GCS_PROJECT_FOLDER')
 
 router = APIRouter()
 
@@ -24,11 +30,11 @@ async def post_audio(
     db: Session = Depends(get_db),
 ):
     # Retrieve category ID from the repository
-    cat_id = subCategoryRepo.get(db, sub_cat_id, request).id
+    cat_id = subCategoryRepo.get(db, sub_cat_id, request).category_id
 
     # Generate a unique ID and audio URI
     my_id = generate_id()
-    file_extension = os.path.splitext(file.filename)[1]
+    file_extension = '.webm'
     my_info = {'id': my_id, 'audio_uri': get_audio_uri(cat_id, my_id, file_extension)}
 
     # Create a temporary file to save the uploaded audio
@@ -37,8 +43,9 @@ async def post_audio(
         temp_file_path = temp_file.name
 
     # Process the audio file and obtain results
-    results = process_audio_and_return_combined_results(
+    results = await process_audio_and_return_combined_results(
         db,
+        request,
         temp_file_path,
         sub_cat_id,
         my_info,
@@ -52,14 +59,26 @@ async def post_audio(
 
 @router.get("/download-audio/{cat_name}/{filename}")
 async def download_audio(request: Request, cat_name: str, filename: str):
-    audio_folder = f"storage/audio/{cat_name}"
-    file_path = os.path.join(audio_folder, filename)
+    storage_client = storage.Client()
 
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File not found")
+    # Define the GCS bucket and file path
+    bucket_name = GOOGLE_CLOUD_STORAGE_BUCKET
+    blob_path = f"{GCS_PROJECT_FOLDER}/audio/{cat_name}/{filename}"
 
-    def iterfile():
-        with open(file_path, mode="rb") as file_like:
+    # Get the bucket and blob
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(blob_path)
+
+    # Check if the file exists in GCS
+    if not blob.exists():
+        # Log the details for debugging
+        error_message = f"File not found: gs://{bucket_name}/{blob_path}"
+        print(error_message)  # Log to console or a logging system
+        raise HTTPException(status_code=404, detail=error_message)
+    
+    # Stream the file from GCS
+    def iter_blob():
+        with blob.open("rb") as file_like:
             yield from file_like
 
-    return StreamingResponse(iterfile(), media_type="audio/mpeg")
+    return StreamingResponse(iter_blob(), media_type="audio/mpeg")

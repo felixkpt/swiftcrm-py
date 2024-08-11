@@ -4,24 +4,40 @@ from app.repositories.social_media.conversation.categories.sub_categories.sub_ca
 from app.repositories.social_media.conversation.categories.sub_categories.questions.question_repo import QuestionRepo
 from app.database.old_connection import execute_query, execute_insert
 
+from fastapi import Request
+from typing import Dict
+from fastapi import Depends
+
+
+def merge_query_params(request: Request, params: Dict[str, str]):
+    query_params = dict(request.query_params)
+    query_params.update(params)
+    request.scope['query_string'] = '&'.join(
+        [f"{key}={value}" for key, value in query_params.items()])
+    return request
+
 
 class SharedRepo:
 
     @staticmethod
     def get_session_by_id(interview_id):
-        query_session = "SELECT * FROM conversation_v2_interviews WHERE id = %s AND status_id = %s"
+        query_session = "SELECT * FROM social_media_conversation_interviews WHERE id = %s AND status_id = %s"
         session = execute_query(
             query_session, (interview_id, 1), fetch_method='first')
         return session
 
     @staticmethod
-    def get_interview_question(db, sub_cat_id, user_id, update=False):
-        cat_id = SubCategoryRepo.get(db, sub_cat_id).category_id
+    async def get_interview_question(db, request, sub_cat_id, user_id, update=False):
+        cat_id = SubCategoryRepo().get(db, sub_cat_id).category_id
 
-        questions = QuestionRepo.get_sub_cat_questions(db, sub_cat_id)[
-            'results']
+        # Merge the sub_category_id into the request's query params
+        # request = merge_query_params(
+        #     request, {'sub_category_id': str(sub_cat_id)})
 
-        query_session = "SELECT id, current_question_id FROM conversation_v2_interviews WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND status_id = %s"
+        questions = (await QuestionRepo().list(db, request))['records']
+        print('questions::', questions)
+
+        query_session = "SELECT id, current_question_id FROM social_media_conversation_interviews WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND status_id = %s"
         session = execute_query(
             query_session, (user_id, cat_id, sub_cat_id, 1), fetch_method='first')
 
@@ -35,7 +51,7 @@ class SharedRepo:
                 # Create a new session if none exists
                 question_id = questions[0].id if questions else 0
                 query_insert_session = """
-                INSERT INTO conversation_v2_interviews (user_id, category_id, sub_category_id, current_question_id, created_at, updated_at)
+                INSERT INTO social_media_conversation_interviews (user_id, category_id, sub_category_id, current_question_id, created_at, updated_at)
                 VALUES (%s, %s, %s,%s, %s, %s)
                 """
                 interview_id = execute_insert(
@@ -56,10 +72,10 @@ class SharedRepo:
                 # Handle case where current question is not found or there is no next question
                 next_question_id = None
                 is_completed = True
-            
+
             if next_question_id and update:
                 query_update_session = """
-                UPDATE conversation_v2_interviews SET current_question_id = %s, updated_at = %s WHERE id = %s
+                UPDATE social_media_conversation_interviews SET current_question_id = %s, updated_at = %s WHERE id = %s
                 """
                 execute_query(query_update_session,
                               (next_question_id, datetime.now(), session['id']))
@@ -68,10 +84,10 @@ class SharedRepo:
         question = None
         interview_id = None
         if session and session.get('current_question_id', False):
-            question = QuestionRepo.get(db, session['current_question_id'])        
+            question = QuestionRepo().get(db, session['current_question_id'])
             question = question.question
             interview_id = session['id']
-        
+
         return {
             'question': question,
             'question_number': question_number,
@@ -131,21 +147,22 @@ class SharedRepo:
         }
 
         if mode == 'interview':
-            progress = SharedRepo.interview_progress(db, interview_id, sub_cat_id)
+            progress = SharedRepo.interview_progress(
+                db, interview_id, sub_cat_id)
             metadata['question_number'] = progress['question_number']
             metadata['is_completed'] = progress['is_completed']
 
         response = {
-            'results': results,
+            'records': results,
             'metadata': metadata
         }
 
         return response
 
     @staticmethod
-    def interview_progress(db, interview_id, sub_cat_id):
-        interview_question = SharedRepo.get_interview_question(db, 
-            sub_cat_id, user_id=1)
+    async def interview_progress(db, request, interview_id, sub_cat_id):
+        interview_question = await SharedRepo.get_interview_question(
+            db, request, sub_cat_id, user_id=1)
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
 

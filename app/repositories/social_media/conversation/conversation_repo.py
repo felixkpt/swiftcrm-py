@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import Request
+from fastapi import Request, Depends
 from sqlalchemy.exc import IntegrityError
 from app.database.old_connection import execute_query, execute_insert
 from app.repositories.social_media.conversation.categories.sub_categories.sub_category_repo import SubCategoryRepo
@@ -26,7 +26,7 @@ class ConversationRepo:
         response_message = assistant_info['message']
 
         user_id = 1
-        cat_id = SubCategoryRepo.get(db, sub_cat_id).id
+        cat_id = SubCategoryRepo().get(db, sub_cat_id).category_id
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         created_at = now
         updated_at = now
@@ -58,14 +58,14 @@ class ConversationRepo:
                 message_id, word_confidences)
 
         return {
-            'results': results,
+            'records': results,
             'metadata': {}
         }
 
     @staticmethod
-    def store_interview_messages(db, sub_cat_id, my_info, assistant_info, interview_id):
-        interview_question = SharedRepo.get_interview_question(
-            db, sub_cat_id, user_id=1)
+    async def store_interview_messages(db, request, sub_cat_id, my_info, assistant_info, interview_id):
+        interview_question = await SharedRepo.get_interview_question(
+            db, request, sub_cat_id, user_id=1)
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
 
@@ -74,7 +74,7 @@ class ConversationRepo:
 
         if interview_question['is_completed']:
             return {
-                'results': [],
+                'records': [],
                 'metadata': {
                     'question_number': interview_question['question_number'],
                     'is_completed': True
@@ -87,7 +87,7 @@ class ConversationRepo:
         response_message = assistant_info['message']
 
         user_id = 1
-        cat_id = SubCategoryRepo.get(db, sub_cat_id).category_id
+        cat_id = SubCategoryRepo().get(db, sub_cat_id).category_id
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         created_at = now
         updated_at = now
@@ -133,7 +133,7 @@ class ConversationRepo:
                 message_id, word_confidences)
 
         return {
-            'results': results,
+            'records': results,
             'metadata': {
                 'question_number': interview_question['question_number'],
                 'is_completed': interview_question['is_completed']
@@ -141,12 +141,12 @@ class ConversationRepo:
         }
 
     @staticmethod
-    def store_messages(db, sub_cat_id, my_info, assistant_info, mode='training', interview_id=None):
+    async def store_messages(db, request, sub_cat_id, my_info, assistant_info, mode='training', interview_id=None):
         if mode == 'training':
             resp = ConversationRepo.store_training_messages(db,
                                                             sub_cat_id, my_info, assistant_info)
         else:
-            resp = ConversationRepo.store_interview_messages(db,
+            resp = await ConversationRepo.store_interview_messages(db, request,
                                                              sub_cat_id, my_info, assistant_info, interview_id)
 
         # Return the inserted records
@@ -214,12 +214,14 @@ class ConversationRepo:
         return learn_instructions + add + ' Respond in English only.'
 
     @staticmethod
-    def get_interview_instructions(db, sub_cat):
-        cat_name = CategoryRepo.get(db, sub_cat.category_id).name
+    async def get_interview_instructions(db, request, sub_cat):
+        cat_name = CategoryRepo().get(db, sub_cat.category_id).name
         learn_instructions = f'You are interviewing a user on "{cat_name} - {sub_cat.name}".'
 
-        res = SharedRepo.get_interview_question(
-            db, sub_cat.id, user_id=1, update=True)
+        res = await SharedRepo.get_interview_question(
+            db, request, sub_cat.id, user_id=1, update=True)
+        print('res::: --->', res)
+
         question = res['question']
         question_number = res['question_number']
         is_completed = res['is_completed']
@@ -236,8 +238,8 @@ class ConversationRepo:
         return learn_instructions + ' ASK THE QUESTION, DO NOT ANSWER. You MUST include question & number. eg "1. What is lorem ipsum?" Respond in English only. Keep your response under 40 words.', interview_id
 
     @staticmethod
-    def get_recent_messages(db, sub_cat_id, mode='training'):
-        sub_cat = SubCategoryRepo.get(db, sub_cat_id)
+    async def get_recent_messages(db, request, sub_cat_id, mode='training'):
+        sub_cat = SubCategoryRepo().get(db, sub_cat_id)
         if not sub_cat:
             raise ValueError(f"Invalid sub-category ID: {sub_cat_id}")
 
@@ -246,8 +248,9 @@ class ConversationRepo:
             learn_instructions = ConversationRepo.get_training_instructions(
                 sub_cat)
         else:
-            learn_instructions, interview_id = ConversationRepo.get_interview_instructions(
-                db, sub_cat)
+            print('get_recent_messages---->get_interview_instructions')
+            learn_instructions, interview_id = await ConversationRepo.get_interview_instructions(
+                db, request, sub_cat)
 
         messages = [{'content': learn_instructions, 'role': 'system'}]
 
@@ -272,18 +275,18 @@ class ConversationRepo:
 
     @staticmethod
     def save_word_confidences(message_id, word_confidences):
-         
+
         if not word_confidences:
             return
 
         query = """
-        INSERT INTO conversation_v2_word_confidences (message_id, word, confidence, start_time_seconds, end_time_seconds)
+        INSERT INTO soccc_media_conversation_messages_word_confidences (message_id, word, confidence, start_time_seconds, end_time_seconds)
         VALUES (%s, %s, %s, %s, %s)
         """
 
         values = [(message_id, wc['word'], wc['confidence'], wc['start_time'], wc['end_time'])
                   for wc in word_confidences]
-        
+
         print(values)
 
         try:
