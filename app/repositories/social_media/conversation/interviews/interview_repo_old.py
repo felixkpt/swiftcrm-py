@@ -14,15 +14,15 @@ class InterviewRepo:
         return session
 
     @staticmethod
-    def get_interview_progress(db, sub_cat_id, interview_id):
+    async def get_interview_progress(db,request, sub_cat_id, interview_id):
         # Step 1: Query the database to get the list of questions
-        query = "SELECT * FROM soc7e_media_conversation_categories_sub_categories_questions WHERE sub_category_id = %s"
+        query = "SELECT * FROM soc4bversation_categories_sub_categories_questions WHERE sub_category_id = %s ORDER BY created_at desc"
         results = execute_query(query, (sub_cat_id,))
 
         # Step 2: Retrieve the session messages using sub_cat_id and the interview_id
-        response = SharedRepo.get_sub_cat_conversation(db, 
+        response = await SharedRepo.get_sub_cat_conversation(db, request,
             sub_cat_id, 'interview', interview_id)
-        messages = response['results']
+        messages = response['records']
 
         current_question_id = None
         if len(messages):
@@ -33,7 +33,6 @@ class InterviewRepo:
         current_question = 0
         if current_question_id:
             # Step 3: Determine the current question's index
-            print('current_question_id:', current_question_id)
             current_question = next((index for index, item in enumerate(
                 results) if item['id'] == current_question_id), 0) + 1
 
@@ -63,9 +62,9 @@ class InterviewRepo:
             return None
 
         query = """
-        SELECT question_id, question_scores as score, content AS answer, soc7e_media_conversation_categories_sub_categories_questions.question, soc7e_media_conversation_categories_sub_categories_questions.marks as max_score 
+        SELECT question_id, question_scores as score, content AS answer, soc4bversation_categories_sub_categories_questions.question, soc4bversation_categories_sub_categories_questions.marks as max_score 
         FROM social_media_conversation_messages
-        JOIN soc7e_media_conversation_categories_sub_categories_questions on social_media_conversation_messages.question_id = soc7e_media_conversation_categories_sub_categories_questions.id
+        JOIN soc4bversation_categories_sub_categories_questions on social_media_conversation_messages.question_id = soc4bversation_categories_sub_categories_questions.id
         WHERE interview_id = %s AND role = 'user' AND question_id IS NOT NULL
         """
 
@@ -79,7 +78,7 @@ class InterviewRepo:
         percentage_score = round(percentage_score)
 
         return {
-            "results": results,
+            "records": results,
             "total_score": total_score,
             "max_score": max_score,
             "percentage_score": percentage_score
@@ -93,7 +92,7 @@ class InterviewRepo:
         # Fetch the actual questions and marks
         for msg in messages:
             if msg['role'] == 'user' and msg['question_id']:
-                question_query = "SELECT question, marks FROM soc7e_media_conversation_categories_sub_categories_questions WHERE id = %s"
+                question_query = "SELECT question, marks FROM soc4bversation_categories_sub_categories_questions WHERE id = %s"
                 question_result = execute_query(
                     question_query, (msg['question_id'],), fetch_method='first')
                 if question_result:
@@ -116,7 +115,7 @@ class InterviewRepo:
         # notify_new_interview_results(interview_id)
 
         return {
-            "results": scores,
+            "records": scores,
             "total_score": total_score,
             "max_score": max_score,
             "percentage_score": percentage_score
@@ -152,7 +151,7 @@ class InterviewRepo:
         }
 
         response = {
-            'results': results,
+            'records': results,
             'metadata': metadata
         }
 
@@ -169,7 +168,7 @@ class InterviewRepo:
         }
 
         response = {
-            'results': results,
+            'records': results,
             'metadata': metadata
         }
 
@@ -178,11 +177,11 @@ class InterviewRepo:
     @staticmethod
     def list_interviews_by_category_sub_category_id(category_id, sub_category_id, status_id=None):
         base_query = """
-        SELECT social_media_conversation_interviews.*, soc7e_media_conversation_categories_sub_categories.name AS sub_category_name, soc7e_media_conversation_categories_sub_categories_questions.question AS question, soc7e_media_conversation_categories_sub_categories_questions.marks AS max_score, social_media_conversation_messages.question_scores AS score
+        SELECT social_media_conversation_interviews.*, soc7e_media_conversation_categories_sub_categories.name AS sub_category_name, soc4bversation_categories_sub_categories_questions.question AS question, soc4bversation_categories_sub_categories_questions.marks AS max_score, social_media_conversation_messages.question_scores AS score
         FROM social_media_conversation_interviews
         JOIN soc7e_media_conversation_categories_sub_categories ON social_media_conversation_interviews.sub_category_id = soc7e_media_conversation_categories_sub_categories.id
         LEFT JOIN social_media_conversation_messages ON social_media_conversation_interviews.id = social_media_conversation_messages.interview_id AND social_media_conversation_messages.role = 'user'
-        LEFT JOIN soc7e_media_conversation_categories_sub_categories_questions ON social_media_conversation_messages.question_id = soc7e_media_conversation_categories_sub_categories_questions.id
+        LEFT JOIN soc4bversation_categories_sub_categories_questions ON social_media_conversation_messages.question_id = soc4bversation_categories_sub_categories_questions.id
         WHERE social_media_conversation_interviews.category_id = %s AND social_media_conversation_interviews.sub_category_id = %s
         """
         params = [category_id, sub_category_id]
@@ -203,7 +202,7 @@ class InterviewRepo:
         }
 
         response = {
-            'results': results,
+            'records': results,
             'metadata': metadata
         }
 
@@ -260,7 +259,7 @@ class InterviewRepo:
         }
 
         return {
-            'results': grouped_results,
+            'records': grouped_results,
             'metadata': metadata
         }
 
@@ -300,6 +299,6 @@ class InterviewRepo:
         }
 
         return {
-            'results': grouped_results,
+            'records': grouped_results,
             'metadata': metadata
         }

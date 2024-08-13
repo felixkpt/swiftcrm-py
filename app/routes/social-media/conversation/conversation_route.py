@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Request
 from sqlalchemy.orm import Session
 from app.repositories.social_media.conversation.conversation_repo import ConversationRepo as Repo
 from app.repositories.social_media.conversation.messages.message_repo import MessageRepo
@@ -10,6 +10,7 @@ router = APIRouter()
 # Instantiate model repository classes
 repo = Repo()
 messageRepo = MessageRepo()
+
 
 @router.get("/seeder")
 async def set_database(db: Session = Depends(get_db)):
@@ -24,9 +25,9 @@ async def cat_conversation(cat_id: str, mode: str = Query(..., description="Mode
 
 
 @router.get("/sub-categories/{sub_cat_id}/conversation")
-async def sub_cat_conversation(sub_cat_id: str, mode: str = Query(..., description="Mode type (e.g., 'training', 'interview')"), interview_id: str = Query(None, description="Interview Session ID."), db: Session = Depends(get_db)):
-    conversation = messageRepo.get_sub_cat_conversation(db, 
-        sub_cat_id, mode=mode, interview_id=interview_id)
+async def sub_cat_conversation(request: Request, sub_cat_id: str, mode: str = Query(..., description="Mode type (e.g., 'training', 'interview')"), interview_id: str = Query(None, description="Interview Session ID."), db: Session = Depends(get_db)):
+    conversation = await messageRepo.get_sub_cat_conversation(db,
+                                                        request, sub_cat_id, mode=mode, interview_id=interview_id)
     return conversation
 
 

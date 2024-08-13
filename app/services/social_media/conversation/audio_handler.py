@@ -65,7 +65,7 @@ async def process_audio_and_return_combined_results(db, request, source_file_nam
     # Save messages
     response = []
     if response_message:
-        response = conversationRepo.store_messages(
+        response = await conversationRepo.store_messages(
             db, request, sub_cat_id, my_info, assistant_info, mode, interview_id)
         records = response['records']
         if records:

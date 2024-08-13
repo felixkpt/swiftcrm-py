@@ -4,18 +4,13 @@ from app.repositories.social_media.conversation.categories.sub_categories.sub_ca
 from app.repositories.social_media.conversation.categories.sub_categories.questions.question_repo import QuestionRepo
 from app.database.old_connection import execute_query, execute_insert
 
-from fastapi import Request
+from fastapi import Request, Query
 from typing import Dict
-from fastapi import Depends
-
 
 def merge_query_params(request: Request, params: Dict[str, str]):
     query_params = dict(request.query_params)
     query_params.update(params)
-    request.scope['query_string'] = '&'.join(
-        [f"{key}={value}" for key, value in query_params.items()])
     return request
-
 
 class SharedRepo:
 
@@ -30,12 +25,13 @@ class SharedRepo:
     async def get_interview_question(db, request, sub_cat_id, user_id, update=False):
         cat_id = SubCategoryRepo().get(db, sub_cat_id).category_id
 
-        # Merge the sub_category_id into the request's query params
-        # request = merge_query_params(
-        #     request, {'sub_category_id': str(sub_cat_id)})
+        # Merge the sub_category_id into the request's state params
+        request.state.category_id = str(cat_id)
+        request.state.sub_category_id = str(sub_cat_id)
+        request.state.order_by = 'id'
+        request.state.order_direction = 'desc'
 
         questions = (await QuestionRepo().list(db, request))['records']
-        print('questions::', questions)
 
         query_session = "SELECT id, current_question_id FROM social_media_conversation_interviews WHERE user_id = %s AND category_id = %s AND sub_category_id = %s AND status_id = %s"
         session = execute_query(
@@ -114,7 +110,7 @@ class SharedRepo:
         return message_record
 
     @staticmethod
-    def get_sub_cat_conversation(db, sub_cat_id, mode='training', interview_id=None):
+    async def get_sub_cat_conversation(db, request, sub_cat_id, mode='training', interview_id=None):
         if mode not in ['training', 'interview']:
             raise ValueError("Mode must be either 'training' or 'interview'")
 
@@ -147,8 +143,8 @@ class SharedRepo:
         }
 
         if mode == 'interview':
-            progress = SharedRepo.interview_progress(
-                db, interview_id, sub_cat_id)
+            progress = await SharedRepo.interview_progress(
+                db, request, interview_id, sub_cat_id)
             metadata['question_number'] = progress['question_number']
             metadata['is_completed'] = progress['is_completed']
 

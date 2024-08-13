@@ -116,8 +116,8 @@ class ConversationRepo:
         execute_insert(assistant_message_query, (user_id, cat_id, sub_cat_id, 'assistant', 'interview',
                        response_message, assistant_info['audio_uri'], interview_id, question_id, created_at, updated_at))
 
-        interview_question = SharedRepo.get_interview_question(
-            db, sub_cat_id, user_id=1)
+        interview_question = await SharedRepo.get_interview_question(
+            db, request, sub_cat_id, user_id=1)
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
         interview_question['is_completed'] = interview_question['is_completed'] and interview_question[

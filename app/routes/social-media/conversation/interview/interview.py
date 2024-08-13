@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Request
 from sqlalchemy.orm import Session
 from app.repositories.social_media.conversation.interviews.interview_repo_old import InterviewRepo as Repo
 from typing import Dict, Any, Optional
@@ -6,19 +6,21 @@ from app.database.connection import get_db
 
 router = APIRouter()
 
+
 @router.get("/completed-by-categories")
 async def route_list_completed_interviews():
     return Repo.list_completed_interviews_grouped_by_category()
 
 
-@router.get("/completed-by-categories/{cat_id}")
-async def route_list_completed_interviews(cat_id: str):
-    return Repo.list_completed_interviews_grouped_by_sub_categories(cat_id)
+@router.get("/completed-by-categories/{category_id}")
+async def route_list_completed_interviews(category_id: str):
+    return Repo.list_completed_interviews_grouped_by_sub_categories(category_id)
 
 
-@router.get("/{sub_cat_id}/progress")
-async def get_interview_session_progress(sub_cat_id: str, interview_id: str = Query(..., description="Interview Session ID."), db: Session = Depends(get_db)):
-    progress = Repo.get_interview_progress(db, sub_cat_id, interview_id)
+@router.get("/{sub_category_id}/progress")
+async def get_interview_session_progress(request: Request, sub_category_id: str, interview_id: str = Query(..., description="Interview Session ID."), db: Session = Depends(get_db)):
+    progress = await Repo.get_interview_progress(
+        db, request, sub_category_id, interview_id)
     return progress
 
 

@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.requests.response.response_helper import ResponseHelper
 from app.repositories.social_media.conversation.shared import SharedRepo
 
+
 class ExtendsMessageRepo():
     def get_cat_conversation(self, db: Session, cat_id: int, mode: str = 'training'):
         if mode not in ['training', 'interview']:
@@ -18,9 +19,8 @@ class ExtendsMessageRepo():
             return query.all()
         except SQLAlchemyError as e:
             return ResponseHelper.handle_database_error(e)
-        
 
-    def get_sub_cat_conversation(self, db: Session, sub_cat_id: int, mode: str = 'training', interview_id: int = None):
+    async def get_sub_cat_conversation(self, db: Session, request, sub_cat_id: int, mode: str = 'training', interview_id: int = None):
         if mode not in ['training', 'interview']:
             raise ValueError("Mode must be either 'training' or 'interview'")
 
@@ -43,8 +43,10 @@ class ExtendsMessageRepo():
             }
 
             if mode == 'interview' and interview_id:
-                progress = SharedRepo.interview_progress(db, interview_id, sub_cat_id)
-                metadata['question_number'] = progress.get('question_number', 0)
+                progress = await SharedRepo.interview_progress(
+                    db, request, interview_id, sub_cat_id)
+                metadata['question_number'] = progress.get(
+                    'question_number', 0)
                 metadata['is_completed'] = progress.get('is_completed', False)
 
             response = {
