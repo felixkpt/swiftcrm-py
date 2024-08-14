@@ -1,7 +1,6 @@
 from google.cloud import texttospeech, speech, storage
 from google.oauth2 import service_account
 import os
-import tempfile
 
 # Load environment variables
 GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv('GOOGLE_CLOUD_STORAGE_BUCKET')
@@ -43,21 +42,11 @@ def convert_text_to_speech(text, destination_file_name):
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
 
-    file_extension = '.webm'
+    with open(destination_file_name, 'wb') as f:
+        f.write(response.audio_content)
+        file_path = f.name
 
-    # Create a temporary file to save the text-to-speech
-    with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
-        temp_file.write(response.audio_content)
-        temp_file_path = temp_file.name
-
-    # Upload assistant audio file to Google Cloud Storage
-    public_url = upload_to_gcs(temp_file_path, destination_file_name)
-
-    # Optionally remove the temporary file after processing
-    os.remove(temp_file_path)
-
-    # Return the public URL of the uploaded audio file
-    return public_url
+    return file_path
 
 
 def upload_to_gcs(source_file_name, destination_file_name):
@@ -82,50 +71,46 @@ def upload_to_gcs(source_file_name, destination_file_name):
     return blob.public_url
 
 
-def transcribe_speech(public_gcs_url):
-    # Convert the public GCS URL to the gs:// format
-    # Example public URL: https://storage.googleapis.com/bucket_name/object_name
-    # Converted gs URI: gs://bucket_name/object_name
+def transcribe_speech(source_file_name):
+
+    print('source_file_name',source_file_name)
 
     try:
-        # Extract the bucket and object name from the public URL
-        if public_gcs_url.startswith('https://storage.googleapis.com/'):
-            parts = public_gcs_url.replace(
-                'https://storage.googleapis.com/', '').split('/', 1)
-            gcs_uri = f'gs://{parts[0]}/{parts[1]}'
-        else:
-            raise ValueError("Invalid public GCS URL format.")
 
-        audio = speech.RecognitionAudio(uri=gcs_uri)
-        config = speech.RecognitionConfig(
-            encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
-            sample_rate_hertz=48000,
-            language_code="en-KE",
-            model="default",
-            audio_channel_count=1,
-            enable_word_confidence=True,
-            enable_word_time_offsets=True,
-        )
+        with open(source_file_name, "rb") as audio_file:
+            audio_content = audio_file.read()
 
-        response = speech_client.recognize(config=config, audio=audio)
+            audio = speech.RecognitionAudio(content=audio_content)
+            config = speech.RecognitionConfig(
+                encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
+                sample_rate_hertz=48000,
+                language_code="en-KE",
+                model="default",
+                audio_channel_count=1,
+                enable_word_confidence=True,
+                enable_word_time_offsets=True,
+            )
 
-        transcript_text = ' '.join(
-            [result.alternatives[0].transcript for result in response.results])
+            response = speech_client.recognize(config=config, audio=audio)
 
-        word_confidences = []
-        for result in response.results:
-            for word in result.alternatives[0].words:
-                word_confidences.append({
-                    "word": word.word,
-                    "confidence": word.confidence,
-                    "start_time": word.start_time.total_seconds(),
-                    "end_time": word.end_time.total_seconds()
-                })
+            transcript_text = ' '.join(
+                [result.alternatives[0].transcript for result in response.results])
 
-        return {
-            'transcript_text': transcript_text,
-            'word_confidences': word_confidences,
-        }
+            word_confidences = []
+            for result in response.results:
+                for word in result.alternatives[0].words:
+                    word_confidences.append({
+                        "word": word.word,
+                        "confidence": word.confidence,
+                        "start_time": word.start_time.total_seconds(),
+                        "end_time": word.end_time.total_seconds()
+                    })
+
+            return {
+                'transcript_text': transcript_text,
+                'word_confidences': word_confidences,
+            }
+        
     except Exception as e:
         print('transcribe_speech error:', e)
         return None
