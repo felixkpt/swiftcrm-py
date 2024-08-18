@@ -1,7 +1,8 @@
 # app/repositories/interviews.py
 from app.database.old_connection import execute_query
 from app.repositories.social_media.conversation.shared import SharedRepo
-from app.services.social_media.conversation.openai_requests import fetch_openai_interview_scores
+from app.repositories.social_media.conversation.categories.sub_categories.questions.question_repo import QuestionRepo
+from app.services.social_media.conversation.openai_services import OpenAIService
 from collections import defaultdict
 
 class InterviewRepo:
@@ -14,10 +15,17 @@ class InterviewRepo:
         return session
 
     @staticmethod
-    async def get_interview_progress(db,request, sub_cat_id, interview_id):
+    async def get_interview_progress(db,request, sub_cat_id):
+        # Merge the sub_category_id into the request's state params
+        request.state.sub_category_id = str(sub_cat_id)
+        request.state.order_by = 'id'
+        request.state.order_direction = 'desc'
+
+        interview = InterviewRepo.get_interview_session(sub_cat_id, 1)
+        interview_id = interview['id'] if interview else None
+        
         # Step 1: Query the database to get the list of questions
-        query = "SELECT * FROM soc4bversation_categories_sub_categories_questions WHERE sub_category_id = %s ORDER BY created_at desc"
-        results = execute_query(query, (sub_cat_id,))
+        questions = (await QuestionRepo().list(db, request))['records']
 
         # Step 2: Retrieve the session messages using sub_cat_id and the interview_id
         response = await SharedRepo.get_sub_cat_conversation(db, request,
@@ -34,12 +42,13 @@ class InterviewRepo:
         if current_question_id:
             # Step 3: Determine the current question's index
             current_question = next((index for index, item in enumerate(
-                results) if item['id'] == current_question_id), 0) + 1
+                questions) if item.id == current_question_id), 0) + 1
 
         # Step 4: Construct and return the response
         response = {
+            'interview_id': interview_id,
             'current_question': current_question,
-            'total_count': len(results) if results else 0
+            'total_count': len(questions) if questions else 0
         }
 
         return response
@@ -99,7 +108,7 @@ class InterviewRepo:
                     msg['question'] = question_result['question']
                     msg['marks'] = question_result['marks']
 
-        scores = fetch_openai_interview_scores(messages)
+        scores = OpenAIService().fetch_openai_interview_scores(messages)
 
         if scores and len(scores) > 0:
             InterviewRepo.update_interview_scores(interview_id, scores)

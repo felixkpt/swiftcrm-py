@@ -25,9 +25,9 @@ async def cat_conversation(cat_id: str, mode: str = Query(..., description="Mode
 
 
 @router.get("/sub-categories/{sub_cat_id}/conversation")
-async def sub_cat_conversation(request: Request, sub_cat_id: str, mode: str = Query(..., description="Mode type (e.g., 'training', 'interview')"), interview_id: str = Query(None, description="Interview Session ID."), db: Session = Depends(get_db)):
+async def sub_cat_conversation(request: Request, sub_cat_id: str, mode: str = Query(..., description="Mode type (e.g., 'training', 'interview')"), db: Session = Depends(get_db)):
     conversation = await messageRepo.get_sub_cat_conversation(db,
-                                                        request, sub_cat_id, mode=mode, interview_id=interview_id)
+                                                        request, sub_cat_id, mode=mode)
     return conversation
 
 

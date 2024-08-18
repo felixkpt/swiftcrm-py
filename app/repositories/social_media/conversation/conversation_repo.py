@@ -217,7 +217,7 @@ class ConversationRepo:
     async def get_interview_instructions(db, request, sub_cat):
         cat_name = CategoryRepo().get(db, sub_cat.category_id).name
         learn_instructions = f'You are interviewing a user on "{cat_name} - {sub_cat.name}".'
-
+ 
         res = await SharedRepo.get_interview_question(
             db, request, sub_cat.id, user_id=1, update=True)
         print('res::: --->', res)
@@ -248,7 +248,6 @@ class ConversationRepo:
             learn_instructions = ConversationRepo.get_training_instructions(
                 sub_cat)
         else:
-            print('get_recent_messages---->get_interview_instructions')
             learn_instructions, interview_id = await ConversationRepo.get_interview_instructions(
                 db, request, sub_cat)
 

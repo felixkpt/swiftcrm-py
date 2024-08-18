@@ -18,9 +18,9 @@ async def route_list_completed_interviews(category_id: str):
 
 
 @router.get("/{sub_category_id}/progress")
-async def get_interview_session_progress(request: Request, sub_category_id: str, interview_id: str = Query(..., description="Interview Session ID."), db: Session = Depends(get_db)):
+async def get_interview_session_progress(request: Request, sub_category_id: str, db: Session = Depends(get_db)):
     progress = await Repo.get_interview_progress(
-        db, request, sub_category_id, interview_id)
+        db, request, sub_category_id)
     return progress
 
 

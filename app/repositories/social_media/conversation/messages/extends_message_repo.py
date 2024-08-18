@@ -3,6 +3,7 @@ from app.repositories.base_repo import BaseRepo
 from sqlalchemy.exc import SQLAlchemyError
 from app.requests.response.response_helper import ResponseHelper
 from app.repositories.social_media.conversation.shared import SharedRepo
+from app.repositories.social_media.conversation.interviews.interview_repo_old import InterviewRepo
 
 
 class ExtendsMessageRepo():
@@ -20,7 +21,10 @@ class ExtendsMessageRepo():
         except SQLAlchemyError as e:
             return ResponseHelper.handle_database_error(e)
 
-    async def get_sub_cat_conversation(self, db: Session, request, sub_cat_id: int, mode: str = 'training', interview_id: int = None):
+    async def get_sub_cat_conversation(self, db: Session, request, sub_cat_id: int, mode: str = 'training'):
+        interview = InterviewRepo.get_interview_session(sub_cat_id, 1)
+        interview_id = interview['id'] if interview else None
+        
         if mode not in ['training', 'interview']:
             raise ValueError("Mode must be either 'training' or 'interview'")
 
@@ -35,11 +39,11 @@ class ExtendsMessageRepo():
             else:
                 query = query.filter(self.model.interview_id.is_(None))
 
-            results = query.order_by(self.model.id.asc()).all()
+            messages = query.order_by(self.model.id.asc()).all()
 
             metadata = {
                 'title': 'Conversation list',
-                'total_count': len(results),
+                'total_count': len(messages),
             }
 
             if mode == 'interview' and interview_id:
@@ -50,7 +54,7 @@ class ExtendsMessageRepo():
                 metadata['is_completed'] = progress.get('is_completed', False)
 
             response = {
-                'records': results,
+                'records': messages,
                 'metadata': metadata
             }
 
