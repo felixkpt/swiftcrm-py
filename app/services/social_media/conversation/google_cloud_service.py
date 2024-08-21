@@ -1,12 +1,15 @@
 from google.cloud import texttospeech, speech, storage
 from google.oauth2 import service_account
 import os
+from decouple import Config, RepositoryEnv
 
 class GoogleCloudService:
     def __init__(self):
         # Load environment variables
-        self.bucket_name = os.getenv('GOOGLE_CLOUD_STORAGE_BUCKET')
-        self.project_folder = os.getenv('GCS_PROJECT_FOLDER')
+
+        self.env_config = Config(RepositoryEnv('.env'))
+        self.bucket_name = self.env_config.get('GOOGLE_CLOUD_STORAGE_BUCKET')
+        self.project_folder = self.env_config.get('GCS_PROJECT_FOLDER')
         
         # Define the path to the service account JSON file
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

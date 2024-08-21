@@ -1,6 +1,5 @@
 import openai
 from decouple import Config, RepositoryEnv
-import re
 
 
 class OpenAIService:

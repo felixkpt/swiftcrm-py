@@ -20,12 +20,6 @@ async def list_route(request: Request, db: Session = Depends(get_db)):
     results = await repo.list(db, request)
     return results
 
-# Retrieve counts or statistics related to Questions.
-@router.get("/counts")
-async def counts_route(request: Request, db: Session = Depends(get_db)):
-    results = await repo.list(db, request)
-    return results['metadata']['total_records']
-
 # Retrieve a single Question by ID.
 @router.get("/{model_id}")
 def view_route(model_id: int, db: Session = Depends(get_db)):
@@ -41,6 +35,12 @@ async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = D
     if result is None:
         raise HTTPException(status_code=404, detail=f"Question not found")
     return await repo.update(db=db, model_id=model_id, model_request=modelRequest)
+
+# Retrieve counts or statistics related to Questions.
+@router.get("/counts")
+async def counts_route(request: Request, db: Session = Depends(get_db)):
+    results = await repo.list(db, request)
+    return results.metadata.total_counts
 
 # Update the status of a Question by ID.
 @router.put("/{model_id}/status/{status_id}")
