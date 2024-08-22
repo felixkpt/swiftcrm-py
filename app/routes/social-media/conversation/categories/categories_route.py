@@ -17,6 +17,8 @@ async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db))
 # Retrieve a list of Categories.
 @router.get("/")
 async def list_route(request: Request, db: Session = Depends(get_db)):
+    print('CATS Source:-->',request.query_params.get('source', None))
+
     results = await repo.list(db, request)
     return results
 

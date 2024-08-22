@@ -10,6 +10,7 @@ class GoogleCloudService:
         self.env_config = Config(RepositoryEnv('.env'))
         self.bucket_name = self.env_config.get('GOOGLE_CLOUD_STORAGE_BUCKET')
         self.project_folder = self.env_config.get('GCS_PROJECT_FOLDER')
+        print('GOOGLE_CLOUD_STORAGE_BUCKET:', self.bucket_name)
         
         # Define the path to the service account JSON file
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
