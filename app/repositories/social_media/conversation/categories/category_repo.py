@@ -11,18 +11,20 @@ from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 
+
 class CategoryRepo(BaseRepo):
-    
+
     model = Model
     notification = NotificationService()
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['name', 'description']
+        search_fields = ['id', 'name', 'description']
 
         query = db.query(Model)
+        query, search_fields = self.repo_specific_filters(
+            query, Model, search_fields, query_params)
         query = apply_common_filters(query, Model, search_fields, query_params)
-        query = self.repo_specific_filters(query, Model, query_params)
         metadata = set_metadata(query, query_params)
 
         # Get current user ID
@@ -39,7 +41,12 @@ class CategoryRepo(BaseRepo):
 
         return results
 
-    def repo_specific_filters(self, query, Model, query_params):
+    def repo_specific_filters(self, query, Model, search_fields, query_params):
+        value = query_params.get('id')
+        if value is not None and value.isdigit():
+            query = query.filter(Model.id == int(value))
+            search_fields.remove('id')
+
         value = query_params.get('name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name.ilike(f'%{value}%'))
@@ -47,21 +54,22 @@ class CategoryRepo(BaseRepo):
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
 
-        return query
+        return query, search_fields
 
     async def create(self, db: Session, model_request):
         required_fields = ['name', 'description']
         unique_fields = ['name']
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields)
         current_time = datetime.now()
         current_user_id = user().id
         db_query = Model(
-            name = str(model_request.name).strip(),
-            description = model_request.description,
-            user_id = current_user_id,
-            created_at = current_time,
-            updated_at = current_time,
+            name=str(model_request.name).strip(),
+            description=model_request.description,
+            user_id=current_user_id,
+            created_at=current_time,
+            updated_at=current_time,
         )
         db.add(db_query)
         try:
@@ -77,10 +85,12 @@ class CategoryRepo(BaseRepo):
         required_fields = ['name', 'description']
         unique_fields = ['name']
         Validator.validate_required_fields(model_request, required_fields)
-        UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
+        UniqueChecker.check_unique_fields(
+            db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
         current_user_id = user().id
-        db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
+        db_query = db.query(Model).filter(
+            Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
             db_query.name = str(model_request.name).strip()
             db_query.description = model_request.description

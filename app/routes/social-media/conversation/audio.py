@@ -10,9 +10,13 @@ from app.database.connection import get_db
 from fastapi import APIRouter, Request, HTTPException
 from google.cloud import storage
 from starlette.responses import StreamingResponse
+from decouple import Config, RepositoryEnv
+
+
+env_config = Config(RepositoryEnv('.env'))
 # Load environment variables
-GOOGLE_CLOUD_STORAGE_BUCKET = os.getenv('GOOGLE_CLOUD_STORAGE_BUCKET')
-GCS_PROJECT_FOLDER = os.getenv('GCS_PROJECT_FOLDER')
+GOOGLE_CLOUD_STORAGE_BUCKET = env_config.get('GOOGLE_CLOUD_STORAGE_BUCKET')
+GCS_PROJECT_FOLDER = env_config.get('GCS_PROJECT_FOLDER')
 
 router = APIRouter()
 
