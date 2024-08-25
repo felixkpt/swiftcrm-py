@@ -14,7 +14,7 @@ class Validator:
                 errors.append({
                     "type": "missing_field",
                     "loc": ["body", field],
-                    "msg": f"{field} is required.",
+                    "msg": f"{field} is a required field.",
                     "input": getattr(model_request, field),
                     "url": "https://errors.pydantic.dev/2.8/v/missing_field"
                 })

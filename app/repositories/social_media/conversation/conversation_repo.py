@@ -69,17 +69,10 @@ class ConversationRepo:
         current_interview_message = SharedRepo.get_current_interview_message(
             interview_id, role='user')
 
-        interview_question['is_completed'] = interview_question['is_completed'] and interview_question[
-            'last_question_id'] == current_interview_message['question_id']
+        print('current_interview_message::', current_interview_message)
 
-        if interview_question['is_completed']:
-            return {
-                'records': [],
-                'metadata': {
-                    'question_number': interview_question['question_number'],
-                    'is_completed': True
-                }
-            }
+        interview_question['is_completed'] = (interview_question['is_completed'] and (current_interview_message is None or interview_question[
+            'last_question_id'] == current_interview_message['question_id']))
 
         request_message = my_info['message']
         word_confidences = my_info.get('word_confidences', [])
@@ -147,7 +140,7 @@ class ConversationRepo:
                                                             sub_cat_id, my_info, assistant_info)
         else:
             resp = await ConversationRepo.store_interview_messages(db, request,
-                                                             sub_cat_id, my_info, assistant_info, interview_id)
+                                                                   sub_cat_id, my_info, assistant_info, interview_id)
 
         # Return the inserted records
         return resp
@@ -217,7 +210,7 @@ class ConversationRepo:
     async def get_interview_instructions(db, request, sub_cat):
         cat_name = CategoryRepo().get(db, sub_cat.category_id).name
         learn_instructions = f'You are interviewing a user on "{cat_name} - {sub_cat.name}".'
- 
+
         res = await SharedRepo.get_interview_question(
             db, request, sub_cat.id, user_id=1, update=True)
         print('res::: --->', res)

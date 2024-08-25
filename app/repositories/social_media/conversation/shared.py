@@ -71,6 +71,8 @@ class SharedRepo:
         interview = SharedRepo.fetch_interview_session(
             user_id, cat_id, sub_cat_id)
 
+        print('interview;;;;;', interview, 'update::', update)
+
         if not interview:
             if update:
                 question_number = 1
@@ -84,6 +86,8 @@ class SharedRepo:
                     query_insert_session, (user_id, cat_id, sub_cat_id, question_id, datetime.now(), datetime.now()))
                 interview = {'id': interview_id,
                              'current_question_id': question_id}
+                
+                print('has interview:::', interview)
 
         else:
             # Find the current question index and move to the next question
@@ -94,7 +98,7 @@ class SharedRepo:
                 question_number = current_index + 1
                 next_question_id = question_ids[current_index + 1]
                 question_number += 1
-            except (ValueError, IndexError):
+            except (ValueError, IndexError) as e:
                 # Handle case where current question is not found or there is no next question
                 next_question_id = None
                 is_completed = True
