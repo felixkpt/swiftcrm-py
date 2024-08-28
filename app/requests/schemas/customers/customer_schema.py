@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 class CustomerSchema(BaseModel):
-    name: str = Field(..., max_length=255)
+    first_name: str = Field(..., max_length=255)
     last_name: str = Field(..., max_length=255)
     phone_number: str = Field(..., max_length=255)
     email: str = Field(..., max_length=255)

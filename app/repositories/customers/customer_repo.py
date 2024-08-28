@@ -18,7 +18,7 @@ class CustomerRepo(BaseRepo):
 
     async def list(self, db: Session, request: Request):
         query_params = get_query_params(request)
-        search_fields = ['name', 'last_name', 'phone_number', 'email', 'alternate_number']
+        search_fields = ['first_name', 'last_name', 'phone_number', 'email', 'alternate_number']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -40,9 +40,9 @@ class CustomerRepo(BaseRepo):
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
-        value = query_params.get('name', '').strip()
+        value = query_params.get('first_name', '').strip()
         if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.name.ilike(f'%{value}%'))
+            query = query.filter(Model.first_name.ilike(f'%{value}%'))
         value = query_params.get('last_name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.last_name.ilike(f'%{value}%'))
@@ -62,14 +62,14 @@ class CustomerRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name', 'last_name', 'phone_number', 'email', 'alternate_number']
+        required_fields = ['first_name', 'last_name', 'phone_number', 'email', 'alternate_number']
         unique_fields = ['phone_number', 'email']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
         current_user_id = user().id
         db_query = Model(
-            name = str(model_request.name).strip(),
+            first_name = str(model_request.first_name).strip(),
             last_name = str(model_request.last_name).strip(),
             phone_number = str(model_request.phone_number).strip(),
             email = str(model_request.email).strip(),
@@ -89,7 +89,7 @@ class CustomerRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name', 'last_name', 'phone_number', 'email', 'alternate_number']
+        required_fields = ['first_name', 'last_name', 'phone_number', 'email', 'alternate_number']
         unique_fields = ['phone_number', 'email']
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -97,7 +97,7 @@ class CustomerRepo(BaseRepo):
         current_user_id = user().id
         db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
-            db_query.name = str(model_request.name).strip()
+            db_query.first_name = str(model_request.first_name).strip()
             db_query.last_name = str(model_request.last_name).strip()
             db_query.phone_number = str(model_request.phone_number).strip()
             db_query.email = str(model_request.email).strip()
