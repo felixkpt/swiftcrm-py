@@ -10,27 +10,34 @@ from app.requests.response.response_helper import ResponseHelper
 from app.repositories.base_repo import BaseRepo
 from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
-
+import time
 class CustomerRepo(BaseRepo):
     
     model = Model
     notification = NotificationService()
 
     async def list(self, db: Session, request: Request):
+        start_time = time.time()
         query_params = get_query_params(request)
         search_fields = ['first_name', 'last_name', 'phone_number', 'email', 'alternate_number']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
-        query = self.repo_specific_filters(query, Model, query_params)
+        
+        query,search_fields = self.repo_specific_filters(query, Model, search_fields, query_params)
         metadata = set_metadata(query, query_params)
 
         # Get current user ID
         current_user_id = user(request).id
-        query = query.filter(Model.user_id == current_user_id)
+        # query = query.filter(Model.user_id == current_user_id)
 
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
+
+        end_time = time.time()
+
+        loading_time = end_time - start_time
+        metadata['loading_time'] = str(round(loading_time, 2)) + ' secs'
 
         results = {
             "records": query.all(),
@@ -39,7 +46,7 @@ class CustomerRepo(BaseRepo):
 
         return results
 
-    def repo_specific_filters(self, query, Model, query_params):
+    def repo_specific_filters(self, query, Model, search_fields, query_params):
         value = query_params.get('first_name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.first_name.ilike(f'%{value}%'))
@@ -59,7 +66,7 @@ class CustomerRepo(BaseRepo):
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
 
-        return query
+        return query,search_fields
 
     async def create(self, db: Session, model_request):
         required_fields = ['first_name', 'last_name', 'phone_number', 'email', 'alternate_number']
