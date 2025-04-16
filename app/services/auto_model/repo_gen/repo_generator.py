@@ -4,7 +4,7 @@ from app.services.auto_model.repo_gen.content_templates import get_custom_conten
 
 def generate_repo(data):
     api_endpoint = data['api_endpoint']
-    api_endpoint_slugged = data['api_endpoint_slugged']
+    api_endpoint_dotnotation = data['api_endpoint_dotnotation']
     fields = data['fields']
     name_singular = data['name_singular'].replace('-', '_')
     model_name_pascal = data['model_name_pascal']
@@ -55,10 +55,10 @@ def generate_repo(data):
 
     if name_singular.replace('-', '_').lower() in customs:
         print(f"{name_singular} is a custom content type.")
-        content = get_custom_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2, name_singular)
+        content = get_custom_content(api_endpoint_dotnotation, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2, name_singular)
     else:
         print(f"{name_singular} is using default content type.")
-        content = get_default_content(api_endpoint_slugged, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2)
+        content = get_default_content(api_endpoint_dotnotation, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2)
 
     # Check if content is None or empty, and raise an error if so
     if not content:

@@ -1,8 +1,9 @@
 from app.services.auto_model.saves_file import handler
+from app.services.auto_model.helpers import build_dot_namespace
 
 def generate_routes(data):
     api_endpoint = data['api_endpoint']
-    api_endpoint_slugged = data['api_endpoint_slugged']
+    api_endpoint_dotnotation = data['api_endpoint_dotnotation']
     model_name_pascal = data['model_name_pascal']
     name_singular = data['name_singular'].replace('-', '_')
     name_plural = data['name_plural']
@@ -16,8 +17,8 @@ def generate_routes(data):
     content = f"""
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.repositories.{api_endpoint_slugged+'.'+name_singular.lower()}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{api_endpoint_slugged+'.'+name_singular.lower()}_schema import {model_name_pascal}Schema as ModelSchema
+from app.repositories.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_repo import {model_name_pascal}Repo as Repo
+from app.requests.schemas.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_schema import {model_name_pascal}Schema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()

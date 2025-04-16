@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models..team_model import Team as Model
+from app.models.team_model import Team as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper

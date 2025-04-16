@@ -1,8 +1,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.repositories.team_repo import TeamRepo as Repo
-from app.requests.schemas.team_schema import TeamSchema as ModelSchema
+from app.repositories.api.teams.team_repo import TeamRepo as Repo
+from app.requests.schemas.api.teams.team_schema import TeamSchema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()
