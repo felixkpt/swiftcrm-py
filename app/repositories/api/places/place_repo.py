@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models..api.assignment.assignment_model import ApiAssignment as Model
+from app.models.api.places.place_model import ApiPlace as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.services.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
@@ -12,7 +12,7 @@ from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 import time
 
-class AssignmentRepo(BaseRepo):
+class PlaceRepo(BaseRepo):
     
     model = Model
     notification = NotificationService()
@@ -21,7 +21,7 @@ class AssignmentRepo(BaseRepo):
         start_time = time.time()
         
         query_params = get_query_params(request)
-        search_fields = ['id', 'name', 'lecturer']
+        search_fields = ['id', 'name', 'address', 'featured_image']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -50,9 +50,12 @@ class AssignmentRepo(BaseRepo):
         value = query_params.get('name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name.ilike(f'%{value}%'))
-        value = query_params.get('lecturer', '').strip()
+        value = query_params.get('address', '').strip()
         if isinstance(value, str) and len(value) > 0:
-            query = query.filter(Model.lecturer.ilike(f'%{value}%'))
+            query = query.filter(Model.address.ilike(f'%{value}%'))
+        value = query_params.get('featured_image', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.featured_image.ilike(f'%{value}%'))
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
@@ -60,7 +63,7 @@ class AssignmentRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name', 'lecturer']
+        required_fields = ['name', 'address', 'featured_image']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -68,7 +71,8 @@ class AssignmentRepo(BaseRepo):
         current_user_id = user().id
         db_query = Model(
             name = str(model_request.name).strip(),
-            lecturer = str(model_request.lecturer).strip(),
+            address = str(model_request.address).strip(),
+            featured_image = model_request.featured_image,
             user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
@@ -84,7 +88,7 @@ class AssignmentRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name', 'lecturer']
+        required_fields = ['name', 'address', 'featured_image']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -93,7 +97,8 @@ class AssignmentRepo(BaseRepo):
         db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
             db_query.name = str(model_request.name).strip()
-            db_query.lecturer = str(model_request.lecturer).strip()
+            db_query.address = str(model_request.address).strip()
+            db_query.featured_image = model_request.featured_image
             db_query.user_id = current_user_id
             db_query.updated_at = current_time
             db.commit()

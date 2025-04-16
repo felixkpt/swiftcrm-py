@@ -145,7 +145,7 @@ def generate_model_and_api_names(data):
     """
     model_name = data.modelDisplayName
     api_endpoint = data.apiEndpoint
-    api_endpoint_slugged = api_endpoint.replace('/', '.').replace('-', '_')
+    api_endpoint_slugged = api_endpoint.strip('/').replace('/', '.').replace('-', '_')
 
     name_singular, name_plural, model_name_pascal = get_model_names(model_name)
 
