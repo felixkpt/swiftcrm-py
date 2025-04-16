@@ -21,7 +21,7 @@ class CompanyRepo(BaseRepo):
         start_time = time.time()
         
         query_params = get_query_params(request)
-        search_fields = ['id', 'name', 'address']
+        search_fields = ['id', 'name', 'address', 'Number_of_employees']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -53,6 +53,9 @@ class CompanyRepo(BaseRepo):
         value = query_params.get('address', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.address.ilike(f'%{value}%'))
+        value = query_params.get('Number_of_employees', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.Number_of_employees.ilike(f'%{value}%'))
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
@@ -60,7 +63,7 @@ class CompanyRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name', 'address']
+        required_fields = ['name', 'address', 'Number_of_employees']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -69,6 +72,7 @@ class CompanyRepo(BaseRepo):
         db_query = Model(
             name = str(model_request.name).strip(),
             address = str(model_request.address).strip(),
+            Number_of_employees = model_request.Number_of_employees,
             user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
@@ -84,7 +88,7 @@ class CompanyRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name', 'address']
+        required_fields = ['name', 'address', 'Number_of_employees']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -94,6 +98,7 @@ class CompanyRepo(BaseRepo):
         if db_query:
             db_query.name = str(model_request.name).strip()
             db_query.address = str(model_request.address).strip()
+            db_query.Number_of_employees = model_request.Number_of_employees
             db_query.user_id = current_user_id
             db_query.updated_at = current_time
             db.commit()
