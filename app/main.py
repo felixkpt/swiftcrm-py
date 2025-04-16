@@ -7,6 +7,7 @@ from app.websocket.websocket_route_handlers import websocket_routes
 import subprocess
 import logging
 from app.database.seeders.seed_data import seed_user
+from contextlib import asynccontextmanager
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -46,17 +47,9 @@ def list_routes():
 # Include WebSocket routes
 app.include_router(websocket_routes)
 
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-    list_of_routes = list_routes()
-    for route in list_of_routes:
-        print(route)
-
-@app.on_event("startup")
-async def on_startup():
+# Define the lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     # Run Alembic migrations
     try:
         subprocess.run(["alembic", "upgrade", "head"], check=True)
@@ -66,3 +59,13 @@ async def on_startup():
 
     # Seed the database
     seed_user()
+
+    yield  # This is where the application is up and running
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    list_of_routes = list_routes()
+    for route in list_of_routes:
+        print(route)
