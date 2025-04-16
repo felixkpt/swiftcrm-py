@@ -3,8 +3,10 @@ from fastapi import FastAPI
 from app.requests.middleware.cors import cors_middleware
 from app.requests.middleware.auth import auth_middleware
 from app.auto_routes_handler import auto_register_routes
-from fastapi import FastAPI
 from app.websocket.websocket_route_handlers import websocket_routes
+import subprocess
+import logging
+from app.database.seeders.seed_data import seed_user
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -52,3 +54,15 @@ if __name__ == "__main__":
     list_of_routes = list_routes()
     for route in list_of_routes:
         print(route)
+
+@app.on_event("startup")
+async def on_startup():
+    # Run Alembic migrations
+    try:
+        subprocess.run(["alembic", "upgrade", "head"], check=True)
+        logging.info("Alembic migrations applied.")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error running Alembic migrations: {e}")
+
+    # Seed the database
+    seed_user()
