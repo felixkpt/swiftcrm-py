@@ -12,7 +12,7 @@ import asyncio
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting application...")
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
 
     try:
         subprocess.run(["alembic", "upgrade", "head"], check=True)

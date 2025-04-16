@@ -16,7 +16,7 @@ def create_directory_if_not_exists(directory_path):
 def generate_file_path(api_endpoint, relative_folder, filename):
     # Determine the directory path based on api_endpoint
     directory_path = os.path.join(
-        os.getcwd(), 'app', relative_folder, *api_endpoint.split('/'))
+        os.getcwd(), 'app', relative_folder, *api_endpoint.strip('/').split('/'))
     return {'directory_path': directory_path, 'file_path': os.path.join(directory_path, filename)}
 
 def handler(api_endpoint, relative_folder, filename, content):
