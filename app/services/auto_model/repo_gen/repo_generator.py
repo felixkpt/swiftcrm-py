@@ -41,13 +41,13 @@ def generate_repo(data):
                 repo_specific_filters += f"        value = query_params.get('{field['name']}', None)\n"
                 repo_specific_filters += f"        if value is not None and value.isdigit():\n"
                 repo_specific_filters += f"            query = query.filter(Model.{field['name']} == int(value))\n"
-                repo_specific_filters += f"            search_fields.remove({field['name']})\n"
+                # repo_specific_filters += f"            search_fields.remove('{field['name']}')\n"
 
             else:
                 repo_specific_filters += f"        value = query_params.get('{field['name']}', '').strip()\n"
                 repo_specific_filters += f"        if isinstance(value, str) and len(value) > 0:\n"
                 repo_specific_filters += f"            query = query.filter(Model.{field['name']}.ilike(f'%{{value}}%'))\n"
-                repo_specific_filters += f"            search_fields.remove({field['name']})\n"
+                # repo_specific_filters += f"            search_fields.remove('{field['name']}')\n"
 
     model_path_name = name_singular.lower() + '_model'
 

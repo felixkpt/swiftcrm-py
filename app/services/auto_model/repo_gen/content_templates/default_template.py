@@ -36,6 +36,7 @@ class {model_name_pascal}Repo(BaseRepo):
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
 
+        end_time = time.time()
         loading_time = end_time - start_time
         metadata['loading_time'] = str(round(loading_time, 2))+' secs'
 
@@ -48,7 +49,7 @@ class {model_name_pascal}Repo(BaseRepo):
 
     def repo_specific_filters(self, query, Model, search_fields, query_params):
 {repo_specific_filters}
-        return query, search_fields
+        return query
 
     async def create(self, db: Session, model_request):
         required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}

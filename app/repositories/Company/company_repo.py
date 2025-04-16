@@ -35,6 +35,7 @@ class CompanyRepo(BaseRepo):
         skip = (query_params['page'] - 1) * query_params['per_page']
         query = query.offset(skip).limit(query_params['per_page'])
 
+        end_time = time.time()
         loading_time = end_time - start_time
         metadata['loading_time'] = str(round(loading_time, 2))+' secs'
 
@@ -49,13 +50,11 @@ class CompanyRepo(BaseRepo):
         value = query_params.get('name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name.ilike(f'%{value}%'))
-            search_fields.remove(name)
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
-            search_fields.remove(user_id)
 
-        return query, search_fields
+        return query
 
     async def create(self, db: Session, model_request):
         required_fields = ['name']
