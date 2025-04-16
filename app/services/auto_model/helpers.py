@@ -108,6 +108,8 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
 
 	if are_similar:
 		other = other_segments.replace('/', '_').replace('.', '_')
+		class_name = other + ' ' + name_singular
+
 		if other:
 			table_name_singular = STR.slug(f"{other}_{name_singular}")
 			table_name_plural = STR.slug(f"{other}_{name_plural}")
@@ -119,6 +121,9 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
 		class_name = api_cleaned + '_' + name_singular
 		table_name_singular = api_cleaned + '_' + name_singular
 		table_name_plural = api_cleaned + '_' + name_plural
+
+	print("api_endpoint", api_endpoint)
+	print("table_name_plural", table_name_plural)
 
 	# Convert the class_name to PascalCase
 	limit = 50

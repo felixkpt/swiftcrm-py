@@ -5,7 +5,7 @@ class STR:
     @staticmethod
     def slug(string, separator = '_'):
         # Convert to lower case and remove leading/trailing whitespace
-        string = string.strip().lower()
+        string = string.strip().strip('/').lower()
         # Replace spaces, hyphens, and invalid characters with underscores
         string = re.sub(r'[^\w\s-]', separator, string.replace('-', separator))
         string = re.sub(r'[\s]+', separator, string)
