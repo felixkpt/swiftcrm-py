@@ -1,10 +1,9 @@
-# app/auth.py
-class User:
-    def __init__(self, id: int):
-        self.id = id
+from app.models.users.user_model import User
 
-
-def user(request=None):
-    # Placeholder for getting the current user from the request
-    # Implement this based on your auth strategy
-    return User(id=1)  # Example: Replace with actual user ID retrieval logic
+def user(request=None) -> User:
+    """
+    Returns the current user object.
+    For now, this is a mock with hardcoded ID.
+    Replace with actual authentication logic in production.
+    """
+    return User(id=1)
