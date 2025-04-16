@@ -1,67 +1,67 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.repositories.social_media.conversation.categories.sub_categories.questions.question_repo import QuestionRepo as Repo
-from app.requests.schemas.social_media.conversation.categories.sub_categories.questions.question_schema import QuestionSchema as ModelSchema
+from app.repositories.Company.company_repo import CompanyRepo as Repo
+from app.requests.schemas.Company.company_schema import CompanySchema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()
 
 repo = Repo()  # Instantiate model repository class
 
-# Create a new Question instance.
+# Create a new Company instance.
 @router.post("/", response_model=ModelSchema)
 async def create_route(modelRequest: ModelSchema, db: Session = Depends(get_db)):
     return await repo.create(db=db, model_request=modelRequest)
 
-# Retrieve a list of Questions.
+# Retrieve a list of Companies.
 @router.get("/")
 async def list_route(request: Request, db: Session = Depends(get_db)):
     results = await repo.list(db, request)
     return results
 
-# Retrieve counts or statistics related to Questions.
-@router.get("/counts")
-async def counts_route(request: Request, db: Session = Depends(get_db)):
-    results = await repo.list(db, request)
-    return results['metadata']['total_records']
-
-# Retrieve a single Question by ID.
+# Retrieve a single Company by ID.
 @router.get("/{model_id}")
 def view_route(model_id: int, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"Question not found")
+        raise HTTPException(status_code=404, detail=f"Company not found")
     return result
 
-# Update an existing Question by ID.
+# Update an existing Company by ID.
 @router.put("/{model_id}", response_model=ModelSchema)
 async def update_route(model_id: int, modelRequest: ModelSchema, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"Question not found")
+        raise HTTPException(status_code=404, detail=f"Company not found")
     return await repo.update(db=db, model_id=model_id, model_request=modelRequest)
 
-# Update the status of a Question by ID.
+# Retrieve counts or statistics related to Companies.
+@router.get("/counts")
+async def counts_route(request: Request, db: Session = Depends(get_db)):
+    results = await repo.list(db, request)
+    return results.metadata.total_counts
+
+# Update the status of a Company by ID.
 @router.put("/{model_id}/status/{status_id}")
 async def update_status_route(model_id: int, status_id: int, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"Question not found")
+        raise HTTPException(status_code=404, detail=f"Company not found")
     return await repo.update_status(db=db, model_id=model_id, status_id=status_id)
 
-# Update statuses of multiple Questions.
+# Update statuses of multiple Companies.
 @router.put("/statuses")
 async def update_statuses_route(request: Request, status_id: int, db: Session = Depends(get_db)):
     result = await repo.update_multiple_statuses(db, request, status_id=status_id)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"Question not found")
+        raise HTTPException(status_code=404, detail=f"Company not found")
     return result
 
-# Delete a Question by ID.
+# Delete a Company by ID.
 @router.delete("/{model_id}")
 async def delete_route(model_id: int, db: Session = Depends(get_db)):
     result = repo.get(db, model_id=model_id)
     if result is None:
-        raise HTTPException(status_code=404, detail=f"Question not found")
+        raise HTTPException(status_code=404, detail=f"Company not found")
     return await repo.delete(db=db, model_id=model_id)
