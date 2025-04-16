@@ -27,7 +27,6 @@ cors_middleware(app)
 def read_root():
     return {"message": "Welcome to SwiftCRM-PY!"}
 
-
 # Automatically generate and register routes
 auto_register_routes(app)
 
