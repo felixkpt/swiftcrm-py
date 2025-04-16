@@ -25,7 +25,7 @@ class CompanyRepo(BaseRepo):
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
-        query = self.repo_specific_filters(query, Model, search_fields, query_params)
+        query = self.repo_specific_filters(query, Model, query_params)
 
         # Get current user ID
         current_user_id = user(request).id
