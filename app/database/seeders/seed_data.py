@@ -21,7 +21,7 @@ def seed_user():
             db.commit()
             print("Default admin user seeded.")
         else:
-            print("ℹAdmin user already exists, skipping.")
+            print("Admin user already exists, skipping.")
 
     except Exception as e:
         db.rollback()
