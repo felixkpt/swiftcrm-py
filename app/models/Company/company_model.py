@@ -7,7 +7,7 @@ class Company(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     address = Column(String(255))
-    Number_of_employees = Column(Integer)
+    number_of_employees = Column(Integer)
     user_id = Column(Integer, ForeignKey('users.id'))
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())

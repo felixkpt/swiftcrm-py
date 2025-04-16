@@ -47,7 +47,7 @@ class {model_name_pascal}Repo(BaseRepo):
 
         return results
 
-    def repo_specific_filters(self, query, Model, search_fields, query_params):
+    def repo_specific_filters(self, query, Model, query_params):
 {repo_specific_filters}
         return query
 

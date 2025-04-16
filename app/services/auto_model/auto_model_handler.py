@@ -10,11 +10,19 @@ from app.database.connection import get_db
 from app.models.users.user_model import User
 from app.patterns.models.factory import ModelFactory
 from app.repositories.users.user_repo import UserRepo
-
+import re
 
 def convert_fields_to_dict(fields):
     """Convert each field in the list to a dictionary if it's not already."""
     return [field.dict() for field in fields]
+
+def normalize_fields(fields: list[dict]) -> list[dict]:
+    for field in fields:
+        # Lowercase, replace spaces with underscores, remove non-alphanumeric (except _)
+        name = field['name'].lower().replace(' ', '_')
+        name = re.sub(r'[^a-z0-9_]', '', name)
+        field['name'] = name
+    return fields
 
 
 async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None):
@@ -23,6 +31,8 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
     fields = convert_fields_to_dict(data.get('fields', []))
 
     if fields:
+        fields = normalize_fields(fields)
+
         fields.append({
             'name': 'user_id',
             'type': 'integer',
