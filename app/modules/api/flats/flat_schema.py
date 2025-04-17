@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-class CloudproviderSchema(BaseModel):
+class FlatSchema(BaseModel):
     name: str = Field(..., max_length=255)
     user_id: Optional[int] = Field(None, max_length=None)
 

@@ -2,8 +2,8 @@ from sqlalchemy import Column, ForeignKey, DateTime, Integer, String, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
-class Cloudprovider(Base):
-    __tablename__ = '_cloudproviders'
+class ApiFlat(Base):
+    __tablename__ = 'api_flats'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     user_id = Column(Integer, ForeignKey('users.id'))
