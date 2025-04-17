@@ -2,8 +2,8 @@ from sqlalchemy import Column, ForeignKey, DateTime, Integer, String, func
 from app.models.base import Base
 from sqlalchemy.orm import relationship
 
-class ApiFlat(Base):
-    __tablename__ = 'api_flats'
+class ApiStage(Base):
+    __tablename__ = 'api_stages'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     user_id = Column(Integer, ForeignKey('users.id'))
