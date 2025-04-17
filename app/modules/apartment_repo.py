@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.modules.cloudprovider_model import Cloudprovider as Model
+from app.modules..apartment_model import Apartment as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.repositories.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
@@ -12,7 +12,7 @@ from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 import time
 
-class CloudproviderRepo(BaseRepo):
+class ApartmentRepo(BaseRepo):
     
     model = Model
     notification = NotificationService()
