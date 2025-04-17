@@ -6,6 +6,7 @@ class ApiEmailProvidersEmailprovider(Base):
     __tablename__ = 'api_email_providers_emailproviders'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
+    location = Column(String(255))
     user_id = Column(Integer, ForeignKey('users.id'))
     status_id = Column(Integer, nullable=False, server_default='1')
     created_at = Column(DateTime, server_default=func.now())

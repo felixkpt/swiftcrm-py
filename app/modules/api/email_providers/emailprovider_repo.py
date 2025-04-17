@@ -21,7 +21,7 @@ class EmailproviderRepo(BaseRepo):
         start_time = time.time()
         
         query_params = get_query_params(request)
-        search_fields = ['id', 'name']
+        search_fields = ['id', 'name', 'location']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -50,6 +50,9 @@ class EmailproviderRepo(BaseRepo):
         value = query_params.get('name', '').strip()
         if isinstance(value, str) and len(value) > 0:
             query = query.filter(Model.name.ilike(f'%{value}%'))
+        value = query_params.get('location', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.location.ilike(f'%{value}%'))
         value = query_params.get('user_id', None)
         if value is not None and value.isdigit():
             query = query.filter(Model.user_id == int(value))
@@ -57,7 +60,7 @@ class EmailproviderRepo(BaseRepo):
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = ['name']
+        required_fields = ['name', 'location']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -65,6 +68,7 @@ class EmailproviderRepo(BaseRepo):
         current_user_id = user().id
         db_query = Model(
             name = str(model_request.name).strip(),
+            location = str(model_request.location).strip(),
             user_id = current_user_id,
             created_at = current_time,
             updated_at = current_time,
@@ -80,7 +84,7 @@ class EmailproviderRepo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = ['name']
+        required_fields = ['name', 'location']
         unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
@@ -89,6 +93,7 @@ class EmailproviderRepo(BaseRepo):
         db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
             db_query.name = str(model_request.name).strip()
+            db_query.location = str(model_request.location).strip()
             db_query.user_id = current_user_id
             db_query.updated_at = current_time
             db.commit()

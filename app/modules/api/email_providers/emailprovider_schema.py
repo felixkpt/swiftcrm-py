@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 class EmailproviderSchema(BaseModel):
     name: str = Field(..., max_length=255)
+    location: str = Field(..., max_length=255)
     user_id: Optional[int] = Field(None, max_length=None)
 
     class Config:
