@@ -4,8 +4,7 @@ from fastapi import FastAPI
 
 
 def auto_register_routes(app: FastAPI):
-    # routes_directory = os.path.join(os.getcwd(), 'app', 'routes')
-    routes_directory = os.path.join(os.getcwd(), 'app', 'modules').replace('_', '-')
+    routes_directory = os.path.join(os.getcwd(), 'app', 'modules')
     register_files_in_directory(app, routes_directory)
 
 
