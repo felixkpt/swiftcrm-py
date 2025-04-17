@@ -4,7 +4,7 @@ def generate_schema(data):
     api_endpoint = data['api_endpoint']
     fields = data['fields']
     model_name_pascal = data['model_name_pascal']
-    name_singular = data['name_singular']
+    nameSingular = data['nameSingular']
 
     # Dictionary to map field data types to Pydantic types
     type_mapping = {
@@ -37,5 +37,5 @@ def generate_schema(data):
 """
 
     path = api_endpoint.replace('-', '_')
-    filename = f'{name_singular.lower()}_schema.py'
+    filename = f'{nameSingular.lower()}_schema.py'
     handler(path, 'modules', filename, content)

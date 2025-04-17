@@ -54,27 +54,27 @@ class ModelBuilderRepo(BaseRepo):
 		value = query_params.get('modelDisplayName', '').strip()
 		if isinstance(value, str) and len(value) > 0:
 			query = query.filter(Model.modelDisplayName.ilike(f'%{value}%'))
-		value = query_params.get('name_singular', '').strip()
+		value = query_params.get('nameSingular', '').strip()
 		if isinstance(value, str) and len(value) > 0:
-			query = query.filter(Model.name_singular.ilike(f'%{value}%'))
-		value = query_params.get('name_plural', '').strip()
+			query = query.filter(Model.nameSingular.ilike(f'%{value}%'))
+		value = query_params.get('namePlural', '').strip()
 		if isinstance(value, str) and len(value) > 0:
-			query = query.filter(Model.name_plural.ilike(f'%{value}%'))
+			query = query.filter(Model.namePlural.ilike(f'%{value}%'))
 		value = query_params.get('modelURI', '').strip()
 		if isinstance(value, str) and len(value) > 0:
 			query = query.filter(Model.modelURI.ilike(f'%{value}%'))
 		value = query_params.get('apiEndpoint', '').strip()
 		if isinstance(value, str) and len(value) > 0:
 			query = query.filter(Model.apiEndpoint.ilike(f'%{value}%'))
-		value = query_params.get('table_name_singular', '').strip()
+		value = query_params.get('tableNameSingular', '').strip()
 		if isinstance(value, str) and len(value) > 0:
-			query = query.filter(Model.table_name_singular.ilike(f'%{value}%'))
-		value = query_params.get('table_name_plural', '').strip()
+			query = query.filter(Model.tableNameSingular.ilike(f'%{value}%'))
+		value = query_params.get('tableNamePlural', '').strip()
 		if isinstance(value, str) and len(value) > 0:
-			query = query.filter(Model.table_name_plural.ilike(f'%{value}%'))
-		value = query_params.get('class_name', '').strip()
+			query = query.filter(Model.tableNamePlural.ilike(f'%{value}%'))
+		value = query_params.get('className', '').strip()
 		if isinstance(value, str) and len(value) > 0:
-			query = query.filter(Model.class_name.ilike(f'%{value}%'))
+			query = query.filter(Model.className.ilike(f'%{value}%'))
 		value = query_params.get('createFrontendViews', '').strip()
 		if isinstance(value, str) and len(value) > 0:
 			query = query.filter(Model.createFrontendViews.ilike(f'%{value}%'))
@@ -87,14 +87,14 @@ class ModelBuilderRepo(BaseRepo):
 	async def create(self, db: Session, model_request):
 		generated_data = self.prepare_data(model_request)
 		await auto_model_handler(generated_data, db)
-		model_request.name_singular = generated_data['name_singular']
-		model_request.name_plural = generated_data['name_plural']
-		model_request.class_name = generated_data['class_name']
-		model_request.table_name_singular = generated_data['table_name_singular']
-		model_request.table_name_plural = generated_data['table_name_plural']
+		model_request.nameSingular = generated_data['nameSingular']
+		model_request.namePlural = generated_data['namePlural']
+		model_request.className = generated_data['className']
+		model_request.tableNameSingular = generated_data['tableNameSingular']
+		model_request.tableNamePlural = generated_data['tableNamePlural']
 
 		required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
-		unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
+		unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'tableNameSingular', 'tableNamePlural']
 
 		Validator.validate_required_fields(model_request, required_fields)
 		UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
@@ -103,13 +103,13 @@ class ModelBuilderRepo(BaseRepo):
 		db_query = Model(
 			uuid = str(model_request.uuid).strip(),
 			modelDisplayName = str(model_request.modelDisplayName).strip(),
-			name_singular = str(model_request.name_singular).strip(),
-			name_plural = str(model_request.name_plural).strip(),
+			nameSingular = str(model_request.nameSingular).strip(),
+			namePlural = str(model_request.namePlural).strip(),
 			modelURI = str(model_request.modelURI).strip(),
 			apiEndpoint = str(model_request.apiEndpoint).strip(),
-			table_name_singular = str(model_request.table_name_singular).strip(),
-			table_name_plural = str(model_request.table_name_plural).strip(),
-			class_name = str(model_request.class_name).strip(),
+			tableNameSingular = str(model_request.tableNameSingular).strip(),
+			tableNamePlural = str(model_request.tableNamePlural).strip(),
+			className = str(model_request.className).strip(),
 			createFrontendViews = model_request.createFrontendViews,
 			user_id = current_user_id,
 			created_at = current_time,
@@ -150,14 +150,14 @@ class ModelBuilderRepo(BaseRepo):
 	async def update(self, db: Session, model_id: int, model_request):
 		generated_data = self.prepare_data(model_request)
 		await auto_model_handler(generated_data, db)
-		model_request.name_singular = generated_data['name_singular']
-		model_request.name_plural = generated_data['name_plural']
-		model_request.class_name = generated_data['class_name']
-		model_request.table_name_singular = generated_data['table_name_singular']
-		model_request.table_name_plural = generated_data['table_name_plural']
+		model_request.nameSingular = generated_data['nameSingular']
+		model_request.namePlural = generated_data['namePlural']
+		model_request.className = generated_data['className']
+		model_request.tableNameSingular = generated_data['tableNameSingular']
+		model_request.tableNamePlural = generated_data['tableNamePlural']
 
 		required_fields = ['modelDisplayName', 'modelURI', 'apiEndpoint', 'createFrontendViews']
-		unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'table_name_singular', 'table_name_plural']
+		unique_fields = ['uuid', 'modelURI', 'apiEndpoint', 'tableNameSingular', 'tableNamePlural']
 		Validator.validate_required_fields(model_request, required_fields)
 		UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
 		current_time = datetime.now()
@@ -166,13 +166,13 @@ class ModelBuilderRepo(BaseRepo):
 		if db_query:
 			db_query.uuid = str(model_request.uuid).strip()
 			db_query.modelDisplayName = str(model_request.modelDisplayName).strip()
-			db_query.name_singular = str(model_request.name_singular).strip()
-			db_query.name_plural = str(model_request.name_plural).strip()
+			db_query.nameSingular = str(model_request.nameSingular).strip()
+			db_query.namePlural = str(model_request.namePlural).strip()
 			db_query.modelURI = str(model_request.modelURI).strip()
 			db_query.apiEndpoint = str(model_request.apiEndpoint).strip()
-			db_query.table_name_singular = str(model_request.table_name_singular).strip()
-			db_query.table_name_plural = str(model_request.table_name_plural).strip()
-			db_query.class_name = str(model_request.class_name).strip()
+			db_query.tableNameSingular = str(model_request.tableNameSingular).strip()
+			db_query.tableNamePlural = str(model_request.tableNamePlural).strip()
+			db_query.className = str(model_request.className).strip()
 			db_query.createFrontendViews = model_request.createFrontendViews
 			db_query.user_id = current_user_id
 			db_query.updated_at = current_time
@@ -234,25 +234,25 @@ class ModelBuilderRepo(BaseRepo):
 			joinedload(Model.headers)
 		).filter(Model.id == model_id).first()
 
-	def get_page_by_name(db: Session, name_singular: str):
-		return db.query(Model).filter(Model.name_singular == name_singular).first()
+	def get_page_by_name(db: Session, nameSingular: str):
+		return db.query(Model).filter(Model.nameSingular == nameSingular).first()
 
-	def get_page_by_table_name(db: Session, table_name_singular: str):
-		return db.query(Model).filter(Model.table_name_singular == table_name_singular).first()
+	def get_page_by_tableName(db: Session, tableNameSingular: str):
+		return db.query(Model).filter(Model.tableNameSingular == tableNameSingular).first()
 
-	def get_page_by_table_name_plural(db: Session, table_name_plural: str):
-		return db.query(Model).filter(Model.table_name_plural == table_name_plural).first()
+	def get_page_by_tableNamePlural(db: Session, tableNamePlural: str):
+		return db.query(Model).filter(Model.tableNamePlural == tableNamePlural).first()
 
 	def get_page_by_apiEndpoint(db: Session, apiEndpoint: str):
 		return db.query(Model).filter(Model.apiEndpoint == apiEndpoint).first()
 
 	def prepare_data(self, model_request):
 		generated_data = generate_model_and_api_names(model_request)
-		model_request.name_singular = generated_data['name_singular']
-		model_request.name_plural = generated_data['name_plural']
-		model_request.table_name_singular = generated_data['table_name_singular']
-		model_request.table_name_plural = generated_data['table_name_plural']
-		model_request.class_name = generated_data['class_name']
+		model_request.nameSingular = generated_data['nameSingular']
+		model_request.namePlural = generated_data['namePlural']
+		model_request.tableNameSingular = generated_data['tableNameSingular']
+		model_request.tableNamePlural = generated_data['tableNamePlural']
+		model_request.className = generated_data['className']
 		return generated_data
 
 	async def delete(self, db: Session, model_id: int):
@@ -276,7 +276,7 @@ class ModelBuilderRepo(BaseRepo):
 		return {"message": "Record deleted successfully"}, 204
 
 	async def delete_model_migrations(self, model):
-		print(f"Performing cleanup for migrations of {model.table_name_plural}")
+		print(f"Performing cleanup for migrations of {model.tableNamePlural}")
 
 		# Search for migration files that mention the model name
 		migration_dir = 'alembic/versions/'
@@ -284,14 +284,14 @@ class ModelBuilderRepo(BaseRepo):
 		print(f"Migration files in directory: {files}")
 
 		for filename in files:
-			if filename.endswith(".py") and model.table_name_plural in filename:
+			if filename.endswith(".py") and model.tableNamePlural in filename:
 				print(f"Removing migration file: {filename}")
 				os.remove(os.path.join(migration_dir, filename))
 
 		if len(files) > 0: 
 			try:
 				subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-					f"Cleanup model migrations: {model.apiEndpoint.replace('/', ' > ')+' '+model.table_name_singular.lower()} table"], check=True)
+					f"Cleanup model migrations: {model.apiEndpoint.replace('/', ' > ')+' '+model.tableNameSingular.lower()} table"], check=True)
 				subprocess.run(['alembic', 'upgrade', 'head'], check=True)
 				return True
 			except subprocess.CalledProcessError as e:

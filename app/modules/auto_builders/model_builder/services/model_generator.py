@@ -9,8 +9,8 @@ class ModelGenerator:
         from app.modules.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo as Repo 
         self.repo = Repo
 
-        data['name_singular'] = data['name_singular'].replace('-', '_')
-        data['name_plural'] = data['name_plural'].replace('-', '_')
+        data['nameSingular'] = data['nameSingular'].replace('-', '_')
+        data['namePlural'] = data['namePlural'].replace('-', '_')
 
         self.data = data
         if 'options' not in self.data:
@@ -82,16 +82,16 @@ class ModelGenerator:
         for field in fields:
             if field.get('dropdownSource'):
                 rship_tbl_name = field['dropdownSource']
-                auto_page = self.repo.get_page_by_table_name(
+                auto_page = self.repo.get_page_by_tableName(
                     self.db, rship_tbl_name)
                 if auto_page:
                     generated_data = generate_model_and_api_names(auto_page)
-                    name_singular = generated_data['name_singular'].replace('-', '_')
-                    class_name = generated_data['class_name']
-                    # back_populates = self.data['name_singular'].lower()
+                    nameSingular = generated_data['nameSingular'].replace('-', '_')
+                    className = generated_data['className']
+                    # back_populates = self.data['nameSingular'].lower()
                     back_populates = None
 
-                    relationship_str = f'    {name_singular.lower()} = relationship("{class_name}", back_populates={back_populates})'
+                    relationship_str = f'    {nameSingular.lower()} = relationship("{className}", back_populates={back_populates})'
                     relationships.append(relationship_str)
         return '\n'.join(relationships) if relationships else ''
 
@@ -111,8 +111,8 @@ class ModelGenerator:
             f"from sqlalchemy import Column, ForeignKey, {imports_str}\n"
             "from app.models.base import Base\n"
             "from sqlalchemy.orm import relationship\n\n"
-            f"class {self.data['class_name']}(Base):\n"
-            f"    __tablename__ = '{self.data['table_name_plural']}'\n"
+            f"class {self.data['className']}(Base):\n"
+            f"    __tablename__ = '{self.data['tableNamePlural']}'\n"
         )
         
         for field in fields:
@@ -135,7 +135,7 @@ class ModelGenerator:
                     auto_page = self.repo.get_page_by_apiEndpoint(
                         self.db, field['dropdownSource'])
                     if auto_page:
-                        column_args += f", ForeignKey('{auto_page.table_name_plural}.id')"
+                        column_args += f", ForeignKey('{auto_page.tableNamePlural}.id')"
 
                 content += f"    {field['name']} = Column({column_type_name}{column_args})\n"
             else:
@@ -163,7 +163,7 @@ class ModelGenerator:
 
     def _write_model_file(self, content):
         path = self.data['api_endpoint'].replace('-', '_')
-        filename = f"{self.data['name_singular'].lower()}_model.py"
+        filename = f"{self.data['nameSingular'].lower()}_model.py"
         directory_path = handler(path, 'modules', filename, content)
         init_py_path = os.path.join(directory_path, '__init__.py')
         with open(init_py_path, 'a') as init_py:
@@ -179,7 +179,7 @@ class ModelGenerator:
 
         # Get existing relationships
         path = self.data['api_endpoint'].replace('-', '_')
-        filename = f"{self.data['name_singular'].lower()}_model.py"
+        filename = f"{self.data['nameSingular'].lower()}_model.py"
         res = generate_file_path(path, 'modules', filename)
         file_path = res['file_path']
 
@@ -191,7 +191,7 @@ class ModelGenerator:
         self._write_model_file(content)
         try:
             subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['name_singular'].lower()} table"], check=True)
+                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['nameSingular'].lower()} table"], check=True)
             subprocess.run(['alembic', 'upgrade', 'head'], check=True)
             return True
         except subprocess.CalledProcessError as e:

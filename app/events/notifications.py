@@ -1,12 +1,12 @@
 from app.websocket.websocket_route_handlers import connections
 
 class NotificationService:
-    async def notify_model_updated(self, db, table_name: str, message: str):
+    async def notify_model_updated(self, db, tableName: str, message: str):
         from app.modules.auto_builders.model_builder.model_builder_repo import ModelBuilderRepo
-        res = ModelBuilderRepo.get_page_by_table_name_plural(db, table_name)
+        res = ModelBuilderRepo.get_page_by_tableNamePlural(db, tableName)
         if res and res.createFrontendViews == 1:
             model_id = res.uuid
-            model_name = res.name_singular
+            model_name = res.nameSingular
             # Notify WebSocket clients
             print(connections)
             for client_id, connection in connections.items():

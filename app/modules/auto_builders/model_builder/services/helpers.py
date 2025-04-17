@@ -18,16 +18,16 @@ def get_model_names(model_name):
 
 	# Singularize the model_name if possible, otherwise use as is
 	singularized = inflect.engine().singular_noun(cleaned_name)
-	name_singular = singularized or cleaned_name
+	nameSingular = singularized or cleaned_name
 
 	# Convert singular model name to PascalCase
-	model_name_pascal = STR.pascal(name_singular)
+	model_name_pascal = STR.pascal(nameSingular)
 
 	# Pluralize the singular model name to generate pluralized version
-	name_plural = inflect.engine().plural(
-		name_singular) if not singularized else cleaned_name
+	namePlural = inflect.engine().plural(
+		nameSingular) if not singularized else cleaned_name
 
-	return name_singular, name_plural, model_name_pascal
+	return nameSingular, namePlural, model_name_pascal
 
 
 def generate_deterministic_random_string(input_string, length=5):
@@ -75,25 +75,25 @@ def trim_name(name, seed_name=None, max_length=55):
 	return name
 
 
-def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
+def generate_class_and_tbl_names(api_endpoint, nameSingular, namePlural):
 	"""
 	Generate class and table names based on API endpoint and model names.
 	
 	Args:
 	    api_endpoint (str): The API endpoint.
-	    name_singular (str): Singular form of the model name.
-	    name_plural (str): Plural form of the model name.
+	    nameSingular (str): Singular form of the model name.
+	    namePlural (str): Plural form of the model name.
 	
 	Returns:
 	    dict: A dictionary containing class name, singular table name, and plural table name.
 	"""
 	api_endpoint = api_endpoint.lower()
-	name_singular = name_singular.lower()
-	name_plural = name_plural.lower()
+	nameSingular = nameSingular.lower()
+	namePlural = namePlural.lower()
 
-	# Remove trailing name_plural from api_endpoint if present
-	if api_endpoint.endswith(name_plural):
-		res = api_endpoint[:-(len(name_plural) + 1)]
+	# Remove trailing namePlural from api_endpoint if present
+	if api_endpoint.endswith(namePlural):
+		res = api_endpoint[:-(len(namePlural) + 1)]
 		if len(res) > 0:
 			api_endpoint = res
 
@@ -101,40 +101,40 @@ def generate_class_and_tbl_names(api_endpoint, name_singular, name_plural):
 	other_segments = '/'.join(parts[:-1]) # Join all parts except the last one
 	last_segment = parts[-1].lower().replace('-', '_')
 
-	name_singular = name_singular.replace('-', '_')
-	name_plural = name_plural.replace('-', '_')
+	nameSingular = nameSingular.replace('-', '_')
+	namePlural = namePlural.replace('-', '_')
 
-	are_similar = last_segment == name_singular or last_segment == name_plural
+	are_similar = last_segment == nameSingular or last_segment == namePlural
 
 	if are_similar:
 		other = other_segments.replace('/', '_').replace('.', '_')
-		class_name = other + ' ' + name_singular
+		className = other + ' ' + nameSingular
 
 		if other:
-			table_name_singular = STR.slug(f"{other}_{name_singular}")
-			table_name_plural = STR.slug(f"{other}_{name_plural}")
+			tableNameSingular = STR.slug(f"{other}_{nameSingular}")
+			tableNamePlural = STR.slug(f"{other}_{namePlural}")
 		else:
-			table_name_singular = name_singular
-			table_name_plural = name_plural
+			tableNameSingular = nameSingular
+			tableNamePlural = namePlural
 	else:
 		api_cleaned = STR.slug(api_endpoint)
-		class_name = api_cleaned + '_' + name_singular
-		table_name_singular = api_cleaned + '_' + name_singular
-		table_name_plural = api_cleaned + '_' + name_plural
+		className = api_cleaned + '_' + nameSingular
+		tableNameSingular = api_cleaned + '_' + nameSingular
+		tableNamePlural = api_cleaned + '_' + namePlural
 
 	print("api_endpoint", api_endpoint)
-	print("table_name_plural", table_name_plural)
+	print("tableNamePlural", tableNamePlural)
 
-	# Convert the class_name to PascalCase
+	# Convert the className to PascalCase
 	limit = 50
-	class_name = trim_name(STR.pascal(class_name), table_name_singular, limit)
-	table_name_singular = trim_name(table_name_singular, None, limit).lower()
-	table_name_plural = trim_name(table_name_plural, None, limit).lower()
+	className = trim_name(STR.pascal(className), tableNameSingular, limit)
+	tableNameSingular = trim_name(tableNameSingular, None, limit).lower()
+	tableNamePlural = trim_name(tableNamePlural, None, limit).lower()
 
 	return {
-		'class_name': class_name,
-		'table_name_singular': table_name_singular,
-		'table_name_plural': table_name_plural
+		'className': className,
+		'tableNameSingular': tableNameSingular,
+		'tableNamePlural': tableNamePlural
 	}
 
 
@@ -152,14 +152,14 @@ def generate_model_and_api_names(data):
 	api_endpoint = data.apiEndpoint
 	api_endpoint_dotnotation = api_endpoint.strip('/').replace('/', '.').replace('-', '_')
 
-	name_singular, name_plural, model_name_pascal = get_model_names(model_name)
+	nameSingular, namePlural, model_name_pascal = get_model_names(model_name)
 
 	res = generate_class_and_tbl_names(
-		api_endpoint, name_singular, name_plural)
+		api_endpoint, nameSingular, namePlural)
 
-	class_name = res['class_name']
-	table_name_singular = res['table_name_singular']
-	table_name_plural = res['table_name_plural']
+	className = res['className']
+	tableNameSingular = res['tableNameSingular']
+	tableNamePlural = res['tableNamePlural']
 
 	fields = data.fields or None
 
@@ -167,15 +167,15 @@ def generate_model_and_api_names(data):
 		'api_endpoint': api_endpoint,
 		'api_endpoint_dotnotation': api_endpoint_dotnotation,
 		'model_name': model_name,
-		'name_singular': name_singular,
-		'name_plural': name_plural,
+		'nameSingular': nameSingular,
+		'namePlural': namePlural,
 		'model_name_pascal': model_name_pascal,
-		'table_name_singular': table_name_singular,
-		'table_name_plural': table_name_plural,
-		'class_name': class_name,
+		'tableNameSingular': tableNameSingular,
+		'tableNamePlural': tableNamePlural,
+		'className': className,
 		'fields': fields,
 	}
 
-def build_dot_namespace(api_endpoint_dotnotation, name_singular):
-	return api_endpoint_dotnotation + '.' + name_singular.lower() if api_endpoint_dotnotation else name_singular.lower()
+def build_dot_namespace(api_endpoint_dotnotation, nameSingular):
+	return api_endpoint_dotnotation + '.' + nameSingular.lower() if api_endpoint_dotnotation else nameSingular.lower()
 

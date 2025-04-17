@@ -6,9 +6,9 @@ def generate_repo(data):
     api_endpoint = data['api_endpoint']
     api_endpoint_dotnotation = data['api_endpoint_dotnotation']
     fields = data['fields']
-    name_singular = data['name_singular'].replace('-', '_')
+    nameSingular = data['nameSingular'].replace('-', '_')
     model_name_pascal = data['model_name_pascal']
-    class_name = data['class_name']
+    className = data['className']
 
     inserts_args1 = ""
     for field in fields:
@@ -49,24 +49,24 @@ def generate_repo(data):
                 repo_specific_filters += f"            query = query.filter(Model.{field['name']}.ilike(f'%{{value}}%'))\n"
                 # repo_specific_filters += f"            search_fields.remove('{field['name']}')\n"
 
-    model_path_name = name_singular.lower() + '_model'
+    model_path_name = nameSingular.lower() + '_model'
 
     customs = ['model_builder']
 
-    if name_singular.replace('-', '_').lower() in customs:
-        print(f"{name_singular} is a custom content type.")
-        content = get_custom_content(api_endpoint_dotnotation, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2, name_singular)
+    if nameSingular.replace('-', '_').lower() in customs:
+        print(f"{nameSingular} is a custom content type.")
+        content = get_custom_content(api_endpoint_dotnotation, model_path_name, className, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2, nameSingular)
     else:
-        print(f"{name_singular} is using default content type.")
-        content = get_default_content(api_endpoint_dotnotation, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2)
+        print(f"{nameSingular} is using default content type.")
+        content = get_default_content(api_endpoint_dotnotation, model_path_name, className, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2)
 
     # Check if content is None or empty, and raise an error if so
     if not content:
-        raise ValueError(f"No content generated for {name_singular}. Aborting the process.")
+        raise ValueError(f"No content generated for {nameSingular}. Aborting the process.")
 
     # Write the generated repo content to a Python file
     path = api_endpoint.replace('-', '_')
-    filename = f'{name_singular.lower()}_repo.py'
+    filename = f'{nameSingular.lower()}_repo.py'
     handler(path, 'modules', filename, content)
 
     return True

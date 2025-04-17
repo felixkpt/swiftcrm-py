@@ -58,7 +58,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         })
         data['fields'] = fields
 
-    print(f"STEP 1: Starting model generation for: {data['table_name_plural']} \n")
+    print(f"STEP 1: Starting model generation for: {data['tableNamePlural']} \n")
     model_generator = ModelGenerator(data, db)
     res = model_generator.generate_model()
     print("STEP 1: Model generation completed\n")
@@ -76,7 +76,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         generate_routes(data)
         print("STEP 4: Routes generation completed\n")
 
-        if data['table_name_plural'] == 'users':
+        if data['tableNamePlural'] == 'users':
             print("SEEDING USER...")
             repo = UserRepo()
             try:
@@ -99,7 +99,7 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         # Run Git Add and Commit
         try:
             subprocess.run(['git', 'add', '.'], check=True)
-            commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
+            commit_message = f"Autobuilder: {action_type.capitalize()} {data['nameSingular'].lower()} model and related files"
             subprocess.run(['git', 'commit', '-m', commit_message], check=True)
             print("STEP 5: Git add and commit completed\n")
         except subprocess.CalledProcessError as e:
