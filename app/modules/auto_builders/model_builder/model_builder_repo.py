@@ -263,7 +263,7 @@ class ModelBuilderRepo(BaseRepo):
 			return {"error": "Model not found"}, 404
 
 		# Perform any necessary cleanup before deletion (e.g., migrations or related data)
-		await self.delete_model_migrations(model)
+		# await self.delete_model_migrations(model)
 
 		# Delete the model record
 		db.delete(model)
