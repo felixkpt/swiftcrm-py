@@ -197,4 +197,3 @@ class ModelGenerator:
         except subprocess.CalledProcessError as e:
             print(f"Error running Alembic commands: {e}")
             return False
-        return True
