@@ -4,7 +4,8 @@ from fastapi import FastAPI
 
 
 def auto_register_routes(app: FastAPI):
-    routes_directory = os.path.join(os.getcwd(), 'app', 'routes')
+    # routes_directory = os.path.join(os.getcwd(), 'app', 'routes')
+    routes_directory = os.path.join(os.getcwd(), 'app', 'modules').replace('_', '-')
     register_files_in_directory(app, routes_directory)
 
 
@@ -26,7 +27,7 @@ def register_files_in_directory(app, directory_path):
 def register_files(app, root, files):
     for filename in files:
         # print('Registering...', root, filename)
-        if filename.endswith('.py'):
+        if filename.endswith('_route.py'):
             module_name = filename[:-3]  # Remove '.py' extension
             prefix = os.path.relpath(root, os.getcwd()).replace(os.sep, '/')
             if prefix.startswith('.'):
@@ -43,7 +44,7 @@ def register_files(app, root, files):
                 if prefix:
                     prefix = '/' + \
                         prefix if not prefix.startswith('/') else prefix
-                    prefix = str_after(prefix, 'app/routes')
+                    prefix = str_after(prefix, 'app/modules').replace('_', '-')
 
                 app.include_router(
                     module.router, prefix=prefix, tags=[module_name])
