@@ -1,4 +1,4 @@
-from app.models.users.user_model import User
+from app.modules.users.user_model import User
 from app.database.connection import SessionLocal
 
 def seed_user():

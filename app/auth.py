@@ -1,4 +1,4 @@
-from app.models.users.user_model import User
+from app.modules.users.user_model import User
 
 def user(request=None) -> User:
     """
