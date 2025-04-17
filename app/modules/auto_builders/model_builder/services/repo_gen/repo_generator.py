@@ -67,7 +67,6 @@ def generate_repo(data):
     # Write the generated repo content to a Python file
     path = api_endpoint.replace('-', '_')
     filename = f'{name_singular.lower()}_repo.py'
-    print(f"Writing repo path: {path}")
-    # handler(path, 'modules', filename, content)
+    handler(path, 'modules', filename, content)
 
     return True

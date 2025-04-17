@@ -17,8 +17,8 @@ def generate_routes(data):
     content = f"""
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.repositories.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_repo import {model_name_pascal}Repo as Repo
-from app.requests.schemas.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_schema import {model_name_pascal}Schema as ModelSchema
+from app.modules.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_repo import {model_name_pascal}Repo as Repo
+from app.modules.{build_dot_namespace(api_endpoint_dotnotation, name_singular.lower())}_schema import {model_name_pascal}Schema as ModelSchema
 from app.database.connection import get_db
 
 router = APIRouter()
@@ -83,5 +83,6 @@ async def delete_route(model_id: int, db: Session = Depends(get_db)):
     return await repo.delete(db=db, model_id=model_id)
 """
 
-    filename = f'{name_plural.lower()}_route.py'
-    handler(api_endpoint, 'modules', filename, content)
+    path = api_endpoint.replace('-', '_')
+    filename = f'{name_singular.lower()}_routes.py'
+    handler(path, 'modules', filename, content)

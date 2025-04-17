@@ -189,12 +189,12 @@ class ModelGenerator:
         content = self._build_model_content(
             imports_str, fields, existing_relationships)
         self._write_model_file(content)
-        # try:
-        #     subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
-        #                     f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['name_singular'].lower()} table"], check=True)
-        #     subprocess.run(['alembic', 'upgrade', 'head'], check=True)
-        #     return True
-        # except subprocess.CalledProcessError as e:
-        #     print(f"Error running Alembic commands: {e}")
-        #     return False
+        try:
+            subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
+                            f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['name_singular'].lower()} table"], check=True)
+            subprocess.run(['alembic', 'upgrade', 'head'], check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error running Alembic commands: {e}")
+            return False
         return True

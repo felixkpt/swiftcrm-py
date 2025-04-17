@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.models.{api_endpoint_dotnotation}.{model_path_name} import {class_name} as Model
+from app.modules.{api_endpoint_dotnotation}.{model_path_name} import {class_name} as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.repositories.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper

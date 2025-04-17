@@ -68,13 +68,13 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         generate_repo(data)
         print("STEP 2: Repository generation completed\n")
 
-        # print("STEP 3: Generating schema\n")
-        # generate_schema(data)
-        # print("STEP 3: Schema generation completed\n")
+        print("STEP 3: Generating schema\n")
+        generate_schema(data)
+        print("STEP 3: Schema generation completed\n")
 
-        # print("STEP 4: Generating routes\n")
-        # generate_routes(data)
-        # print("STEP 4: Routes generation completed\n")
+        print("STEP 4: Generating routes\n")
+        generate_routes(data)
+        print("STEP 4: Routes generation completed\n")
 
         if data['table_name_plural'] == 'users':
             print("SEEDING USER...")
@@ -97,13 +97,13 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
                 print("ERROR SEEDING USER:", e)
 
         # Run Git Add and Commit
-        try:
-            subprocess.run(['git', 'add', '.'], check=True)
-            commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
-            subprocess.run(['git', 'commit', '-m', commit_message], check=True)
-            print("STEP 5: Git add and commit completed\n")
-        except subprocess.CalledProcessError as e:
-            print(f"Error running Git commands: {e}")
-            raise e
+        # try:
+        #     subprocess.run(['git', 'add', '.'], check=True)
+        #     commit_message = f"Autobuilder: {action_type.capitalize()} {data['name_singular'].lower()} model and related files"
+        #     subprocess.run(['git', 'commit', '-m', commit_message], check=True)
+        #     print("STEP 5: Git add and commit completed\n")
+        # except subprocess.CalledProcessError as e:
+        #     print(f"Error running Git commands: {e}")
+        #     raise e
     else:
         print("Model generation failed, stopping process.\n")

@@ -27,7 +27,7 @@ def register_files_in_directory(app, directory_path):
 def register_files(app, root, files):
     for filename in files:
         # print('Registering...', root, filename)
-        if filename.endswith('_route.py'):
+        if filename.endswith('_routes.py'):
             module_name = filename[:-3]  # Remove '.py' extension
             prefix = os.path.relpath(root, os.getcwd()).replace(os.sep, '/')
             if prefix.startswith('.'):
