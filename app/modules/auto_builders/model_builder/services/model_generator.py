@@ -172,23 +172,23 @@ class ModelGenerator:
 
     def generate_model(self):
 
-        # fields = self.data['fields']
-        # fields = self._add_id_field(fields)
-        # fields = self._filter_ignore_fields(fields)
-        # imports_str = self._collect_imports(fields)
+        fields = self.data['fields']
+        fields = self._add_id_field(fields)
+        fields = self._filter_ignore_fields(fields)
+        imports_str = self._collect_imports(fields)
 
-        # # Get existing relationships
-        # path = self.data['api_endpoint'].replace('-', '_')
-        # filename = f"{self.data['name_singular'].lower()}_model.py"
-        # res = generate_file_path(path, 'modules', filename)
-        # file_path = res['file_path']
+        # Get existing relationships
+        path = self.data['api_endpoint'].replace('-', '_')
+        filename = f"{self.data['name_singular'].lower()}_model.py"
+        res = generate_file_path(path, 'modules', filename)
+        file_path = res['file_path']
 
-        # existing_relationships = self._extract_existing_relationships(
-        #     file_path)
+        existing_relationships = self._extract_existing_relationships(
+            file_path)
 
-        # content = self._build_model_content(
-        #     imports_str, fields, existing_relationships)
-        # self._write_model_file(content)
+        content = self._build_model_content(
+            imports_str, fields, existing_relationships)
+        self._write_model_file(content)
         # try:
         #     subprocess.run(['alembic', 'revision', '--autogenerate', '-m',
         #                     f"Added: {self.data['api_endpoint'].replace('/', ' > ')+' '+self.data['name_singular'].lower()} table"], check=True)
@@ -197,4 +197,4 @@ class ModelGenerator:
         # except subprocess.CalledProcessError as e:
         #     print(f"Error running Alembic commands: {e}")
         #     return False
-        pass
+        return True

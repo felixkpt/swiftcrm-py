@@ -68,15 +68,14 @@ async def auto_model_handler(data, db: Session = Depends(get_db), id: int = None
         generate_repo(data)
         print("STEP 2: Repository generation completed\n")
 
-        print("STEP 3: Generating schema\n")
-        generate_schema(data)
-        print("STEP 3: Schema generation completed\n")
+        # print("STEP 3: Generating schema\n")
+        # generate_schema(data)
+        # print("STEP 3: Schema generation completed\n")
 
-        print("STEP 4: Generating routes\n")
-        generate_routes(data)
-        print("STEP 4: Routes generation completed\n")
+        # print("STEP 4: Generating routes\n")
+        # generate_routes(data)
+        # print("STEP 4: Routes generation completed\n")
 
-        print('????',data['table_name_plural'] )
         if data['table_name_plural'] == 'users':
             print("SEEDING USER...")
             repo = UserRepo()
