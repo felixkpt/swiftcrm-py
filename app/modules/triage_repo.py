@@ -1,12 +1,9 @@
-from app.modules.auto_builders.model_builder.services.helpers import build_dot_namespace
 
-def get_default_content(api_endpoint_dotnotation, model_path_name, class_name, model_name_pascal, fields, repo_specific_filters, inserts_args1, inserts_args2):
-    content = f"""
 from datetime import datetime
 from fastapi import Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.modules.{build_dot_namespace(api_endpoint_dotnotation, model_path_name)} import {class_name} as Model
+from app.modules.triage_model import Triage as Model
 from app.requests.validators.base_validator import Validator, UniqueChecker
 from app.repositories.search_repo import get_query_params, apply_common_filters, set_metadata
 from app.requests.response.response_helper import ResponseHelper
@@ -15,7 +12,7 @@ from app.events.notifications import NotificationService
 from app.auth import user  # Import user function
 import time
 
-class {model_name_pascal}Repo(BaseRepo):
+class TriageRepo(BaseRepo):
     
     model = Model
     notification = NotificationService()
@@ -24,7 +21,7 @@ class {model_name_pascal}Repo(BaseRepo):
         start_time = time.time()
         
         query_params = get_query_params(request)
-        search_fields = {['id'] + [field['name'] for field in fields if field.get('isRequired', False)]}
+        search_fields = ['id', 'name']
 
         query = db.query(Model)
         query = apply_common_filters(query, Model, search_fields, query_params)
@@ -42,26 +39,36 @@ class {model_name_pascal}Repo(BaseRepo):
         loading_time = end_time - start_time
         metadata['loading_time'] = str(round(loading_time, 2))+' secs'
 
-        results = {{
+        results = {
             "records": query.all(),
             "metadata": metadata
-        }}
+        }
 
         return results
 
     def repo_specific_filters(self, query, Model, query_params):
-{repo_specific_filters}
+        value = query_params.get('name', '').strip()
+        if isinstance(value, str) and len(value) > 0:
+            query = query.filter(Model.name.ilike(f'%{value}%'))
+        value = query_params.get('user_id', None)
+        if value is not None and value.isdigit():
+            query = query.filter(Model.user_id == int(value))
+
         return query
 
     async def create(self, db: Session, model_request):
-        required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
-        unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
+        required_fields = ['name']
+        unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields)
         current_time = datetime.now()
         current_user_id = user().id
         db_query = Model(
-{inserts_args1}        )
+            name = str(model_request.name).strip(),
+            user_id = current_user_id,
+            created_at = current_time,
+            updated_at = current_time,
+        )
         db.add(db_query)
         try:
             db.commit()
@@ -73,19 +80,20 @@ class {model_name_pascal}Repo(BaseRepo):
         return db_query
 
     async def update(self, db: Session, model_id: int, model_request):
-        required_fields = {[field['name'] for field in fields if field.get('isRequired', False)]}
-        unique_fields = {[field['name'] for field in fields if field.get('isUnique', False)]}
+        required_fields = ['name']
+        unique_fields = []
         Validator.validate_required_fields(model_request, required_fields)
         UniqueChecker.check_unique_fields(db, Model, model_request, unique_fields, model_id)
         current_time = datetime.now()
         current_user_id = user().id
         db_query = db.query(Model).filter(Model.id == model_id, Model.user_id == current_user_id).first()
         if db_query:
-{inserts_args2}            db.commit()
+            db_query.name = str(model_request.name).strip()
+            db_query.user_id = current_user_id
+            db_query.updated_at = current_time
+            db.commit()
             db.refresh(db_query)
             await self.notification.notify_model_updated(db, Model.__tablename__, 'Record was updated!')
             return db_query
         else:
             return ResponseHelper.handle_not_found_error(model_id)
-"""
-    return content
